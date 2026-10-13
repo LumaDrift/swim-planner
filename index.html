@@ -337,6 +337,64 @@ body.has-tabs::after { content: ""; position: fixed; left: 0; right: 0; bottom: 
 .sum { flex-wrap: wrap; gap: 4px 20px; }
 .sum > div { white-space: nowrap; }
 @media (max-width: 400px) { .sum b { font-size: 34px; } }
+/* 3.2.1：标签栏更靠下 */
+.tabs { bottom: max(10px, calc(env(safe-area-inset-bottom, 0px) - 8px)); }
+body.has-tabs { padding-bottom: 110px; }
+body.has-tabs::after { height: 104px; }
+.toast { bottom: calc(92px + env(safe-area-inset-bottom, 0px)); }
+button.li.wk { text-align: left; }
+
+/* 3.3：液态玻璃气泡（按住放大、拖动跟手、松手切换） */
+:root { --lens: linear-gradient(180deg, rgba(255,255,255,.72), rgba(255,255,255,.28)); --lens-edge: rgba(47,124,246,.2); --pill: linear-gradient(180deg, rgba(47,124,246,.17), rgba(47,124,246,.08)); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --lens: linear-gradient(180deg, rgba(255,255,255,.2), rgba(255,255,255,.07)); --lens-edge: rgba(120,170,255,.3); --pill: linear-gradient(180deg, rgba(91,155,255,.22), rgba(91,155,255,.1)); } }
+.tabs { touch-action: none; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; }
+.tabs button { position: relative; z-index: 1; transition: color .2s, transform .25s cubic-bezier(.3,1.4,.5,1); }
+.tabs .on { background: none; box-shadow: none; }
+.tabs .glass { position: absolute; z-index: 0; left: 6px; top: 50%; margin-top: -27px; width: calc((100% - 12px) / 4); height: 54px; border-radius: 27px; pointer-events: none;
+  background: var(--pill); box-shadow: inset 0 1px 0 rgba(255,255,255,.5), inset 0 0 0 1px rgba(47,124,246,.12);
+  transition: translate .55s cubic-bezier(.3,1.32,.42,1), scale .38s cubic-bezier(.3,1.5,.5,1), background .25s, box-shadow .25s; will-change: translate, scale; }
+.tabs.press .glass { scale: 1.14; background: var(--lens); -webkit-backdrop-filter: blur(3px) saturate(170%); backdrop-filter: blur(3px) saturate(170%);
+  box-shadow: 0 8px 22px -6px rgba(15,23,32,.22), inset 0 1px 0 rgba(255,255,255,.95), inset 0 -1px 0 rgba(255,255,255,.35), inset 0 0 0 1px var(--lens-edge); }
+.tabs.drag .glass { transition: scale .18s ease-out, background .25s, box-shadow .25s; }
+.tabs.drag button { color: var(--muted); font-weight: 500; }
+.tabs.drag .on:not(.hv) svg { fill: none; }
+.tabs.drag .on:not(.hv) svg .ln { stroke: currentColor; }
+.tabs.drag .hv { color: var(--blue); font-weight: 700; transform: scale(1.06); }
+.tabs.drag .hv svg { fill: currentColor; }
+.tabs.drag .hv svg .ln { stroke: var(--bg); fill: none; }
+
+/* 3.3：页面切换（往里推、返回滑出、标签淡入淡出） */
+::view-transition-group(root) { animation-duration: .42s; }
+html[data-nav="push"]::view-transition-old(root),
+html[data-nav="push"]::view-transition-new(root),
+html[data-nav="back"]::view-transition-old(root),
+html[data-nav="back"]::view-transition-new(root) { mix-blend-mode: normal; animation-duration: .42s; animation-timing-function: cubic-bezier(.32,.72,0,1); animation-fill-mode: both; }
+html[data-nav="push"]::view-transition-old(root) { animation-name: vt-out-left; }
+html[data-nav="push"]::view-transition-new(root) { animation-name: vt-in-right; box-shadow: -10px 0 30px rgba(15,23,32,.12); }
+html[data-nav="back"]::view-transition-old(root) { animation-name: vt-out-right; z-index: 2; box-shadow: -10px 0 30px rgba(15,23,32,.12); }
+html[data-nav="back"]::view-transition-new(root) { animation-name: vt-in-left; }
+html[data-nav="tab"]::view-transition-old(root) { animation: .1s ease-out both vt-fade-out; }
+html[data-nav="tab"]::view-transition-new(root) { animation: .22s ease-out .06s both vt-fade-in; }
+html[data-nav="tab"] .tabs { view-transition-name: tabbar; }
+::view-transition-old(tabbar) { display: none; }
+::view-transition-new(tabbar) { animation: none; }
+@keyframes vt-in-right { from { transform: translateX(100%); } }
+@keyframes vt-out-left { to { transform: translateX(-28%); filter: brightness(.94); } }
+@keyframes vt-out-right { to { transform: translateX(100%); } }
+@keyframes vt-in-left { from { transform: translateX(-28%); filter: brightness(.94); } }
+@keyframes vt-fade-out { to { opacity: 0; } }
+@keyframes vt-fade-in { from { opacity: 0; translate: 0 6px; } }
+/* 旧系统没有 View Transitions 时的简单版本 */
+#app.in-push > :not(.tabs) { animation: .36s cubic-bezier(.32,.72,0,1) both app-in-right; }
+#app.in-back > :not(.tabs) { animation: .36s cubic-bezier(.32,.72,0,1) both app-in-left; }
+#app.in-tab > :not(.tabs) { animation: .22s ease-out both vt-fade-in; }
+@keyframes app-in-right { from { translate: 48px 0; opacity: 0; } }
+@keyframes app-in-left { from { translate: -48px 0; opacity: 0; } }
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; }
+  #app[class*="in-"] > * { animation: none !important; }
+  .tabs .glass { transition: none; }
+}
 
 html { padding-top: env(safe-area-inset-top, 0px); background: var(--bg); }
 body { margin: 0; }
@@ -865,7 +923,7 @@ function swimAlgoProfile(profile) {
   const strokes = ["自由泳", "仰泳", "蛙泳", "蝶泳"];
   if (!profile || !["fit", "endur", "stroke", "team"].includes(profile.goal) ||
       !["l50", "l200", "l800", "l1500"].includes(profile.level) ||
-      !Number.isInteger(profile.weekly) || profile.weekly < 1 || profile.weekly > 4 ||
+      !Number.isInteger(profile.weekly) || profile.weekly < 1 || profile.weekly > 7 ||   // 3.2.2：上限由 4 次改为 7 次（App 里可以选到每天）
       ![30, 45, 60, 90].includes(profile.minutes) ||
       !["米", "码"].includes(profile.paceUnit) ||
       !Array.isArray(profile.strokes) ||
@@ -1246,13 +1304,13 @@ function swimRecommendationTests() {
 }
 
 // ================= 3.0：档案、推荐、页面 =================
-const VERSION = "3.2";
+const VERSION = "3.3";
 const TEST_TOOLS = false;   // 测试模式开关：改成 true 才会在“我的”里出现
 const GOALS = { fit: "健身", endur: "提高耐力", stroke: "练好泳姿", team: "准备进泳队" };
 const LEVELS = { l50: ["50 以内", 50], l200: ["200 左右", 200], l800: ["800 左右", 800], l1500: ["1500 以上", 1500] };
 const LEVEL_MAXD = { l50: 50, l200: 100, l800: 200, l1500: 400 };     // 单组最长距离
 const LEVEL_PACE = { l50: 170, l200: 135, l800: 110, l1500: 92 };     // 不知道速度时的估计（自由泳每 100 秒）
-const SPEEDS = [[160, "2:30 以上"], [120, "2:00 左右"], [100, "1:40 左右"], [85, "1:25 左右"], [72, "1:15 以内"]];
+const SPEEDS = [[160, "2:30 以上"], [120, "2:00 左右"], [100, "1:40 左右"], [85, "1:25 左右"], [75, "1:15 左右"], [58, "1:00 以内"]];
 const STROKES = ["自由泳", "仰泳", "蛙泳", "蝶泳"];
 // 一周里三种训练的目标比例：按用户的目标来定
 const TARGET = {
@@ -1316,7 +1374,7 @@ function algoProfile() {
   const p = P(), st = p.strokes.filter(s => STROKES.includes(s)), pace = {};
   Object.keys(p.pace || {}).forEach(s => { if (STROKES.includes(s) && p.pace[s] > 0) pace[s] = p.pace[s]; });
   return { goal: p.goal, level: p.level, strokes: st, pace, paceUnit: p.paceUnit === "米" ? "米" : "码",
-    weekly: clamp(Math.round(p.weekly) || 2, 1, 4), minutes: [30, 45, 60, 90].includes(p.minutes) ? p.minutes : 45 };
+    weekly: clamp(Math.round(p.weekly) || 2, 1, 7), minutes: [30, 45, 60, 90].includes(p.minutes) ? p.minutes : 45 };
 }
 function algoLogs() {
   return S.logs.filter(l => /^\d{4}-\d{2}-\d{2}$/.test(l.date)).map(l => ({
@@ -1353,7 +1411,8 @@ const IC = {
 };
 const ROOTS = ["home", "plans", "hist", "me"];
 function tabs() {
-  return `<nav class="tabs">${[["home", "首页"], ["plans", "计划"], ["hist", "记录"], ["me", "我的"]].map(([v, l]) =>
+  const i = ROOTS.indexOf(S.view), from = S.glassFrom != null ? S.glassFrom : `${i * 100}%`;
+  return `<nav class="tabs"><i class="glass" data-to="${i}" style="translate:${from} 0"></i>${[["home", "首页"], ["plans", "计划"], ["hist", "记录"], ["me", "我的"]].map(([v, l]) =>
     `<button data-go="${v}" class="${S.view === v ? "on" : ""}" aria-label="${l}"><svg viewBox="0 0 24 24" aria-hidden="true">${IC[v]}</svg><span>${l}</span></button>`).join("")}</nav>`;
 }
 function topBar(title, back, right = "") {
@@ -1431,6 +1490,18 @@ function detailTop(x) {
       <div><span class="lab">动作要点</span><p>${esc(s.tip)}。</p></div>
     </div>`;
 }
+function previewCfg(date, focus, minutes) {
+  const key = `${date}|${focus}|${minutes}`;
+  S.previews = S.previews || {};
+  if (!S.previews[key]) {
+    const keep = { o: S.o, ms: S.ms, rows: S.rows };
+    try {
+      S.o = freshO(focus); S.o.time = minutes; S.o.cap = focus === "technique" ? "easy" : focus === "speed" ? "fast" : "mod";
+      smartPlan(); S.previews[key] = JSON.parse(JSON.stringify(cfg()));
+    } finally { S.o = keep.o; S.ms = keep.ms; S.rows = keep.rows; }
+  }
+  return S.previews[key];
+}
 function ensureToday() { if (!S.rows.length || S.planDate !== todayStr()) makeRecommended(); }
 function pctOf(l) { return l.pct != null ? l.pct : l.planned ? Math.round(l.dist / l.planned * 100) : 100; }
 
@@ -1473,12 +1544,13 @@ const V = {
       ensureToday();
       const p = compute();
       body += planCard(p, S.o, { label: S.planCustom ? "今天的课表 · 自己安排的" : "今天的推荐", why: S.planCustom ? "" : S.planWhy, attrs: `data-go="plan"`,
-        foot: `<div class="pc-foot"><button class="txt" data-act="reroll">换一份</button><button class="txt" data-go="plan">打开课表 ›</button></div>` });
+        foot: `<div class="pc-foot">${S.planCustom ? `<button class="txt" data-act="newRec">改回推荐课表</button>` : `<button class="txt" data-act="reroll">换一份</button>`}<button class="txt" data-go="plan">打开课表 ›</button></div>` });
       body += `<button class="btn soft wide" data-act="custom">自己安排</button>`;
       const wk = planWeek();
       if (wk.length) body += `<div class="sec"><b>接下来 7 天</b><span>每周 ${P().weekly} 次</span></div><div class="card list">${wk.map(d => {
         const dt = new Date(d.date + "T00:00:00"), lab = d.date === todayStr() ? "今天" : `${dt.getMonth() + 1}/${dt.getDate()}`;
-        return `<div class="li wk"><span class="badge${d.rest ? " rest" : ""}" style="color:${d.rest ? "var(--muted)" : FCOLOR[d.focus]}">${lab}</span><span class="g"><b>${d.rest ? "休息" : FOCUS[d.focus] + "课 · " + d.minutes + " 分钟"}</b><small>${esc(d.why)} · 星期${"日一二三四五六"[dt.getDay()]}</small></span></div>`; }).join("")}</div>
+        const inner = `<span class="badge${d.rest ? " rest" : ""}" style="color:${d.rest ? "var(--muted)" : FCOLOR[d.focus]}">${lab}</span><span class="g"><b>${d.rest ? "休息" : FOCUS[d.focus] + "课 · " + d.minutes + " 分钟"}</b><small>${esc(d.why)} · 星期${"日一二三四五六"[dt.getDay()]}</small></span>`;
+        return d.rest ? `<div class="li wk">${inner}</div>` : `<button class="li wk" data-act="preview" data-d="${d.date}" data-f="${d.focus}" data-m="${d.minutes}">${inner}<span class="chev">›</span></button>`; }).join("")}</div>
         <p class="hint">这是暂定安排，每次训练前会按最新的记录重新算。</p>`;
     } else if (seg === "tpl") {
       body += FOCI.map(f => `<div class="sec"><b>${FOCUS[f]}</b></div><div class="card list">${COMPOSITES.filter(c => c.focus === f).map(c =>
@@ -1630,6 +1702,27 @@ const V = {
     });
   },
 
+  preview() {
+    const pv = S.pv; if (!pv) { S.view = "plans"; return V.plans(); }
+    const c = previewCfg(pv.date, pv.focus, pv.minutes), dt = new Date(pv.date + "T00:00:00"), U = unitOf();
+    const title = pv.date === todayStr() ? "今天" : `${dt.getMonth() + 1} 月 ${dt.getDate()} 日`;
+    return withCfg(c, () => {
+      const p = compute();
+      return topBar(title, "plans") + `
+        <div class="sum"><div><b class="num">${p.dist.toLocaleString()}</b><small>${U}</small></div><div><b class="num">${p.mins}</b><small>分钟</small></div><div><b class="num">${p.dist / S.o.pool}</b><small>趟</small></div></div>
+        <p class="hint plan-hint">${FOCUS[pv.focus]}课 · 星期${"日一二三四五六"[dt.getDay()]}的暂定课表。到那天会按最新的记录重新推荐，内容可能会变。点任意一项看怎么练。</p>
+        <div class="card list lane">${laneRows(p, false).replace(/data-act="pastOpen"/g, 'data-act="pvOpen"')}<div class="add end"></div></div>
+        <button class="go" data-act="pvUse">今天就练这份</button>`;
+    });
+  },
+  previewDetail() {
+    const pv = S.pv; if (!pv) { S.view = "plans"; return V.plans(); }
+    return withCfg(previewCfg(pv.date, pv.focus, pv.minutes), () => {
+      const p = compute(), x = p.rows[S.pastIdx] || p.rows[0];
+      return topBar(x.def.name, "preview") + detailTop(x);
+    });
+  },
+
   quiz() { return quizView(); }
 };
 
@@ -1728,7 +1821,7 @@ function quizView() {
   }
   if (k === "weekly") {
     multi = true; title = "一周大概游几次，每次多久?";
-    body = `<div class="qrow"><b>每周</b><div class="chips">${[1, 2, 3, 4].map(n => `<button class="chip${d.weekly === n ? " on" : ""}" data-act="qset" data-f="weekly" data-v="${n}">${n === 4 ? "4 次以上" : n + " 次"}</button>`).join("")}</div></div>
+    body = `<div class="qrow"><b>每周</b><div class="chips">${[1, 2, 3, 4, 5, 6, 7].map(n => `<button class="chip${d.weekly === n ? " on" : ""}" data-act="qset" data-f="weekly" data-v="${n}">${n === 7 ? "每天" : n + " 次"}</button>`).join("")}</div></div>
       <div class="qrow"><b>每次</b><div class="chips">${[30, 45, 60, 90].map(n => `<button class="chip${d.minutes === n ? " on" : ""}" data-act="qset" data-f="minutes" data-v="${n}">${n} 分钟</button>`).join("")}</div></div>`;
   }
   if (S.qi >= QUIZ.length) {
@@ -1768,13 +1861,46 @@ function render() {
   APP.innerHTML = S.view === "quiz" ? html : unitize(html);
   document.body.classList.toggle("has-tabs", root);
   document.body.classList.toggle("has-bar", S.view === "plan");
+  if (root && S.glassFrom != null && APP.querySelector) {
+    // 玻璃气泡从上一个位置滑到新标签
+    const g = APP.querySelector(".tabs .glass");
+    if (g) { void g.offsetWidth; g.style.translate = `${g.dataset.to * 100}% 0`; }
+  }
+  S.glassFrom = null;
   save();
 }
+// ---------- 页面切换动画 ----------
+// 往里点：新页面从右边推进来；返回：往右滑出；底部标签之间：快速淡入淡出
+const DEPTH = { plan: 1, day: 1, past: 1, preview: 1, quiz: 1, setup: 2, detail: 2, done: 2, pastDetail: 2, previewDetail: 2 };
+const depthOf = v => ROOTS.includes(v) ? 0 : (DEPTH[v] || 1);
+const calmMotion = () => typeof window.matchMedia === "function" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+let navSeq = 0, navVT = null;
 function go(v) {
   const from = S.view;
   if (from === "plan") S.planScroll = window.scrollY || 0;
-  S.view = v; S.confirm = null; S.renaming = null; S.swiped = null; render();
-  window.scrollTo(0, v === "plan" && (from === "detail" || from === "done") ? (S.planScroll || 0) : 0);
+  const dir = from === v ? null : ROOTS.includes(from) && ROOTS.includes(v) ? "tab" : depthOf(v) < depthOf(from) ? "back" : "push";
+  if (dir === "tab" && S.glassFrom == null) S.glassFrom = `${ROOTS.indexOf(from) * 100}%`;
+  const tok = ++navSeq;
+  const update = () => {
+    if (tok !== navSeq) return;
+    S.view = v; S.confirm = null; S.renaming = null; S.swiped = null; render();
+    window.scrollTo(0, v === "plan" && (from === "detail" || from === "done") ? (S.planScroll || 0) : 0);
+  };
+  const de = document.documentElement;
+  if (!dir || !de || calmMotion()) return update();
+  if (typeof document.startViewTransition === "function") {
+    try {
+      if (navVT) navVT.skipTransition();
+      de.dataset.nav = dir;
+      const t = navVT = document.startViewTransition(update);
+      t.finished.finally(() => { if (navVT === t) { navVT = null; delete de.dataset.nav; } });
+      return;
+    } catch (err) { /* 不支持就用下面的简单动画 */ }
+  }
+  update();
+  const cls = ["in-push", "in-back", "in-tab"];
+  APP.classList.remove(...cls); void APP.offsetWidth; APP.classList.add("in-" + dir);
+  clearTimeout(go.t); go.t = setTimeout(() => APP.classList.remove(...cls), 420);
 }
 let undoFn = null;
 function toast(msg, undo) {
@@ -1809,11 +1935,58 @@ function load() {
 // ---------- 左滑 ----------
 const APP = document.getElementById("app");
 let sw = null, justSwiped = false;
+// ---------- 液态玻璃标签栏：按住拖动，松手才切换 ----------
+let tb = null, tabHandled = false;
+function tabGeom(nav) { const r = nav.getBoundingClientRect(); return { left: r.left + 6, w: (r.width - 12) / 4 }; }
+function tabAt(t, x) { return Math.max(0, Math.min(3, Math.floor((x - t.left) / t.w))); }
+function tabDown(e) {
+  const nav = e.target.closest && e.target.closest(".tabs"); if (!nav || !nav.getBoundingClientRect) return false;
+  const g = nav.querySelector(".glass"); if (!g) return false;
+  const geo = tabGeom(nav);
+  tb = { nav, g, geo, x0: e.clientX, moved: false, cur: ROOTS.indexOf(S.view), hover: tabAt(geo, e.clientX), px: 0, lx: e.clientX, lt: e.timeStamp, v: 0 };
+  tb.px = tb.cur * geo.w;
+  nav.classList.add("press");
+  try { nav.setPointerCapture(e.pointerId); } catch (err) {}
+  return true;
+}
+function tabMove(e) {
+  if (!tb) return false;
+  const t = tb, dx = e.clientX - t.x0;
+  if (!t.moved && Math.abs(dx) < 6) return true;
+  if (!t.moved) { t.moved = true; t.nav.classList.add("drag"); }
+  const dt = Math.max(1, e.timeStamp - t.lt); t.v = t.v * .6 + ((e.clientX - t.lx) / dt) * .4; t.lx = e.clientX; t.lt = e.timeStamp;
+  t.px = Math.max(-8, Math.min(3 * t.geo.w + 8, e.clientX - t.geo.left - t.geo.w / 2));
+  const st = Math.min(.22, Math.abs(t.v) * .09);
+  t.g.style.translate = `${t.px}px 0`; t.g.style.scale = `${1.14 + st} ${1.14 - st * .6}`;
+  const h = tabAt(t.geo, e.clientX);
+  if (h !== t.hover) { t.hover = h; }
+  t.nav.querySelectorAll("button").forEach((b, i) => b.classList.toggle("hv", i === h));
+  return true;
+}
+function tabUp(e, cancel) {
+  if (!tb) return false;
+  const t = tb; tb = null;
+  t.nav.classList.remove("press", "drag"); t.g.style.scale = "";
+  t.nav.querySelectorAll(".hv").forEach(b => b.classList.remove("hv"));
+  tabHandled = true; setTimeout(() => tabHandled = false, 450);
+  const target = cancel ? t.cur : t.moved ? t.hover : tabAt(t.geo, e.clientX);
+  if (target === t.cur || target < 0) {
+    t.g.style.translate = `${t.cur * 100}% 0`;
+    if (!cancel && !t.moved && window.scrollY > 0) window.scrollTo({ top: 0, behavior: "smooth" });
+    return true;
+  }
+  S.glassFrom = t.moved ? `${t.px}px` : `${t.cur * 100}%`;
+  go(ROOTS[target]);
+  return true;
+}
+
 APP.addEventListener("pointerdown", e => {
+  if (tabDown(e)) return;
   const row = e.target.closest(".swipe .row"); if (!row) return;
   sw = { el: row, box: row.parentElement, x: e.clientX, y: e.clientY, dx: 0, moved: false, base: row.parentElement.classList.contains("open") ? -160 : 0 };
 });
 APP.addEventListener("pointermove", e => {
+  if (tabMove(e)) return;
   if (!sw) return;
   const dx = e.clientX - sw.x, dy = e.clientY - sw.y;
   if (!sw.moved) { if (Math.abs(dx) < 8) return; if (Math.abs(dy) > Math.abs(dx)) { sw = null; return; } sw.moved = true; sw.el.classList.add("drag"); }
@@ -1827,12 +2000,13 @@ function endSwipe() {
   s.box.classList.toggle("open", open); S.swiped = open ? s.box.dataset.id : null;
   justSwiped = true; setTimeout(() => justSwiped = false, 60);
 }
-APP.addEventListener("pointerup", endSwipe);
-APP.addEventListener("pointercancel", endSwipe);
+APP.addEventListener("pointerup", e => { if (!tabUp(e)) endSwipe(); });
+APP.addEventListener("pointercancel", e => { if (!tabUp(e, true)) endSwipe(); });
 
 // ---------- 点击 ----------
 APP.addEventListener("click", e => {
   if (justSwiped) return;
+  if (tabHandled && e.detail !== 0 && e.target.closest(".tabs")) return;
   const b = e.target.closest("[data-go],[data-act]"); if (!b || b.disabled) return;
   if (b.dataset.go) { if (b.dataset.go === "plan") S.planBack = S.view === "plans" ? "plans" : S.planBack; return go(b.dataset.go); }
   const a = b.dataset.act, row = S.rows.find(r => r.id === S.cur), dv = b.dataset.v;
@@ -1891,6 +2065,9 @@ APP.addEventListener("click", e => {
     case "rpe": S.rpe = +dv; { const dd = document.getElementById("dDate"), dn = document.getElementById("dNote"); if (dd) S.dDate = dd.value; if (dn) S.dNote = dn.value; } break;
     case "past": S.pastId = b.dataset.id; S.confirm = null; return go("past");
     case "pastOpen": S.pastIdx = +b.dataset.i; return go("pastDetail");
+    case "preview": S.pv = { date: b.dataset.d, focus: b.dataset.f, minutes: +b.dataset.m }; return go("preview");
+    case "pvOpen": S.pastIdx = +b.dataset.i; return go("previewDetail");
+    case "pvUse": { const c = previewCfg(S.pv.date, S.pv.focus, S.pv.minutes); loadCfg(c); applyPoolToO(); S.planDate = todayStr(); S.planCustom = false; S.planWhy = "提前练这份暂定课表"; S.planBack = "plans"; toast("换成了这份课表"); return go("plan"); }
     case "log": {
       S.dDate = document.getElementById("dDate").value; S.dNote = document.getElementById("dNote").value;
       if (S.rpe == null) { toast("先选一个分数：整体有多累"); break; }
