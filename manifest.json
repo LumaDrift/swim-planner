@@ -1,11 +1,11 @@
 {
-  "name": "今日泳池课表",
-  "short_name": "泳池课表",
+  "name": "训练计划",
+  "short_name": "训练计划",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#062e45",
-  "theme_color": "#062e45",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
   "lang": "zh-CN",
   "icons": [
     {
