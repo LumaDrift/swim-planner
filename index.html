@@ -2,575 +2,351 @@
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="泳池课表">
 <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#131f24" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#0d1116" media="(prefers-color-scheme: dark)">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" href="icon-512.png">
 <link rel="manifest" href="manifest.json">
 <title>泳池课表</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,200;0,300;0,500;0,700;1,700;1,800&family=Nunito:wght@700;800;900&family=Noto+Sans+SC:wght@400;500;700;900&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+SC:wght@400;500;700;800&display=swap">
 <style>
-/* Layout: an app of small pages (home, setup, plan, detail, favourites, calendar); one job per page, big touch targets, a thin lane-rope stripe as the only ornament */
+/* Layout: one calm column; the home page opens on a water-ripple week check-in, everything else is quiet tinted cards; a floating liquid-glass tab bar */
 :root {
-  --bg: #f1f6f8;
-  --surface: #ffffff;
-  --ink: #0c2a36;
-  --muted: #5a7682;
-  --line: #d7e4e8;
-  --navy: #0a4766;
-  --aqua: #0f8fb0;
-  --aqua-soft: #e0f0f4;
-  --rope: #e04a37;
-  --seg-warm: #7fd0e2;
-  --seg-drill: #2aa6c4;
-  --seg-main: #e04a37;
-  --seg-cool: #b5dde6;
-  --font-body: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
-  --font-num: "Barlow Condensed", "DIN Alternate", "Arial Narrow", sans-serif;
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --bg: #08171e; --surface: #102631; --ink: #e2eef2; --muted: #8eabb7; --line: #1f3e4b;
-    --navy: #3aa3c6; --aqua: #4dbcd8; --aqua-soft: #12313d; --rope: #f0705d;
-    --seg-warm: #5fb8cc; --seg-drill: #2b8fab; --seg-main: #f0705d; --seg-cool: #2e5866;
-    color-scheme: dark;
-  }
-}
-:root[data-theme="dark"] {
-  --bg: #08171e; --surface: #102631; --ink: #e2eef2; --muted: #8eabb7; --line: #1f3e4b;
-  --navy: #3aa3c6; --aqua: #4dbcd8; --aqua-soft: #12313d; --rope: #f0705d;
-  --seg-warm: #5fb8cc; --seg-drill: #2b8fab; --seg-main: #f0705d; --seg-cool: #2e5866;
-  color-scheme: dark;
-}
-* { box-sizing: border-box; }
-body { background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 16px; line-height: 1.55; padding-inline: 16px; padding-block: 0 32px; }
-#app { max-width: 560px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
-button { font: inherit; color: inherit; cursor: pointer; border: 0; background: none; }
-button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 2px solid var(--aqua); outline-offset: 2px; }
-.num { font-family: var(--font-num); font-variant-numeric: tabular-nums; }
-
-/* top bar */
-.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); display: grid; grid-template-columns: 72px 1fr 72px; align-items: center; min-height: 54px; }
-.top h1 { margin: 0; font-size: 17px; font-weight: 700; text-align: center; }
-.back { justify-self: start; min-height: 44px; padding: 0 8px 0 0; color: var(--aqua); font-weight: 500; display: inline-flex; align-items: center; gap: 2px; }
-.back::before { content: "‹"; font-size: 28px; line-height: 1; margin-top: -3px; }
-.rope { height: 4px; border-radius: 2px; background: repeating-linear-gradient(90deg, var(--rope) 0 14px, #ffffff 14px 19px, #2a63c9 19px 33px, #ffffff 33px 38px); opacity: .9; }
-
-/* home */
-.hello { display: flex; flex-direction: column; gap: 2px; padding-top: 28px; }
-.hello small { color: var(--muted); font-size: 14px; }
-.hello b { font-size: 28px; font-weight: 900; letter-spacing: .02em; }
-.big { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; width: 100%; text-align: left; padding: 22px 20px; border-radius: 18px; background: var(--navy); color: #ffffff; }
-.big b { font-size: 21px; font-weight: 900; }
-.big span { font-size: 14px; opacity: .8; }
-.list { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; }
-.li { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; padding: 15px 16px; min-height: 60px; border-bottom: 1px solid var(--line); }
-.li:last-child { border-bottom: 0; }
-.li .grow { flex: 1; min-width: 0; display: flex; flex-direction: column; }
-.li .grow small { color: var(--muted); font-size: 13px; }
-.li .chev { color: var(--muted); font-size: 22px; }
-.li .side { color: var(--muted); font-size: 14px; white-space: nowrap; }
-
-/* setup */
-.field { display: flex; flex-direction: column; gap: 8px; }
-.label { font-size: 13px; font-weight: 700; color: var(--muted); letter-spacing: .08em; }
-.seg { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 4px; padding: 4px; border-radius: 12px; background: var(--surface); border: 1px solid var(--line); }
-.seg button { min-height: 44px; border-radius: 9px; color: var(--muted); font-size: 15px; }
-.seg button[aria-pressed="true"] { background: var(--navy); color: #ffffff; font-weight: 700; }
-.chips { display: flex; flex-wrap: wrap; gap: 8px; }
-.chip { min-height: 44px; padding: 0 18px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); font-size: 15px; }
-.chip[aria-pressed="true"] { border-color: var(--aqua); background: var(--aqua-soft); font-weight: 700; }
-
-/* buttons */
-.btn { min-height: 50px; padding: 0 20px; border-radius: 14px; font-weight: 700; font-size: 16px; background: var(--navy); color: #ffffff; display: inline-flex; align-items: center; justify-content: center; }
-.btn.alt { background: var(--surface); color: var(--ink); border: 1px solid var(--line); }
-.btn.warn { background: var(--surface); color: var(--rope); border: 1px solid var(--line); }
-.btn.full { width: 100%; }
-.bar { position: sticky; bottom: 0; z-index: 4; display: grid; grid-template-columns: 1fr 1fr 1.3fr; gap: 8px; padding: 10px 0 calc(10px + env(safe-area-inset-bottom, 0px)); background: var(--bg); }
-
-/* plan */
-.sum { display: flex; flex-direction: column; gap: 8px; }
-.sum-row { display: flex; align-items: baseline; gap: 18px; flex-wrap: wrap; }
-.sum-row b { font-family: var(--font-num); font-style: italic; font-weight: 800; font-size: 40px; line-height: 1; }
-.sum-row b small { font-style: normal; font-weight: 500; font-size: 15px; color: var(--muted); margin-left: 3px; }
-.cond { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 14px; color: var(--muted); }
-.cond button { color: var(--aqua); font-weight: 700; min-height: 40px; }
-.mix { display: flex; height: 6px; gap: 2px; border-radius: 3px; overflow: hidden; }
-.row { display: grid; grid-template-columns: 6px 1fr auto; gap: 12px; align-items: center; width: 100%; text-align: left; padding: 14px 16px 14px 12px; min-height: 68px; border-bottom: 1px solid var(--line); }
-.row:last-child { border-bottom: 0; }
-.row .stripe { align-self: stretch; border-radius: 3px; background: var(--seg); }
-.row .grow { min-width: 0; display: flex; flex-direction: column; gap: 1px; }
-.row .ph { font-size: 12px; color: var(--muted); letter-spacing: .06em; }
-.row .nm { font-size: 16px; font-weight: 700; }
-.row .nm em { font-style: normal; font-weight: 400; color: var(--muted); font-size: 14px; }
-.row .q { font-family: var(--font-num); font-style: italic; font-weight: 800; font-size: 24px; white-space: nowrap; text-align: right; }
-.row .q small { font-style: normal; font-weight: 500; font-size: 13px; color: var(--muted); margin-left: 2px; }
-.add { width: 100%; min-height: 54px; color: var(--aqua); font-weight: 700; border-top: 1px dashed var(--line); }
-.linkish { color: var(--muted); font-size: 14px; text-decoration: underline; text-underline-offset: 3px; min-height: 40px; align-self: center; }
-
-/* detail */
-.hero { display: flex; flex-direction: column; gap: 6px; padding: 18px; border-radius: 16px; background: var(--surface); border: 1px solid var(--line); }
-.hero .ph { font-size: 13px; color: var(--muted); }
-.hero h2 { margin: 0; font-size: 24px; font-weight: 900; }
-.hero .q { font-family: var(--font-num); font-style: italic; font-weight: 800; font-size: 46px; line-height: 1; }
-.hero .q small { font-style: normal; font-weight: 500; font-size: 16px; color: var(--muted); margin-left: 4px; }
-.facts { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 14px; color: var(--muted); }
-.dots { display: inline-flex; gap: 3px; margin-right: 6px; vertical-align: middle; }
-.dots i { width: 14px; height: 6px; border-radius: 3px; background: var(--line); }
-.dots i.on { background: var(--seg-main); }
-.how { margin: 0; font-size: 15px; }
-.extra-line { font-size: 14px; color: var(--muted); padding-top: 6px; border-top: 1px dashed var(--line); }
-.stepper { display: grid; grid-template-columns: 64px 1fr 64px; align-items: center; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
-.stepper button { min-height: 56px; font-size: 28px; font-weight: 700; color: var(--navy); background: var(--aqua-soft); }
-.stepper span { text-align: center; font-size: 17px; font-weight: 700; }
-.opts { display: flex; flex-direction: column; }
-.opts .li { min-height: 54px; }
-.opts .li[aria-pressed="true"] { background: var(--aqua-soft); }
-.opts .li[aria-pressed="true"] .grow b::after { content: " ✓"; color: var(--aqua); }
-.two { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-
-/* forms */
-.input { width: 100%; min-height: 50px; padding: 0 14px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font: inherit; }
-textarea.input { padding: 12px 14px; min-height: 90px; resize: vertical; }
-.panel { display: flex; flex-direction: column; gap: 10px; padding: 16px; border-radius: 16px; background: var(--surface); border: 1px solid var(--line); }
-
-/* calendar */
-.stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.stat { padding: 14px; border-radius: 14px; background: var(--surface); border: 1px solid var(--line); display: flex; flex-direction: column; }
-.stat b { font-family: var(--font-num); font-style: italic; font-weight: 800; font-size: 32px; line-height: 1.05; }
-.stat small { color: var(--muted); font-size: 13px; }
-.mon { display: flex; align-items: center; justify-content: space-between; }
-.mon b { font-size: 17px; }
-.mon button { min-width: 44px; min-height: 44px; font-size: 24px; color: var(--aqua); }
-.cal { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
-.cal .wd { text-align: center; font-size: 12px; color: var(--muted); padding-bottom: 2px; }
-.day { position: relative; aspect-ratio: 1; max-width: 100%; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 14px; background: var(--surface); border: 1px solid var(--line); overflow: hidden; }
-.day::before { content: ""; position: absolute; inset: 0; background: var(--aqua); opacity: calc(var(--lv, 0) * 0.22); }
-.day span, .day small { position: relative; }
-.day small { font-family: var(--font-num); font-size: 11px; line-height: 1; }
-.day.has span { font-weight: 700; }
-.day.today { border-color: var(--rope); border-width: 2px; }
-.day.empty { visibility: hidden; }
-.entry { display: flex; flex-direction: column; gap: 6px; }
-.entry ul { margin: 0; padding-left: 18px; font-size: 14px; color: var(--muted); }
-.empty-note { text-align: center; color: var(--muted); font-size: 14px; padding: 24px 0; }
-.toast { position: fixed; left: 50%; bottom: calc(90px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--ink); color: var(--bg); padding: 10px 18px; border-radius: 999px; font-size: 14px; z-index: 9; max-width: calc(100% - 32px); }
-@media (prefers-reduced-motion: no-preference) { #app > * { animation: in .18s ease-out; } @keyframes in { from { opacity: .4; transform: translateY(4px); } } }
-
-/* tab bar */
-.tabs { position: fixed; left: 0; right: 0; bottom: 0; z-index: 6; display: grid; grid-template-columns: repeat(4, 1fr); background: var(--surface); border-top: 1px solid var(--line); padding: 4px max(8px, env(safe-area-inset-right, 0px)) calc(4px + env(safe-area-inset-bottom, 0px)) max(8px, env(safe-area-inset-left, 0px)); }
-.tabs button { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; min-height: 52px; font-size: 11px; color: var(--muted); }
-.tabs svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
-.tabs button[aria-current="page"] { color: var(--navy); font-weight: 700; }
-body.has-tabs { padding-bottom: calc(84px + env(safe-area-inset-bottom, 0px)); }
-body.has-tabs .bar { bottom: calc(60px + env(safe-area-inset-bottom, 0px)); padding: 10px 0; }
-.top .right { justify-self: end; color: var(--aqua); font-weight: 700; min-height: 44px; padding-left: 8px; }
-/* home week card: one fixed deep-water look in both themes */
-.week { position: relative; overflow: hidden; border-radius: 22px; background: linear-gradient(160deg, #0b5577, #062e45 70%); color: #ffffff; margin-top: 16px; }
-.week canvas { position: absolute; inset: 0; width: 100%; height: 100%; opacity: .5; mix-blend-mode: screen; }
-.week-in { position: relative; padding: 22px 20px 20px; display: flex; flex-direction: column; gap: 14px; }
-.week-in small { opacity: .78; font-size: 13px; letter-spacing: .04em; }
-.big-n { font-family: var(--font-num); font-style: italic; font-weight: 800; font-size: 60px; line-height: .95; }
-.big-n span { font-size: 17px; font-style: normal; font-weight: 500; opacity: .78; margin-left: 6px; font-family: var(--font-body); }
-.wk { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
-.wk div { display: flex; flex-direction: column; align-items: center; gap: 5px; font-size: 12px; opacity: .85; }
-.wk i { width: 26px; height: 26px; border-radius: 50%; border: 1.5px solid rgba(255,255,255,.45); display: block; }
-.wk i.on { background: #ffffff; border-color: #ffffff; }
-.wk i.today { box-shadow: 0 0 0 2px #e04a37; }
-.week .rope { border-radius: 0; height: 6px; }
-.quick { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; padding: 14px 16px; min-height: 64px; border-radius: 14px; background: var(--surface); border: 1px solid var(--line); text-align: left; }
-.quick small { display: block; color: var(--muted); font-size: 13px; }
-.quick .go { color: var(--aqua); white-space: nowrap; }
-.sec-title { display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: 700; color: var(--muted); letter-spacing: .08em; margin-bottom: -8px; }
-.sec-title button { color: var(--aqua); letter-spacing: 0; min-height: 36px; }
-/* swipe rows */
-.swipe { position: relative; overflow: hidden; border-bottom: 1px solid var(--line); }
-.swipe .row { position: relative; z-index: 1; border-bottom: 0; background: var(--surface); transition: transform .2s ease; touch-action: pan-y; }
-.swipe .row.drag { transition: none; }
-.swipe .acts { position: absolute; top: 0; right: 0; bottom: 0; display: flex; }
-.swipe .acts button { width: 76px; color: #ffffff; font-weight: 700; font-size: 15px; }
-.swipe .acts .r { background: var(--aqua); }
-.swipe .acts .d { background: var(--rope); }
-.swipe.open .row { transform: translateX(-152px); }
-.hint { margin: -6px 0 0; font-size: 12px; color: var(--muted); text-align: center; }
-.toast { bottom: calc(150px + env(safe-area-inset-bottom, 0px)); display: flex; align-items: center; gap: 12px; }
-.toast button { color: #7fd0e2; font-weight: 700; }
-@media (prefers-reduced-motion: reduce) { .swipe .row { transition: none; } }
-
-/* round 3: numbered, plain-language plan rows */
-.row { grid-template-columns: 30px 1fr 14px; align-items: start; padding: 14px 14px 14px 12px; }
-.row .chev { color: var(--muted); font-size: 22px; align-self: center; }
-.no { width: 28px; height: 28px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-family: var(--font-num); font-weight: 700; font-size: 16px; background: var(--seg); color: #ffffff; margin-top: 2px; }
-.row .grow, .erow .grow { gap: 3px; }
-.ph { font-size: 12px; color: var(--muted); }
-.nm { font-size: 17px; font-weight: 700; }
-.nm em { font-style: normal; font-weight: 400; color: var(--muted); font-size: 14px; }
-.pl { font-size: 14px; color: var(--ink); opacity: .85; line-height: 1.5; }
-.erow { display: grid; grid-template-columns: 30px 1fr auto; gap: 12px; align-items: start; padding: 14px 12px; border-bottom: 1px solid var(--line); }
-.erow .grow { min-width: 0; display: flex; flex-direction: column; }
-.eb { display: flex; gap: 6px; align-self: center; }
-.eb button { min-width: 44px; min-height: 40px; padding: 0 10px; border-radius: 10px; border: 1px solid var(--aqua); color: var(--aqua); font-weight: 700; font-size: 14px; }
-.eb button.d { border-color: var(--rope); color: var(--rope); }
-.guide { margin: 0; padding: 12px 14px; border-radius: 12px; background: var(--aqua-soft); font-size: 14px; line-height: 1.5; }
-.steps { gap: 14px; }
-.steps p { margin: 4px 0 0; font-size: 15px; }
-.today-card { display: flex; flex-direction: column; gap: 8px; padding: 14px 16px; cursor: pointer; text-align: left; }
-.tc-h { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
-.tc-h b { font-size: 26px; font-style: italic; font-weight: 800; }
-.tc-h span { color: var(--muted); font-size: 14px; }
-.today-card ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; font-size: 14px; }
-.today-card li { display: flex; justify-content: space-between; gap: 12px; color: var(--muted); }
-.today-card li span:first-child { color: var(--ink); }
-.tip-card { display: flex; flex-direction: column; gap: 4px; padding: 16px; border-radius: 16px; background: var(--surface); border: 1px dashed var(--aqua); }
-.tip-card b { font-size: 17px; }
-.tip-card p { margin: 0; font-size: 14px; color: var(--muted); }
-
-/* round 4: swimmer notation on the right */
-.row, .erow { grid-template-columns: 30px 1fr auto; }
-.bq { font-family: var(--font-num); font-style: italic; font-weight: 800; font-size: 28px; line-height: 1.1; white-space: nowrap; font-variant-numeric: tabular-nums; align-self: center; }
-.erow .bq { display: none; }
-@media (max-width: 380px) { .bq { font-size: 23px; } }
-
-/* settings & equipment */
-.week .gear { position: absolute; top: 12px; right: 12px; z-index: 2; min-height: 36px; padding: 0 14px; border-radius: 999px; background: rgba(255,255,255,.16); color: #ffffff; font-size: 13px; font-weight: 700; }
-.seg2 { grid-auto-flow: row; grid-template-columns: 1fr 1fr; }
-.note { margin: 0; font-size: 13px; color: var(--muted); line-height: 1.5; }
-.toggle .sw { width: 48px; height: 28px; border-radius: 14px; background: var(--line); position: relative; flex: none; transition: background .15s; }
-.toggle .sw i { position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%; background: #ffffff; box-shadow: 0 1px 2px rgba(0,0,0,.25); transition: transform .15s; }
-.toggle[aria-pressed="true"] .sw { background: var(--aqua); }
-.toggle[aria-pressed="true"] .sw i { transform: translateX(20px); }
-.eqp { display: flex; flex-wrap: wrap; gap: 8px; padding: 4px 16px 16px; }
-.poolline { width: 100%; min-height: 44px; font-size: 14px; color: var(--muted); text-align: center; }
-.poolline b { color: var(--aqua); }
-.panel .stepper { margin-top: 2px; }
-
-/* composite sets */
-.segs { margin: 6px 0 0; padding-left: 22px; display: flex; flex-direction: column; gap: 8px; }
-.segs li b { font-family: var(--font-num); font-size: 19px; font-style: italic; }
-.segs li span { display: block; font-size: 13px; color: var(--muted); }
-.tag { font-style: normal; font-size: 11px; font-weight: 700; color: var(--aqua); border: 1px solid var(--aqua); border-radius: 6px; padding: 0 5px; margin-left: 4px; vertical-align: 2px; }
-
-/* 带 hidden 的元素一定隐藏（提示条没消息时不显示） */
-[hidden] { display: none !important; }
-
-/* ================= 设计升级「泳道」 ================= */
-:root { --tile: rgba(10,61,87,.05); --lane: #12303d; --ink-strong: #0a3d57; --glass: rgba(241,246,248,.82); }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --tile: rgba(255,255,255,.035); --lane: #a9c6d0; --ink-strong: #e2eef2; --glass: rgba(8,23,30,.8); } }
-:root[data-theme="dark"] { --tile: rgba(255,255,255,.035); --lane: #a9c6d0; --ink-strong: #e2eef2; --glass: rgba(8,23,30,.8); }
-
-/* 背景：泳池瓷砖方格 */
-body { background-color: var(--bg); background-image: linear-gradient(var(--tile) 1px, transparent 1px), linear-gradient(90deg, var(--tile) 1px, transparent 1px); background-size: 28px 28px; }
-#app { gap: 20px; }
-
-/* 字号层级 */
-.label { letter-spacing: 0; font-size: 13px; font-weight: 500; }
-.sec-title { letter-spacing: 0; font-weight: 500; font-size: 14px; margin-bottom: -10px; }
-h2, .hero h2 { font-weight: 700; }
-
-/* 顶栏：磨砂玻璃；主页面左对齐大标题 */
-.top { background: var(--glass); -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px); margin-inline: -16px; padding-inline: 16px; }
-.top.large { display: flex; align-items: flex-end; justify-content: space-between; min-height: 68px; padding-bottom: 6px; }
-.top.large h1 { font-size: 30px; font-weight: 700; text-align: left; letter-spacing: .01em; }
-.top.large .right { min-height: 36px; }
-
-/* 卡片减法：去边框，靠底色区分 */
-.list, .panel, .stat, .quick, .stepper, .seg, .chip, .chips .opt span, .input { border-color: transparent; }
-.list { border-radius: 20px; }
-.li, .row, .erow, .swipe { border-bottom-color: var(--line); }
-.quick { border: 0; }
-.tip-card { border: 0; background: var(--aqua-soft); border-radius: 20px; }
-.tip-card .label { color: var(--aqua); }
-.big { border-radius: 20px; }
-.chip { background: var(--surface); }
-.chip[aria-pressed="true"] { border-color: var(--aqua); }
-.input { border: 1px solid var(--line); }
-
-/* 首页本周卡片 */
-.week { border-radius: 24px; }
-.big-n { letter-spacing: -.01em; }
-
-/* 课表总览：数字直立 */
-.sum-row b, .stat b, .hero .q, .tc-h b { font-style: normal; font-weight: 700; }
-.sum-row b { font-size: 38px; }
-.cond { font-size: 13px; }
-.guide { background: transparent; padding: 0 2px; color: var(--muted); font-size: 13px; }
-
-/* 课表：泳道线 */
-.lane .row, .lane .erow { position: relative; background: var(--surface); }
-.lane .row::after, .lane .erow::after { content: ""; position: absolute; left: 25.5px; top: 0; bottom: 0; width: 3px; background: var(--lane); }
-.lane > div:first-child .row::after, .lane > .erow:first-child::after { top: 50%; }
-.no { position: relative; z-index: 1; background: var(--surface); color: var(--lane); border: 2.5px solid var(--lane); width: 30px; height: 30px; margin-top: 0; font-weight: 700; }
-.row, .erow { align-items: center; }
-.is-main .no { background: var(--rope); border-color: var(--rope); color: #ffffff; }
-.nm { font-size: 17px; font-weight: 700; }
-.ph { font-size: 12px; }
-.pl { color: var(--muted); opacity: 1; font-size: 13px; }
-.bq { font-style: normal; font-weight: 700; font-size: 27px; color: var(--ink-strong); }
-.is-main .bq { color: var(--rope); }
-.add { position: relative; border-top: 0; padding-left: 52px; text-align: left; color: var(--aqua); }
-.add::before { content: ""; position: absolute; left: 25.5px; top: 0; height: 18px; width: 3px; background: var(--lane); }
-.add::after { content: ""; position: absolute; left: 15px; top: 18px; width: 24px; height: 3px; border-radius: 2px; background: var(--lane); }
-.swipe .acts button { font-size: 14px; }
-
-/* 底部按钮栏：磨砂，不再挤成两行 */
-.bar { background: var(--glass); -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px); margin-inline: -16px; padding-inline: 16px; grid-template-columns: auto auto 1fr; }
-.bar .btn { white-space: nowrap; font-size: 15px; padding: 0 16px; min-height: 48px; }
-.bar .btn.alt { background: var(--surface); }
-
-/* 底部标签栏：磨砂 */
-.tabs { background: var(--glass); -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px); border-top: 1px solid var(--line); }
-
-/* 练法详情：标题直接放在页面上，不套卡片 */
-.hero { background: transparent; border: 0; padding: 4px 2px 0; }
-.hero h2 { font-size: 26px; }
-.hero .q { font-size: 52px; }
-.steps { gap: 16px; }
-.steps .label { color: var(--aqua); }
-
-/* 日历：去掉方框，游过的天是水蓝圆点 */
-.cal { gap: 6px 4px; }
-.day { border: 0; background: transparent; border-radius: 50%; width: 100%; max-width: 46px; justify-self: center; }
-.day::before { border-radius: 50%; opacity: calc(var(--lv, 0) * 0.25); }
-.day.has { color: var(--ink-strong); }
-.day.today { box-shadow: inset 0 0 0 2px var(--rope); }
-.stat { border-radius: 20px; }
-.stat b { font-size: 34px; }
-
-/* 设置开关等 */
-.seg { background: var(--surface); }
-.seg button[aria-pressed="true"] { background: var(--ink-strong); color: var(--bg); }
-.btn { background: var(--ink-strong); color: var(--bg); }
-.btn.alt, .btn.warn { color: var(--ink); }
-.btn.warn { color: var(--rope); }
-.big { background: var(--ink-strong); color: var(--bg); }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .big { background: #0b5577; color: #ffffff; } }
-:root[data-theme="dark"] .big { background: #0b5577; color: #ffffff; }
-
-body.has-tabs .bar { padding: 10px 16px; }
-:root { --tile: rgba(10,61,87,.035); }
-.segs li b { font-style: normal; font-weight: 700; }
-.lane .pl { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-
-/* ================= 液态玻璃 + 固定泳池背景 ================= */
-:root {
-  --bg: #d6eaef; --surface: rgba(255,255,255,.42); --solid: #f1f8f9;
-  --ink: #0b2e3c; --ink-strong: #0b2e3c; --muted: #4c6a75; --line: rgba(11,46,60,.1); --lane: #133847;
-  --aqua: #0a7ea2; --aqua-soft: rgba(10,126,162,.1); --navy: #0b3a50;
-  --water-a: #ecf6f8; --water-b: #c9e6ec; --water-c: #a3d2de; --grout: rgba(255,255,255,.5); --caustic: .6;
-  --glass: rgba(236,246,248,.55);
-  --glass-bg: linear-gradient(145deg, rgba(255,255,255,.66), rgba(255,255,255,.34));
-  --glass-edge: rgba(255,255,255,.8); --glass-hi: rgba(255,255,255,.95); --glass-lo: rgba(255,255,255,.25);
-  --glass-shadow: 0 12px 32px -16px rgba(5,50,70,.35);
-}
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
-  --bg: #051720; --surface: rgba(255,255,255,.06); --solid: #0c2833;
-  --ink: #e4f0f3; --ink-strong: #e4f0f3; --muted: #8eafba; --line: rgba(255,255,255,.09); --lane: #a8c7d1;
-  --aqua: #63c8e1; --aqua-soft: rgba(99,200,225,.12); --navy: #0b5577;
-  --water-a: #031119; --water-b: #062431; --water-c: #0a3a4d; --grout: rgba(255,255,255,.04); --caustic: .32;
-  --glass: rgba(5,23,32,.5);
-  --glass-bg: linear-gradient(145deg, rgba(255,255,255,.11), rgba(255,255,255,.035));
-  --glass-edge: rgba(255,255,255,.14); --glass-hi: rgba(255,255,255,.24); --glass-lo: rgba(255,255,255,.04);
-  --glass-shadow: 0 14px 36px -16px rgba(0,0,0,.7); color-scheme: dark;
-} }
-:root[data-theme="dark"] {
-  --bg: #051720; --surface: rgba(255,255,255,.06); --solid: #0c2833;
-  --ink: #e4f0f3; --ink-strong: #e4f0f3; --muted: #8eafba; --line: rgba(255,255,255,.09); --lane: #a8c7d1;
-  --aqua: #63c8e1; --aqua-soft: rgba(99,200,225,.12); --navy: #0b5577;
-  --water-a: #031119; --water-b: #062431; --water-c: #0a3a4d; --grout: rgba(255,255,255,.04); --caustic: .32;
-  --glass: rgba(5,23,32,.5);
-  --glass-bg: linear-gradient(145deg, rgba(255,255,255,.11), rgba(255,255,255,.035));
-  --glass-edge: rgba(255,255,255,.14); --glass-hi: rgba(255,255,255,.24); --glass-lo: rgba(255,255,255,.04);
-  --glass-shadow: 0 14px 36px -16px rgba(0,0,0,.7); color-scheme: dark;
-}
-
-/* 固定在屏幕后面的泳池：水色 + 池底瓷砖 + 水光，内容从上面滑过 */
-body { background: var(--bg); background-image: none; }
-.pool { position: fixed; inset: 0; z-index: 0; pointer-events: none;
-  background:
-    linear-gradient(var(--grout) 1px, transparent 1px) 0 0 / 34px 34px,
-    linear-gradient(90deg, var(--grout) 1px, transparent 1px) 0 0 / 34px 34px,
-    linear-gradient(180deg, var(--water-a), var(--water-b) 45%, var(--water-c)); }
-.pool canvas { position: absolute; inset: -4%; width: 108%; height: 108%; opacity: var(--caustic); mix-blend-mode: screen; filter: blur(1.5px); }
-#app { position: relative; z-index: 1; }
-
-/* 液态玻璃材质 */
-.list, .panel, .stat, .quick, .tip-card, .stepper, .seg, .gear, .chip, .bar .btn.alt, .eqp .chip {
-  background: var(--glass-bg);
-  -webkit-backdrop-filter: blur(22px) saturate(175%); backdrop-filter: blur(22px) saturate(175%);
-  border: 1px solid var(--glass-edge);
-  box-shadow: inset 0 1px 0 var(--glass-hi), inset 0 -1px 0 var(--glass-lo), var(--glass-shadow);
-}
-.chip[aria-pressed="true"] { background: var(--aqua-soft); border-color: var(--aqua); }
-.list, .panel, .stat, .quick, .tip-card { border-radius: 22px; }
-.li, .row, .erow, .swipe { background: transparent; }
-.lane .row, .lane .erow { background: transparent; }
-.no { background: var(--solid); }
-.opts .li[aria-pressed="true"] { background: var(--aqua-soft); }
-
-/* 左滑：没滑开时隐藏操作按钮，滑开时这一行变实心 */
-.swipe .acts { opacity: 0; transition: opacity .15s; }
-.swipe.open .acts, .swipe:has(.row.drag) .acts { opacity: 1; }
-.swipe.open .row, .swipe .row.drag { background: var(--solid); }
-
-/* 顶栏、底部按钮栏、标签栏：玻璃 */
-.top, .bar, .tabs { background: var(--glass); -webkit-backdrop-filter: blur(24px) saturate(180%); backdrop-filter: blur(24px) saturate(180%); }
-.tabs { border-top: 1px solid var(--glass-edge); box-shadow: inset 0 1px 0 var(--glass-hi); }
-
-/* 主按钮：唯一的实心深色元素 */
-.big, .btn:not(.alt):not(.warn) {
-  background: linear-gradient(160deg, #0f5d7e, #0a3349); color: #ffffff;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.28), 0 16px 30px -16px rgba(5,45,65,.7); border: 0; }
-.big { border-radius: 24px; padding: 24px 22px; }
-.seg button[aria-pressed="true"] { background: linear-gradient(160deg, #0f5d7e, #0a3349); color: #ffffff; box-shadow: inset 0 1px 0 rgba(255,255,255,.25); }
-
-/* 首页顶部：直接写在水面上的本周码数 */
-.hero-water { display: flex; flex-direction: column; gap: 20px; padding: 22px 2px 6px; color: var(--ink); }
-.hw-top { display: flex; align-items: center; justify-content: space-between; font-size: 14px; color: var(--muted); }
-.gear { width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center; color: var(--ink); padding: 0; }
-.gear svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; }
-.hw-num { display: flex; align-items: flex-end; gap: 14px; }
-.hw-num b { font-family: var(--font-num); font-weight: 200; font-size: 104px; line-height: .8; letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
-.hw-num span { font-size: 14px; line-height: 1.45; color: var(--muted); padding-bottom: 6px; }
-.hero-water .wk { grid-template-columns: repeat(7, 1fr); gap: 8px; }
-.hero-water .wk div { display: flex; flex-direction: column; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); opacity: 1; }
-.hero-water .wk i { width: 100%; height: 5px; border-radius: 3px; border: 0; background: var(--line); box-shadow: none; }
-.hero-water .wk i.on { background: var(--ink-strong); }
-.hero-water .wk .is-today { color: var(--rope); font-weight: 700; }
-.hero-water .wk .is-today i:not(.on) { background: transparent; box-shadow: inset 0 0 0 1.5px var(--rope); }
-.tip-card .label, .steps .label { color: var(--aqua); }
-.day { background: transparent; }
-
-.tabs button[aria-current="page"] { color: var(--aqua); }
-:root { --glass: rgba(236,246,248,.72); }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --glass: rgba(5,23,32,.72); } }
-:root[data-theme="dark"] { --glass: rgba(5,23,32,.72); }
-/* ================= 纯色扁平「Duolingo 式」 ================= */
-:root {
-  --bg: #ffffff; --surface: #ffffff; --solid: #ffffff; --ink: #3c3c3c; --ink-strong: #3c3c3c; --muted: #8a8a8a;
-  --line: #e5e5e5; --lane: #e5e5e5; --aqua: #1899d6; --aqua-soft: #ddf4ff; --rope: #ff4b4b;
-  --c-blue: #1cb0f6; --c-blue-d: #1899d6; --c-green: #58cc02; --c-green-d: #46a302;
-  --c-yellow: #ffc800; --c-yellow-d: #e5a400; --c-pink: #ff86d0; --c-pink-d: #e56cb6;
-  --c-purple: #ce82ff; --c-purple-d: #a568cc; --c-red: #ff4b4b; --c-red-d: #ea2b2b;
-  --sel-bg: #ddf4ff; --sel-edge: #84d8ff; --font-num: "Nunito", "Noto Sans SC", system-ui, sans-serif;
+  --bg: #ffffff; --ink: #0f1720; --muted: #8b95a1; --line: #e8edf2; --tint: #f4f7fb; --tint-2: #eef3f9;
+  --blue: #2f7cf6; --blue-s: #e9f1fe; --purple: #8b6cf0; --coral: #f2705f; --red: #e5484d;
+  --ph-warm: #9cc2fb; --ph-drill: #b9a6f6; --ph-cool: #9fdcbf;
+  --glass: linear-gradient(180deg, rgba(255,255,255,.74), rgba(255,255,255,.52)); --glass-edge: rgba(255,255,255,.85);
+  --glass-shadow: 0 14px 34px -12px rgba(15,23,32,.28), 0 2px 6px rgba(15,23,32,.06);
+  --fade: rgba(255,255,255,.94);
+  --font: "Inter", "Noto Sans SC", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
   color-scheme: light;
 }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
-  --bg: #131f24; --surface: #131f24; --solid: #131f24; --ink: #f1f7fb; --ink-strong: #f1f7fb; --muted: #8a9ba3;
-  --line: #37464f; --lane: #37464f; --aqua: #49c0f8; --aqua-soft: #1b3a4b; --sel-bg: #1b3a4b; --sel-edge: #3f87b0; color-scheme: dark; } }
+  --bg: #0d1116; --ink: #eef2f6; --muted: #8893a0; --line: #222a33; --tint: #161c23; --tint-2: #1b222a;
+  --blue: #5b9bff; --blue-s: #172a45; --purple: #a48cff; --coral: #ff8a7a; --red: #ff6b6f;
+  --ph-warm: #3d6fae; --ph-drill: #6b58b8; --ph-cool: #3f8a68;
+  --glass: linear-gradient(180deg, rgba(40,48,58,.72), rgba(28,34,42,.6)); --glass-edge: rgba(255,255,255,.12);
+  --glass-shadow: 0 14px 34px -12px rgba(0,0,0,.7); --fade: rgba(13,17,22,.94); color-scheme: dark; } }
 :root[data-theme="dark"] {
-  --bg: #131f24; --surface: #131f24; --solid: #131f24; --ink: #f1f7fb; --ink-strong: #f1f7fb; --muted: #8a9ba3;
-  --line: #37464f; --lane: #37464f; --aqua: #49c0f8; --aqua-soft: #1b3a4b; --sel-bg: #1b3a4b; --sel-edge: #3f87b0; color-scheme: dark; }
+  --bg: #0d1116; --ink: #eef2f6; --muted: #8893a0; --line: #222a33; --tint: #161c23; --tint-2: #1b222a;
+  --blue: #5b9bff; --blue-s: #172a45; --purple: #a48cff; --coral: #ff8a7a; --red: #ff6b6f;
+  --ph-warm: #3d6fae; --ph-drill: #6b58b8; --ph-cool: #3f8a68;
+  --glass: linear-gradient(180deg, rgba(40,48,58,.72), rgba(28,34,42,.6)); --glass-edge: rgba(255,255,255,.12);
+  --glass-shadow: 0 14px 34px -12px rgba(0,0,0,.7); --fade: rgba(13,17,22,.94); color-scheme: dark; }
 
-/* 纯色背景，去掉水光、格子、玻璃 */
-.pool { display: none; }
-body { background: var(--bg); background-image: none; font-weight: 500; }
-.top, .bar, .tabs, .list, .panel, .stat, .quick, .tip-card, .stepper, .seg, .gear, .chip, .eqp .chip { -webkit-backdrop-filter: none; backdrop-filter: none; }
-.top { background: var(--bg); border-bottom: 2px solid var(--line); }
-.top.large { border-bottom: 0; }
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; touch-action: pan-x pan-y; }
+body { background: var(--bg); color: var(--ink); font-family: var(--font); font-size: 15px; line-height: 1.5; padding-inline: 20px; padding-block: 0 40px; -webkit-font-smoothing: antialiased; -webkit-tap-highlight-color: transparent; }
+body.has-tabs { padding-bottom: 130px; }
+body.has-bar { padding-bottom: 110px; }
+#app { max-width: 520px; margin: 0 auto; display: flex; flex-direction: column; }
+button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; text-align: inherit; }
+button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; border-radius: 10px; }
+h1, h2, p { margin: 0; }
+.num { font-family: "Inter", var(--font); font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
+.muted { color: var(--muted); }
+.red { color: var(--red) !important; }
+.center { text-align: center; align-self: center; }
+.flexrow { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.hint { margin-top: 12px; font-size: 13px; color: var(--muted); line-height: 1.55; }
 
-/* 卡片：白底 + 2px 浅灰边框，不加阴影 */
-.list, .panel, .stat, .quick, .tip-card { background: var(--surface); border: 2px solid var(--line); border-radius: 16px; box-shadow: none; }
-.li, .row, .erow, .swipe { border-bottom: 2px solid var(--line); }
-.tip-card { border-color: var(--c-purple); }
-.tip-card .label { color: var(--c-purple-d); font-weight: 700; }
-.steps .label, .label { color: var(--muted); font-weight: 700; }
-.sec-title { font-weight: 700; }
-h1, .nm, .hero h2, .li b, .quick b, .tip-card b { font-weight: 900; }
+/* 页面标题 */
+.date { margin-top: 26px; font-size: 13px; color: var(--muted); }
+.hi { font-size: 28px; font-weight: 800; letter-spacing: -.01em; }
+.hd { display: flex; align-items: flex-end; justify-content: space-between; padding-top: 26px; min-height: 76px; }
+.hd h1 { font-size: 30px; font-weight: 800; letter-spacing: -.01em; }
+.nav { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; min-height: 52px; margin-inline: -20px; padding-inline: 20px; background: var(--bg); }
+.nav b { font-size: 16px; }
+.nav > span { justify-self: end; }
+.back { color: var(--blue); font-weight: 500; display: inline-flex; align-items: center; min-height: 44px; }
+.back::before { content: "‹"; font-size: 26px; line-height: 1; margin: -3px 4px 0 0; }
+.txt { color: var(--blue); font-weight: 600; min-height: 40px; font-size: 14px; }
+.txt.center { margin-top: 16px; color: var(--muted); font-weight: 500; text-decoration: underline; text-underline-offset: 3px; }
 
-/* 立体按钮：实心色 + 底下一条厚边，按下去会沉 */
-.pb { display: inline-flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
-  min-height: 50px; padding: 0 18px; border-radius: 16px; border: 0; color: #ffffff; font-weight: 900; font-size: 16px;
-  letter-spacing: .02em; white-space: nowrap; background: var(--c); box-shadow: 0 4px 0 var(--cd); transition: transform .06s, box-shadow .06s; }
-.pb:active { transform: translateY(4px); box-shadow: 0 0 0 var(--cd); }
-.pb.blue { --c: var(--c-blue); --cd: var(--c-blue-d); }
-.pb.green { --c: var(--c-green); --cd: var(--c-green-d); }
-.pb.yellow { --c: var(--c-yellow); --cd: var(--c-yellow-d); color: #4b3a00; }
-.pb.pink { --c: var(--c-pink); --cd: var(--c-pink-d); }
-.pb.full { width: 100%; }
-.pb.big { align-items: flex-start; padding: 22px 22px 20px; border-radius: 20px; min-height: 0; box-shadow: 0 5px 0 var(--cd); }
-.pb.big:active { box-shadow: 0 0 0 var(--cd); transform: translateY(5px); }
-.pb.big b { font-size: 21px; }
-.pb.big span { font-size: 14px; font-weight: 700; opacity: .92; }
-.btn.alt, .btn.warn { background: var(--surface); border: 2px solid var(--line); box-shadow: 0 3px 0 var(--line); color: var(--ink); font-weight: 900; }
-.btn.warn { color: var(--c-red); }
-.bar { background: var(--bg); border-top: 2px solid var(--line); grid-template-columns: 1fr 1fr 1.4fr; gap: 10px; }
-body.has-tabs .bar { padding: 12px 16px 14px; }
+/* 水波打卡 */
+.rip { position: relative; margin: 34px auto 0; max-width: 100%; }
+.rip i { position: absolute; border-radius: 50%; border: 1px solid #c9dcfb; display: block; }
+.rip .core { position: absolute; border-radius: 50%; background: radial-gradient(circle at 50% 35%, var(--bg) 0%, var(--blue-s) 60%, #dce9fd 100%); box-shadow: inset 0 0 0 1px #d3e3fb; }
+.dot { position: absolute; width: 16px; height: 16px; border-radius: 50%; background: var(--bg); box-shadow: inset 0 0 0 1.5px #d0def4; }
+.dot.on { background: var(--blue); box-shadow: 0 0 0 4px var(--bg); }
+.dot.now { box-shadow: inset 0 0 0 2.5px var(--blue), 0 0 0 4px var(--bg); }
+.dl { position: absolute; width: 28px; text-align: center; font-size: 11px; color: #a7b0bb; }
+.dl.now { color: var(--blue); font-weight: 700; }
+.mid { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; font-size: 13px; color: var(--muted); text-align: center; }
+.mid strong { font-family: "Inter", var(--font); font-size: 60px; font-weight: 700; color: var(--ink); line-height: 1; letter-spacing: -.04em; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .rip i { border-color: #2a4466; } :root:not([data-theme="light"]) .rip .core { background: radial-gradient(circle at 50% 35%, #1c2a3d, #14233a 70%); box-shadow: inset 0 0 0 1px #2a4466; } :root:not([data-theme="light"]) .dot { box-shadow: inset 0 0 0 1.5px #33465e; } }
 
-/* 选项：选中时浅蓝底 + 蓝边 */
-.seg { background: transparent; border: 0; padding: 0; gap: 8px; box-shadow: none; }
-.seg button { background: var(--surface); border: 2px solid var(--line); border-bottom-width: 4px; border-radius: 14px; color: var(--ink); font-weight: 700; min-height: 48px; box-shadow: none; }
-.seg button[aria-pressed="true"] { background: var(--sel-bg); border-color: var(--sel-edge); color: var(--aqua); box-shadow: none; }
-.chip, .eqp .chip { background: var(--surface); border: 2px solid var(--line); border-bottom-width: 4px; border-radius: 14px; box-shadow: none; font-weight: 700; color: var(--ink); }
-.chip[aria-pressed="true"] { background: var(--sel-bg); border-color: var(--sel-edge); color: var(--aqua); }
-.stepper { background: var(--surface); border: 2px solid var(--line); border-radius: 16px; box-shadow: none; }
-.stepper button { background: transparent; color: var(--aqua); }
-.toggle[aria-pressed="true"] .sw { background: var(--c-green); }
-.input { border: 2px solid var(--line); border-radius: 14px; background: var(--surface); }
-.gear { background: var(--surface); border: 2px solid var(--line); box-shadow: 0 3px 0 var(--line); color: var(--muted); }
+/* 按钮 */
+.go { margin-top: 36px; min-height: 56px; border-radius: 999px; background: var(--blue); color: #ffffff; font-weight: 700; font-size: 17px; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 24px -12px rgba(47,124,246,.7); }
+.go:active, .btn:active { transform: scale(.98); }
+.btn { min-height: 50px; border-radius: 16px; background: var(--ink); color: var(--bg); font-weight: 700; display: flex; align-items: center; justify-content: center; padding: 0 16px; white-space: nowrap; }
+.btn.soft { background: var(--tint); color: var(--ink); box-shadow: inset 0 0 0 1px var(--line); }
+.btn.danger { margin-top: 24px; background: transparent; color: var(--red); box-shadow: inset 0 0 0 1px var(--line); }
+.two { margin-top: 14px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
-/* 首页顶部：纯色上的大数字 */
-.hw-num b { font-family: var(--font-num); font-weight: 900; font-size: 84px; line-height: .85; letter-spacing: -.02em; color: var(--c-blue); }
-.hw-num span { font-weight: 700; }
-.hero-water .wk i { height: 30px; width: 30px; max-width: 100%; border-radius: 50%; background: var(--line); }
-.hero-water .wk i.on { background: var(--c-blue); }
-.hero-water .wk .is-today { color: var(--c-red); }
-.hero-water .wk .is-today i:not(.on) { background: transparent; box-shadow: inset 0 0 0 3px var(--c-red); }
-.quick .go { color: var(--c-green-d); font-weight: 900; }
+/* 数据方块与卡片 */
+.tiles { margin-top: 16px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.tl { border-radius: 22px; background: linear-gradient(180deg, var(--tint), var(--tint-2)); box-shadow: inset 0 1px 0 rgba(255,255,255,.6), inset 0 0 0 1px rgba(15,23,32,.035); padding: 14px 13px 12px; display: flex; flex-direction: column; min-width: 0; }
+.tl small { font-size: 12px; color: var(--muted); }
+.tl b { font-size: 23px; font-weight: 700; margin-top: 6px; line-height: 1.1; white-space: nowrap; }
+.tl em { font-style: normal; font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sec { margin-top: 30px; display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.sec.first { margin-top: 18px; }
+.sec b { font-size: 17px; font-weight: 700; }
+.sec span, .sec button { font-size: 13px; color: var(--muted); }
+.card { margin-top: 12px; border-radius: 22px; background: var(--tint); box-shadow: inset 0 0 0 1px rgba(15,23,32,.035); padding: 18px; display: block; width: 100%; }
+.card.empty { color: var(--muted); font-size: 14px; text-align: center; padding: 22px 18px; }
+.card.list { padding: 4px 18px; }
+.tip { display: flex; gap: 14px; align-items: flex-start; }
+.tic { width: 46px; height: 46px; border-radius: 15px; background: var(--bg); color: var(--blue); display: grid; place-items: center; flex: none; }
+.tip b { font-size: 16px; display: block; }
+.tip p { font-size: 13px; color: var(--muted); margin-top: 2px; }
+.bal { display: flex; flex-direction: column; gap: 12px; }
+.bl { display: grid; grid-template-columns: 40px 1fr 24px; align-items: center; gap: 12px; font-size: 13px; }
+.bl .tr { position: relative; height: 8px; border-radius: 4px; background: var(--line); overflow: visible; }
+.bl .tr i { display: block; height: 100%; border-radius: 4px; }
+.bl .tr u { position: absolute; top: -4px; width: 2px; height: 16px; background: var(--muted); opacity: .5; border-radius: 1px; }
+.bl b { text-align: right; }
+.bl b.zero { color: var(--muted); font-weight: 500; }
 
-/* 课表：浅灰泳道线 + 每个阶段一个颜色 */
-.sum-row b, .stat b, .hero .q, .tc-h b, .bq, .segs li b { font-family: var(--font-num); font-weight: 900; font-style: normal; }
-.lane .row::after, .lane .erow::after, .add::before { background: var(--lane); width: 4px; left: 25px; }
-.add::after { background: var(--lane); width: 24px; height: 4px; left: 15px; }
-.no { border: 0; color: #ffffff; background: var(--c-blue); width: 32px; height: 32px; font-family: var(--font-num); font-weight: 900; }
-.ph-warm .no { background: var(--c-blue); }
-.ph-drill .no { background: var(--c-purple); }
-.ph-main .no { background: var(--c-red); }
-.ph-cool .no { background: var(--c-green); }
-.bq { color: var(--ink); }
-.is-main .bq { color: var(--c-red); }
-.add { color: var(--c-blue-d); font-weight: 900; }
-.swipe.open .row, .swipe .row.drag { background: var(--bg); }
-.swipe .acts .r { background: var(--c-blue); }
-.swipe .acts .d { background: var(--c-red); }
-.eb button { border-width: 2px; border-bottom-width: 4px; border-radius: 12px; font-weight: 900; }
+/* 列表 */
+.li { display: flex; align-items: center; gap: 14px; width: 100%; min-height: 60px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+.li:last-child { border-bottom: 0; }
+.li.col { flex-direction: column; align-items: flex-start; gap: 10px; }
+.li .g { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.li .g b { font-size: 15px; font-weight: 600; }
+.li .g small { font-size: 12px; color: var(--muted); }
+.li.sel { color: var(--blue); }
+.li.sel .g b::after { content: "  ✓"; }
+.badge { width: 44px; height: 40px; border-radius: 13px; background: var(--bg); display: grid; place-items: center; font-size: 13px; font-weight: 700; flex: none; }
+.dotc { width: 10px; height: 10px; border-radius: 50%; flex: none; }
+.chev { color: var(--muted); font-size: 20px; }
+.tag { font-style: normal; font-size: 11px; color: var(--blue); border: 1px solid var(--blue); border-radius: 6px; padding: 0 5px; margin-left: 4px; vertical-align: 2px; }
+.favs { margin-top: 12px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.fav { border-radius: 20px; box-shadow: inset 0 0 0 1px var(--line); padding: 16px; background: var(--bg); display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.fav b { font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fav small { font-size: 12px; color: var(--muted); }
+.fav .pbar { margin-top: 10px; }
+.pbar { display: flex; gap: 3px; }
+.pbar i { display: block; border-radius: 3px; }
 
-/* 详情 */
-.hero .q { color: var(--c-blue); }
-.dots i.on { background: var(--c-red); }
+/* 分段切换 */
+.segs { margin-top: 6px; display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 4px; padding: 4px; border-radius: 14px; background: var(--tint); }
+.segs button { min-height: 38px; border-radius: 10px; text-align: center; font-size: 14px; color: var(--muted); font-weight: 500; }
+.segs button.on { background: var(--bg); color: var(--ink); font-weight: 700; box-shadow: 0 1px 3px rgba(15,23,32,.1); }
+.plancard { display: flex; flex-direction: column; gap: 12px; text-align: left; }
+.plancard b { display: block; font-size: 19px; }
+.plancard .big { font-size: 26px; font-weight: 700; }
 
-/* 日历 */
-.day::before { display: none; }
-.day.has { background: var(--c-blue); color: #ffffff; }
-.day.has small { color: #ffffff; }
-.day.today { box-shadow: inset 0 0 0 3px var(--c-red); }
-.stat b { color: var(--c-blue); }
+/* 课表 */
+.sum { margin-top: 10px; display: flex; gap: 22px; }
+.sum b { font-size: 34px; font-weight: 700; }
+.sum small { font-size: 13px; color: var(--muted); margin-left: 3px; }
+.lane { padding: 0; overflow: hidden; }
+.swipe { position: relative; overflow: hidden; border-bottom: 1px solid var(--line); }
+.swipe .acts { position: absolute; top: 0; right: 0; bottom: 0; display: flex; opacity: 0; }
+.swipe.open .acts, .swipe:has(.row.drag) .acts { opacity: 1; }
+.swipe .acts button { width: 80px; color: #ffffff; font-weight: 700; font-size: 14px; text-align: center; }
+.swipe .acts .r { background: var(--blue); }
+.swipe .acts .d { background: var(--red); }
+.row { position: relative; z-index: 1; width: 100%; display: grid; grid-template-columns: 32px 1fr auto; gap: 12px; align-items: center; padding: 14px 16px 14px 14px; background: var(--tint); transition: transform .2s ease; touch-action: pan-y; }
+.row.drag { transition: none; }
+.swipe.open .row { transform: translateX(-160px); }
+.row::after { content: ""; position: absolute; left: 29px; top: 0; bottom: 0; width: 2px; background: var(--line); z-index: -1; }
+.lane > .swipe:first-child .row::after { top: 50%; }
+.no { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; font-family: "Inter", var(--font); font-weight: 700; font-size: 13px; background: var(--bg); color: var(--ink); box-shadow: inset 0 0 0 2px var(--c); }
+.row.main .no { background: var(--blue); color: #ffffff; box-shadow: none; }
+.row .g { min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.row .g small { font-size: 12px; color: var(--muted); }
+.row .g b { font-size: 16px; font-weight: 700; }
+.row .g b em { font-style: normal; font-weight: 400; color: var(--muted); font-size: 13px; }
+.row .g .pl { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.bq { font-size: 24px; font-weight: 700; white-space: nowrap; }
+.row.main .bq { color: var(--blue); }
+.add { position: relative; display: block; width: 100%; min-height: 54px; padding-left: 58px; text-align: left; color: var(--blue); font-weight: 700; }
+.add::before { content: ""; position: absolute; left: 29px; top: 0; height: 18px; width: 2px; background: var(--line); }
+.add::after { content: ""; position: absolute; left: 21px; top: 18px; width: 18px; height: 2px; border-radius: 1px; background: var(--line); }
+.bar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 6; display: grid; grid-template-columns: 1fr 1fr 1.4fr; gap: 10px; padding: 12px 20px calc(12px + env(safe-area-inset-bottom, 0px)); background: var(--fade); -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px); border-top: 1px solid var(--line); }
 
-/* 底部标签栏 */
-.tabs { background: var(--bg); border-top: 2px solid var(--line); box-shadow: none; }
-.tabs button { font-weight: 700; }
-.tabs button[aria-current="page"] { color: var(--c-blue); }
-.tabs button[aria-current="page"] svg { stroke-width: 2.4; }
-.toast { background: #3c3c3c; color: #ffffff; font-weight: 700; border-radius: 14px; }
+/* 练法详情 */
+.dhero { margin-top: 8px; display: flex; flex-direction: column; gap: 4px; }
+.dhero small { font-size: 13px; color: var(--muted); }
+.dhero h2 { font-size: 24px; font-weight: 800; }
+.dq { font-size: 48px; font-weight: 700; line-height: 1.05; color: var(--blue); }
+.dq small { font-size: 15px; margin-left: 4px; font-weight: 500; }
+.info { display: flex; flex-direction: column; gap: 16px; }
+.info p { font-size: 15px; margin-top: 4px; }
+.lab { font-size: 13px; color: var(--blue); font-weight: 600; }
+.steps { margin: 6px 0 0; padding-left: 20px; display: flex; flex-direction: column; gap: 8px; }
+.steps b { font-size: 17px; }
+.steps small { display: block; font-size: 13px; color: var(--muted); }
+.ul { margin: 0; padding-left: 18px; font-size: 13px; color: var(--muted); }
+.stepper { margin-top: 12px; display: grid; grid-template-columns: 64px 1fr 64px; align-items: center; border-radius: 18px; background: var(--tint); overflow: hidden; }
+.stepper button { min-height: 56px; font-size: 26px; font-weight: 600; color: var(--blue); text-align: center; }
+.stepper button:disabled { color: var(--line); }
+.stepper span { text-align: center; font-weight: 700; }
+.chips { margin-top: 12px; display: flex; flex-wrap: wrap; gap: 8px; }
+.li .chips { margin-top: 0; }
+.chip { min-height: 42px; padding: 0 16px; border-radius: 999px; background: var(--tint); box-shadow: inset 0 0 0 1px var(--line); font-size: 14px; font-weight: 500; }
+.chip.on { background: var(--blue-s); color: var(--blue); box-shadow: inset 0 0 0 1.5px var(--blue); font-weight: 700; }
+.choose { margin-top: 12px; display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 8px; }
+.choose button { min-height: 50px; border-radius: 16px; background: var(--tint); text-align: center; font-weight: 600; box-shadow: inset 0 0 0 1px var(--line); }
+.choose button.on { background: var(--blue-s); color: var(--blue); box-shadow: inset 0 0 0 1.5px var(--blue); }
+.input { margin-top: 12px; width: 100%; min-height: 52px; padding: 0 16px; border-radius: 16px; border: 0; background: var(--tint); box-shadow: inset 0 0 0 1px var(--line); color: var(--ink); font: inherit; font-size: 16px; }
+textarea.input { padding: 14px 16px; min-height: 96px; resize: vertical; }
+.li .input { margin-top: 0; }
+.rpe { margin-top: 12px; display: grid; grid-template-columns: repeat(11, 1fr); gap: 4px; }
+.rpe button { aspect-ratio: 1 / 1.25; max-width: 100%; border-radius: 10px; background: var(--tint); box-shadow: inset 0 0 0 1px var(--line); text-align: center; font-family: "Inter", var(--font); font-weight: 600; font-size: 14px; }
+.rpe button.on { background: var(--blue); color: #ffffff; box-shadow: none; }
+.rpel { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin-top: 6px; }
 
-/* 独立网页版：自己处理 iPhone 顶部和底部的安全区域 */
+/* 日历与图表 */
+.mon { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.mon button { min-width: 44px; min-height: 40px; font-size: 22px; color: var(--blue); text-align: center; }
+.cal { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; }
+.cal .wd { font-size: 12px; color: var(--muted); padding-bottom: 4px; }
+.day { aspect-ratio: 1; max-width: 42px; width: 100%; justify-self: center; border-radius: 50%; text-align: center; font-size: 14px; font-family: "Inter", var(--font); }
+.day.has { background: var(--blue); color: #ffffff; font-weight: 700; }
+.day.today { box-shadow: inset 0 0 0 1.5px var(--blue); color: var(--blue); font-weight: 700; }
+.day.has.today { color: #ffffff; box-shadow: 0 0 0 2px var(--bg), 0 0 0 3.5px var(--blue); }
+.chart { width: 100%; height: auto; display: block; }
+.chart .gl { stroke: var(--line); stroke-width: 1; }
+.chart .tx { fill: var(--muted); font-size: 10px; font-family: "Inter", sans-serif; }
+.chart .bar { fill: var(--ph-warm); }
+.chart .cur { fill: var(--blue); }
+
+/* 问卷 */
+.qtop { display: flex; justify-content: space-between; align-items: center; min-height: 52px; margin-top: 10px; }
+.qprog { height: 4px; border-radius: 2px; background: var(--tint); overflow: hidden; }
+.qprog i { display: block; height: 100%; background: var(--blue); border-radius: 2px; transition: width .25s; }
+.qbody { margin-top: 30px; display: flex; flex-direction: column; }
+.qt { font-size: 28px; font-weight: 800; margin-top: 4px; line-height: 1.25; }
+.qopts { margin-top: 24px; display: flex; flex-direction: column; gap: 10px; }
+.qopt { display: flex; flex-direction: column; gap: 2px; padding: 18px 20px; border-radius: 20px; background: var(--tint); box-shadow: inset 0 0 0 1px var(--line); }
+.qopt b { font-size: 17px; }
+.qopt small { font-size: 13px; color: var(--muted); }
+.qopt.on { background: var(--blue-s); box-shadow: inset 0 0 0 1.5px var(--blue); color: var(--blue); }
+.qgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.qgrid .qopt { align-items: center; padding: 26px 10px; }
+.qrow { display: flex; flex-direction: column; margin-bottom: 18px; }
+.qrow .chips { margin-top: 8px; }
+
+/* 悬浮液态玻璃标签栏 */
+body.has-tabs::after { content: ""; position: fixed; left: 0; right: 0; bottom: 0; height: 124px; pointer-events: none; z-index: 6; background: linear-gradient(180deg, transparent, var(--fade) 62%); }
+.tabs { position: fixed; z-index: 7; left: 50%; transform: translateX(-50%); width: min(calc(100% - 36px), 480px); bottom: calc(18px + env(safe-area-inset-bottom, 0px)); height: 66px; border-radius: 33px; display: grid; grid-template-columns: repeat(4, 1fr); align-items: center; padding: 0 6px;
+  background: var(--glass); -webkit-backdrop-filter: blur(22px) saturate(180%); backdrop-filter: blur(22px) saturate(180%);
+  border: 1px solid var(--glass-edge); box-shadow: var(--glass-shadow), inset 0 1px 0 rgba(255,255,255,.6); }
+.tabs button { height: 54px; border-radius: 27px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; font-size: 10.5px; color: var(--muted); font-weight: 500; }
+.tabs svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.tabs .on { color: var(--blue); font-weight: 700; background: linear-gradient(180deg, rgba(47,124,246,.17), rgba(47,124,246,.08)); box-shadow: inset 0 1px 0 rgba(255,255,255,.5), inset 0 0 0 1px rgba(47,124,246,.12); }
+.tabs .on svg { fill: currentColor; }
+.tabs .on svg .ln { stroke: var(--bg); fill: none; }
+
+/* 提示条 */
+[hidden] { display: none !important; }
+.toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(104px + env(safe-area-inset-bottom, 0px)); z-index: 9; background: var(--ink); color: var(--bg); padding: 11px 18px; border-radius: 14px; font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 14px; max-width: calc(100% - 40px); }
+.toast button { color: var(--blue); font-weight: 700; }
+@media (max-width: 360px) { .tiles { gap: 8px; } .tl b { font-size: 20px; } .sum b { font-size: 28px; } }
+@media (prefers-reduced-motion: reduce) { .row, .qprog i { transition: none; } .go:active, .btn:active { transform: none; } }
+
+/* ---- 3.0.1 调整 ---- */
+/* 首页第一屏更紧凑，数据方块不被标签栏挡住 */
+.date { margin-top: 18px; }
+.rip { margin-top: 26px; }
+.go { margin-top: 30px; }
+@media (max-height: 760px) { .hi { font-size: 24px; } .rip { margin-top: 20px; } .go { margin-top: 24px; min-height: 52px; } .tiles { margin-top: 12px; } }
+.invite { margin-top: 18px; display: flex; flex-direction: column; gap: 6px; text-align: left; background: var(--blue-s); box-shadow: inset 0 0 0 1px rgba(47,124,246,.18); }
+.invite b { font-size: 18px; }
+.invite small { font-size: 14px; color: var(--muted); }
+.go.small { margin-top: 10px; min-height: 46px; font-size: 15px; }
+
+/* 课表：字放大，泳池边也看得清 */
+.sum b { font-size: 40px; }
+.sum small { font-size: 15px; }
+.row { grid-template-columns: 36px 1fr auto; gap: 14px; padding: 18px 18px 18px 14px; }
+.row::after { left: 31px; }
+.add::before { left: 31px; } .add::after { left: 23px; }
+.no { width: 34px; height: 34px; font-size: 15px; }
+.row .g small { font-size: 14px; }
+.row .g b { font-size: 20px; line-height: 1.3; }
+.row .g b em { font-size: 15px; }
+.row .g .pl { font-size: 15px; color: var(--ink); opacity: .72; }
+.bq { font-size: 32px; }
+.plan-hint { font-size: 15px; }
+/* 练法详情也放大 */
+.dhero h2 { font-size: 28px; }
+.dq { font-size: 60px; }
+.info p, .info li { font-size: 18px; line-height: 1.6; }
+.lab { font-size: 15px; }
+.steps b { font-size: 21px; }
+.steps small { font-size: 15px; }
+
+/* 日历：选中的那一天 */
+.day.sel { background: var(--ink); color: var(--bg); font-weight: 700; box-shadow: none; }
+.day.has.sel { background: var(--ink); color: var(--bg); box-shadow: 0 0 0 2px var(--bg), 0 0 0 3.5px var(--blue); }
+.day.today:not(.sel):not(.has) { box-shadow: inset 0 0 0 1.5px var(--blue); }
+.dayc .dt { font-size: 18px; }
+.dayc .dd { font-size: 20px; font-weight: 700; }
+.dayc .meta { font-size: 13px; color: var(--muted); margin-top: -10px; }
+.dayc .note { font-size: 15px; }
+.dayc .ul { font-size: 14px; display: flex; flex-direction: column; gap: 4px; }
+.dayc .two { margin-top: 0; }
+.row .g b em { display: block; font-size: 14px; line-height: 1.3; }
+.row .g > small:first-child { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bq { font-size: 30px; align-self: center; }
+/* 3.0.2：按钮下面的方块边缘清楚，不再发糊 */
+.go { box-shadow: none; }
+.tiles { margin-top: 18px; }
+.tl { background: var(--tint); box-shadow: none; }
+.li.wk { min-height: 56px; }
+.badge.rest { background: transparent; box-shadow: inset 0 0 0 1px var(--line); }
+/* 测试模式 */
+.testbar { margin-top: 14px; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 12px 10px 16px; border-radius: 14px; background: #fff4e5; color: #8a5300; font-size: 13px; font-weight: 600; }
+.testbar button { background: #8a5300; color: #ffffff; border-radius: 10px; padding: 7px 12px; font-size: 13px; font-weight: 700; white-space: nowrap; }
+.sw { width: 50px; height: 30px; border-radius: 15px; background: var(--line); position: relative; flex: none; transition: background .15s; }
+.sw i { position: absolute; top: 3px; left: 3px; width: 24px; height: 24px; border-radius: 50%; background: #ffffff; box-shadow: 0 1px 3px rgba(0,0,0,.25); transition: transform .15s; }
+.sw.on { background: var(--blue); }
+.sw.on i { transform: translateX(20px); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .testbar { background: #3a2a10; color: #ffcf8a; } :root:not([data-theme="light"]) .testbar button { background: #ffcf8a; color: #3a2a10; } }
+/* 3.2：课表卡片、过去的训练、完成度进度条 */
+.plancard { padding: 0; overflow: hidden; }
+.pc-main { display: flex; flex-direction: column; gap: 8px; width: 100%; padding: 18px 18px 14px; text-align: left; }
+.pc-main b { font-size: 19px; }
+.pc-main .big { font-size: 28px; font-weight: 700; }
+.pc-why { font-size: 14px; color: var(--ink); opacity: .75; margin-top: -4px; }
+.pc-foot { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 4px 18px 10px; border-top: 1px solid var(--line); }
+.pc-foot .input { margin-top: 6px; min-height: 44px; }
+.btn.wide { width: 100%; margin-top: 12px; min-height: 54px; }
+.prow { position: relative; border-bottom: 1px solid var(--line); }
+.lane > .prow:first-child .row::after { top: 50%; }
+.add.end { min-height: 26px; pointer-events: none; }
+.range { -webkit-appearance: none; appearance: none; width: 100%; height: 44px; margin-top: 8px; background: transparent; touch-action: pan-y; }
+.range::-webkit-slider-runnable-track { height: 12px; border-radius: 6px; background: linear-gradient(90deg, var(--blue) var(--v, 100%), var(--line) var(--v, 100%)); }
+.range::-moz-range-track { height: 12px; border-radius: 6px; background: var(--line); }
+.range::-moz-range-progress { height: 12px; border-radius: 6px; background: var(--blue); }
+.range::-webkit-slider-thumb { -webkit-appearance: none; width: 32px; height: 32px; margin-top: -10px; border-radius: 50%; background: #ffffff; box-shadow: 0 2px 8px rgba(15,23,32,.25), inset 0 0 0 1px rgba(15,23,32,.06); }
+.range::-moz-range-thumb { width: 32px; height: 32px; border: 0; border-radius: 50%; background: #ffffff; box-shadow: 0 2px 8px rgba(15,23,32,.25); }
+#pctLab { color: var(--blue); font-weight: 700; font-size: 15px; }
+.sum { flex-wrap: wrap; gap: 4px 20px; }
+.sum > div { white-space: nowrap; }
+@media (max-width: 400px) { .sum b { font-size: 34px; } }
+
 html { padding-top: env(safe-area-inset-top, 0px); background: var(--bg); }
-body { margin: 0; -webkit-text-size-adjust: 100%; -webkit-tap-highlight-color: transparent; }
+body { margin: 0; }
 </style>
 </head>
 <body>
-
-
 <div id="app"></div>
-<div class="toast" id="toast" hidden></div>
-
+<div class="toast" id="toast" role="status" hidden></div>
 <script>
+
 const PACE = 95;   // 熟练泳者每 100 码大约用时（秒），自由泳中等强度
 const STROKE_ADJ = { "自由泳": 0, "仰泳": 9, "蛙泳": 16, "蝶泳": 6 };
 const INT = {
@@ -621,7 +397,7 @@ const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 function tools(o) {
   const pool = o.pool;
   const fixD = d => Math.max(pool, Math.round(d / pool) * pool);
-  const T = (d, stroke, inten, extra = 1) => d / 100 * (paceOf(o) + (STROKE_ADJ[stroke] || 0)) * INT[inten].f * extra;
+  const T = (d, stroke, inten, extra = 1) => d / 100 * strokePace(o, stroke) * INT[inten].f * extra;
   const reps = (budget, d, stroke, inten, r, max, extra) => clamp(Math.round(budget / (T(d, stroke, inten, extra) + r)), 1, max);
   // 组数太多时把每组距离加倍，避免出现 30×50 这种课表
   const fit = (budget, d0, stroke, inten, r, max = 10, extra = 1, maxD = 400) => {
@@ -788,10 +564,10 @@ const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;"
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
 const ymd = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 
-const S = { view: "home", prefs: null, o: null, draft: null, ms: null, rows: [], cur: null, favs: [], logs: [], calMonth: null, day: null, confirm: null, saving: false };
+const S = { view: "home", seg: {}, profile: null, prefs: null, o: null, draft: null, ms: null, rows: [], cur: null, favs: [], logs: [], calMonth: null, day: null, confirm: null, saving: false };
 
 function strokesOf(o) { return o.strokes.length ? o.strokes : ["自由泳"]; }
-function optionsFor(type) {
+function baseOptionsFor(type) {
   const o = S.o, t = tools(o), st = strokesOf(o);
   if (!st.includes(S.ms)) S.ms = pick(st);
   const B = o.time * 60 * shareOf(type), m = S.ms, eq = eqOf(o);
@@ -877,8 +653,7 @@ function dots(lv) { return `<span class="dots" aria-hidden="true">${[1, 2, 3, 4]
 function cfg() { return { o: S.o, ms: S.ms, rows: S.rows.map(r => ({ type: r.type, key: r.key, adj: r.adj })) }; }
 function loadCfg(c) { S.o = { ...c.o }; S.ms = c.ms; S.rows = c.rows.map(r => ({ ...r, id: uid() })); }
 
-// ---------- 页面 ----------
-const ROOTS = ["home", "plan", "cal", "favs"];
+
 // 用力程度 1–10 分（RPE）；“能不能说话”是陆上的说法，水里不适用
 const INT_DESC = { easy: "用力 2–3 分：很轻松，动作舒展，呼吸平稳", mod: "用力 4–6 分：呼吸加快，但能一直稳定保持", fast: "用力 7–8 分：很吃力，只能坚持几组", sprint: "用力 9–10 分：全力以赴，组间要歇够" };
 // ---------- 组合式主项（来自 USMS / Swim England 公开课表，成人） ----------
@@ -978,20 +753,6 @@ function ensureEquip() {   // 开了器材，就保证用上
   }
   if (eq.includes("脚蹼") && !S.rows.some(r => (r.key || "").startsWith("fin"))) main.key = { endurance: "finE", speed: "finS", technique: "finT" }[S.o.focus];
 }
-function progressionAdj() {   // 同一个目标：上次游完了就加一组，明显没游完就减一组
-  const last = logsDesc().find(l => l.cfg.o.focus === S.o.focus && l.planned);
-  if (!last) return 0;
-  const prev = (last.cfg.rows.find(r => r.type === "main") || {}).adj || 0, ratio = last.dist / last.planned;
-  return ratio >= 0.95 ? Math.min(3, prev + 1) : ratio < 0.85 ? Math.max(-2, prev - 1) : prev;
-}
-function recommend() {   // 首页推荐今天练什么
-  const l = logsDesc();
-  if (!l.length) return { focus: "endurance", why: "还没有训练记录，先从耐力开始打基础" };
-  const idx = f => { const i = l.findIndex(x => x.cfg.o.focus === f); return i < 0 ? 99 : i; };
-  const focus = [...FOCI].sort((a, b) => idx(b) - idx(a))[0];
-  const lastTwo = l.slice(0, 2).map(x => FOCUS[x.cfg.o.focus]).join("、");
-  return { focus, why: idx(focus) === 99 ? `最近还没练过${FOCUS[focus]}` : `最近练的是${lastTwo}，换个目标更全面` };
-}
 
 // 游泳习惯写法：大字 4×200，小字 每组 8 趟 · 组间歇 15 秒
 function bigQty(s) {
@@ -1011,279 +772,1008 @@ function subText(s) {
 function plainText(s) { return `${bigQty(s)}${s.ladder && s.label !== "逐组减一趟" ? "" : " 码"}，${subText(s)}`; }
 function dailyTip() {
   const all = Object.entries(DRILLS).flatMap(([st, l]) => l.map(([n, t]) => ({ st, n, t })));
-  const d = new Date(), k = d.getFullYear() * 400 + d.getMonth() * 31 + d.getDate();
+  const d = nowDate(), k = d.getFullYear() * 400 + d.getMonth() * 31 + d.getDate();
   return all[k % all.length];
 }
-function topBar(title, backTo, right = "") {
-  if (!backTo) return `<header class="top large"><h1>${title}</h1>${right}</header>`;   // 主页面：左对齐大标题
-  return `<header class="top"><button class="back" data-go="${backTo}">返回</button><h1>${title}</h1>${right || "<span></span>"}</header>`;
+function cfgKey(c) { return JSON.stringify([c.o, c.ms, c.rows.map(r => [r.type, r.key, r.adj])]); }
+function isSaved() { const k = cfgKey(cfg()); return S.favs.some(f => cfgKey(f.cfg) === k); }
+function fmtPace(sec) { sec = Math.round(sec); return `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, "0")}`; }
+
+/*
+ * 游泳训练推荐：离线、确定性、无 DOM / import / 存储 / 网络 / 随机数。
+ * 四个公开函数见下方；swimAlgo* 是纯函数辅助工具。
+ * 资料核对：2026-10-13。来源链接仅为注释，运行时不会访问。
+ *
+ * 证据与经验值：
+ * 1. 按“课次的主要目的”分配，不是按距离或强度区间分配。
+ *    耐力/速度/技术：fit=50/15/35，endur=65/10/25，stroke=25/10/65，
+ *    team=40/25/35，均为经验值；未发现这些业余目标的官方统一比例。
+ *    技术贯穿所有课的依据（不能据此推出以上百分比）：
+ *    https://www.swimming.org/members/swimming-fitness-training-plan/
+ * 2. session-RPE × 分钟是负荷指标，单位 AU：
+ *    https://pubmed.ncbi.nlm.nih.gov/11708692/
+ *    注意：题给 mins 是计划时长，这里严格用该字段，所以是负荷代理值，
+ *    不是基于实际时长的严格 session-RPE 负荷。rpe=0 有效，null 未知。
+ * 3. 周增幅 10% 是保守提醒阈值（经验值），不是安全保证。
+ *    背景：https://bjsm.bmj.com/content/50/5/273
+ *    反面证据：https://pmc.ncbi.nlm.nih.gov/articles/PMC6253751/
+ *    后者为跑步系统综述，不能直接外推游泳，也不支持普适 10% 安全线。
+ * 4. RPE>=8、RPE>=7、完成率<75% / <95% 的疲劳及减组阈值均为经验值。
+ *    单次 RPE 不是过度训练诊断；只是短期安排的保守信号。
+ *    监控恢复的背景：https://pmc.ncbi.nlm.nih.gov/articles/PMC6683628/
+ * 5. 高强度间隔至少 48 小时：经验值；上述游泳研究支持额外恢复，
+ *    未给业余游泳统一小时数。只有日期时要求相差>=3个日历日，
+ *    相差2日可能实际不足48小时；相差3日通常能留足恢复时间。
+ *    日期不能校验精确小时，跨夏令时也可能不足48小时；需时间戳才能硬保证。
+ *    speed 或 RPE>=7 视为高强度；计划中只把 fast/sprint 速度课算高强度。
+ * 6. 停训>=7 / >=14 / >=30日，首周时长目标恢复到此前的80% / 60% / 50%，
+ *    均为经验值，时长再向下取30/45/60/90，配合降强度、减组。
+ *    每周1次、恰好相隔7日视为正常节奏。恢复限制保持到回归后的第7日。
+ *    渐进回归依据（不提供以上恢复百分比）：
+ *    https://www.usms.org/fitness-and-training/articles-and-videos/articles/five-swim-workouts-for-returning-to-swimming-after-a-long-break
+ *
+ * 接口约定：
+ * - today 是用户当地的 YYYY-MM-DD；UTC 仅用于日历运算，避免 DST 差一天。
+ * - thisWeek=[today-6,today]，lastWeek=[today-13,today-7]，是滚动窗口。
+ * - weekPlan 是含 today 的未来7个日历日，严格安排 weekly 个未来训练日；
+ *   今日已完成的课不重复安排，历史课不占这个未来计划的名额。
+ * - 休息行 focus=null、minutes=0；训练行才有 focus 和合法训练时长。
+ * - 非法字段抛 TypeError / RangeError；未来日志忽略；输入不修改。
+ * - 无ID无法识别重复日志，不自动去重；同日多课均累计，疲劳取同日最大RPE。
+ * - pace/strokes/paceUnit 按题给格式校验；此接口不选泳姿、不算配速或距离，
+ *   不据配速猜测体能，不混合米/码。完成率要求同一条日志dist/planned同单位。
+ * - 返回的强度上限用于短段训练强度，不代表整节课的 session-RPE。
+ *   minutes含休息、热身与放松，不要求初学者连续游满该时长。
+ * - 30分钟下限、未知实际RPE以及未知标准组长，使这些接口无法硬性保证
+ *   10%增幅或精确恢复百分比。低量时仍返回30分钟easy并减组，不能强行补课。
+ *   生成具体课表时也须限制实际总距离；减2组应由调用方钳制到非负组数。
+ * - weekPlan 是暂定安排；不伪造未来完成率/RPE，每次训练前用真实logs重算。
+ */
+
+function swimAlgoRules() {
+  return {
+    // 以下所有数值阈值均为经验值，依据与适用限制见文件头。
+    weights: {
+      fit: { endurance: 0.50, speed: 0.15, technique: 0.35 },
+      endur: { endurance: 0.65, speed: 0.10, technique: 0.25 },
+      stroke: { endurance: 0.25, speed: 0.10, technique: 0.65 },
+      team: { endurance: 0.40, speed: 0.25, technique: 0.35 }
+    },
+    levelMinutes: { l50: 30, l200: 45, l800: 60, l1500: 90 },
+    growth: 1.10,
+    hardDayGap: 3,
+    longWindowWeight: 0.35
+  };
 }
+
+function swimAlgoDay(date) {
+  if (typeof date !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    throw new TypeError("日期必须是 YYYY-MM-DD");
+  }
+  const ms = Date.parse(date + "T00:00:00Z");
+  if (!Number.isFinite(ms) || new Date(ms).toISOString().slice(0, 10) !== date) {
+    throw new RangeError("日期不存在");
+  }
+  return ms / 86400000;
+}
+
+function swimAlgoDate(day) {
+  return new Date(day * 86400000).toISOString().slice(0, 10);
+}
+
+function swimAlgoProfile(profile) {
+  const strokes = ["自由泳", "仰泳", "蛙泳", "蝶泳"];
+  if (!profile || !["fit", "endur", "stroke", "team"].includes(profile.goal) ||
+      !["l50", "l200", "l800", "l1500"].includes(profile.level) ||
+      !Number.isInteger(profile.weekly) || profile.weekly < 1 || profile.weekly > 4 ||
+      ![30, 45, 60, 90].includes(profile.minutes) ||
+      !["米", "码"].includes(profile.paceUnit) ||
+      !Array.isArray(profile.strokes) ||
+      profile.strokes.some(stroke => !strokes.includes(stroke)) ||
+      !profile.pace || typeof profile.pace !== "object" || Array.isArray(profile.pace) ||
+      Object.keys(profile.pace).some(stroke => !strokes.includes(stroke) ||
+        !Number.isFinite(profile.pace[stroke]) || profile.pace[stroke] <= 0)) {
+    throw new TypeError("profile 不符合约定格式");
+  }
+}
+
+function swimAlgoLogs(logs, day) {
+  if (!Array.isArray(logs)) throw new TypeError("logs 必须是数组");
+  const rows = logs.map(log => {
+    if (!log || !["endurance", "speed", "technique"].includes(log.focus) ||
+        !Number.isFinite(log.dist) || log.dist < 0 ||
+        !Number.isFinite(log.planned) || log.planned < 0 ||
+        !Number.isFinite(log.mins) || log.mins <= 0 ||
+        !(log.rpe === null || (Number.isFinite(log.rpe) && log.rpe >= 0 && log.rpe <= 10))) {
+      throw new TypeError("训练日志不符合约定格式");
+    }
+    return { ...log, day: swimAlgoDay(log.date) };
+  }).filter(log => log.day <= day);
+  // 同日无时间戳，按最大RPE优先保护恢复；其余字段打破平局，避免依赖输入顺序。
+  return rows.sort((a, b) => a.day - b.day ||
+    (a.rpe === null ? -1 : a.rpe) - (b.rpe === null ? -1 : b.rpe) ||
+    (a.focus < b.focus ? -1 : a.focus > b.focus ? 1 : 0) ||
+    a.dist - b.dist || a.planned - b.planned || a.mins - b.mins);
+}
+
+function swimAlgoWindow(rows, day, from, to) {
+  return rows.filter(row => day - row.day >= from && day - row.day <= to);
+}
+
+function swimAlgoLoad(rows) {
+  return rows.reduce((sum, row) => sum + (row.rpe === null ? 0 : row.rpe * row.mins), 0);
+}
+
+function swimAlgoLoadInfo(rows, day) {
+  const current = swimAlgoWindow(rows, day, 0, 6);
+  const previous = swimAlgoWindow(rows, day, 7, 13);
+  const thisWeek = swimAlgoLoad(current);
+  const lastWeek = swimAlgoLoad(previous);
+  return {
+    current, previous, thisWeek, lastWeek,
+    complete: current.concat(previous).every(row => row.rpe !== null)
+  };
+}
+
+function weeklyLoad(logs, today) {
+  const day = swimAlgoDay(today);
+  const info = swimAlgoLoadInfo(swimAlgoLogs(logs, day), day);
+  const warnings = [];
+  if (!info.complete) warnings.push("有记录未填累度，训练量仅为已知部分");
+  if (info.lastWeek === 0 && info.current.length > 0) {
+    warnings.push("上周缺少有效负荷基线，先慢慢来");
+  } else if (info.complete && info.thisWeek > info.lastWeek * swimAlgoRules().growth) {
+    warnings.push("这周训练量涨得有点快，轻松些吧");
+  }
+  return {
+    thisWeek: info.thisWeek,
+    lastWeek: info.lastWeek,
+    // 数据不完整或零分母时不可比较，不用0或Infinity冒充百分比。
+    changePct: info.complete && info.lastWeek > 0
+      ? Math.round((info.thisWeek / info.lastWeek - 1) * 1000) / 10 : null,
+    warning: warnings.join("；")
+  };
+}
+
+function swimAlgoCompletion(row) {
+  return row && row.planned > 0 ? row.dist / row.planned : null;
+}
+
+function swimAlgoFloorMinutes(target) {
+  // 不足30仍返回30，源于接口下限，不表示应强撑30分钟。
+  return [30, 45, 60, 90].filter(minutes => minutes <= target).pop() || 30;
+}
+
+function swimAlgoReturn(profile, rows, day) {
+  if (rows.length === 0) return null;
+  const dates = [...new Set(rows.map(row => row.day))];
+  const lastDay = dates[dates.length - 1];
+  function interrupted(gap) {
+    return gap >= 7 && gap > Math.ceil(7 / profile.weekly);
+  }
+  let gap = day - lastDay;
+  let anchor = day;
+  let before = lastDay;
+  if (!interrupted(gap)) {
+    // 已经回归后保持首周限制，不因新增一条轻松日志马上恢复到原量。
+    let found = false;
+    for (let i = dates.length - 1; i > 0; i -= 1) {
+      if (day - dates[i] >= 7) break;
+      if (interrupted(dates[i] - dates[i - 1])) {
+        gap = dates[i] - dates[i - 1];
+        anchor = dates[i];
+        before = dates[i - 1];
+        found = true;
+        break;
+      }
+    }
+    if (!found) return null;
+  }
+  const prior = rows.filter(row => row.day <= before).slice(-4);
+  const baseMinutes = prior.reduce((sum, row) => sum + row.mins, 0) / prior.length;
+  return { gap, anchor, baseMinutes, factor: gap >= 30 ? 0.50 : gap >= 14 ? 0.60 : 0.80 };
+}
+
+function swimAlgoState(profile, rows, day, planned) {
+  const all = rows.concat(planned).sort((a, b) => a.day - b.day);
+  const latest = rows[rows.length - 1] || null;
+  const lastDay = all.length ? all[all.length - 1].day : null;
+  const gap = lastDay === null ? null : day - lastDay;
+  const recent = swimAlgoWindow(all, day, 0, 6);
+  const load = swimAlgoLoadInfo(rows, day);
+  const plannedLoad = swimAlgoWindow(planned, day, 0, 6)
+    .reduce((sum, row) => sum + row.estimatedLoad, 0);
+  const knownLatestGap = latest ? day - latest.day : null;
+  // 疲劳信号只来自真实记录，绝不用预计的完成率或RPE。
+  const fatigue = !!latest && knownLatestGap < 3 &&
+    (latest.rpe >= 8 || (latest.rpe === 7 && knownLatestGap < 2) ||
+      (swimAlgoCompletion(latest) !== null && swimAlgoCompletion(latest) < 0.75));
+  const hard = all.filter(row => row.estimatedLoad !== undefined ? row.hard :
+    row.focus === "speed" || (row.rpe !== null && row.rpe >= 7));
+  const hardGap = hard.length ? day - hard[hard.length - 1].day : Infinity;
+  const recovery = swimAlgoReturn(profile, rows, day);
+  const enough = new Set(recent.map(row => row.day)).size >= profile.weekly;
+  const overloaded = load.complete && load.lastWeek > 0 &&
+    load.thisWeek + plannedLoad > load.lastWeek * swimAlgoRules().growth;
+  const missing = !load.complete;
+  return { all, latest, gap, recent, load, plannedLoad, fatigue, hardGap,
+    recovery, enough, overloaded, missing };
+}
+
+function swimAlgoEstimatedRpe(focus, cap) {
+  // 整节课预算假设：easy技术2、easy其他3、mod4、fast5、sprint6，经验值。
+  // 仅用于预估预算，绝不写入logs或weeklyLoad，亦不是强度与RPE的等价关系。
+  return cap === "easy" ? (focus === "technique" ? 2 : 3) :
+    cap === "mod" ? 4 : cap === "fast" ? 5 : 6;
+}
+
+function swimAlgoDecision(profile, rows, day, planned) {
+  const rules = swimAlgoRules();
+  const state = swimAlgoState(profile, rows, day, planned);
+  const base = Math.min(profile.minutes, rules.levelMinutes[profile.level]);
+  let minutes = base;
+  let focus = "technique";
+  let intensityCap = "mod";
+  let why = "轻松练技术，找找水感";
+  let budgetLimited = false;
+  // 新用户先建基线；之前的旧日志不能拿来证明当前已准备好冲刺。
+  if (rows.length === 0) {
+    minutes = 30;
+    intensityCap = "easy";
+    why = "先找找水感，轻松开始";
+  } else if (state.gap === 0) {
+    minutes = 30;
+    intensityCap = "easy";
+    why = "今天已经游过，轻松就好";
+  } else if (state.fatigue) {
+    minutes = swimAlgoFloorMinutes(base * 0.60); // 疲劳减到60%时长目标，经验值。
+    intensityCap = "easy";
+    why = "上次有点累，今天轻松点";
+  } else if (state.enough || state.overloaded) {
+    minutes = 30;
+    intensityCap = "easy";
+    why = "这周量够啦，轻松练技术";
+  } else {
+    const weight = { ...rules.weights[profile.goal] };
+    // l50/l200不主动安排高强度速度课；把其课次份额移给技术，经验值。
+    if (profile.level === "l50" || profile.level === "l200") {
+      weight.technique += weight.speed;
+      weight.speed = 0;
+    }
+    const recent14 = swimAlgoWindow(state.all, day, 0, 13);
+    const candidates = ["technique", "endurance", "speed"].filter(candidate =>
+      weight[candidate] > 0 && (candidate !== "speed" ||
+        (state.hardGap >= rules.hardDayGap && !state.missing && !state.recovery &&
+          state.all[state.all.length - 1].focus !== "speed")));
+    function deficit(candidate) {
+      const count7 = state.recent.filter(row => row.focus === candidate).length;
+      const count14 = recent14.filter(row => row.focus === candidate).length;
+      return weight[candidate] * (state.recent.length + 1) - count7 +
+        rules.longWindowWeight * (weight[candidate] * (recent14.length + 1) - count14);
+    }
+    // 固定平局优先级：技术、耐力、速度；不依赖对象枚举或随机。
+    focus = candidates.reduce((best, candidate) =>
+      deficit(candidate) > deficit(best) + 1e-9 ? candidate : best, candidates[0]);
+    intensityCap = focus === "technique" || profile.level === "l50" ? "easy" : "mod";
+    why = focus === "endurance" ? "稳稳游一会儿，攒点耐力" :
+      focus === "speed" ? "换点短距离，试试轻快节奏" : "轻松练技术，找找水感";
+    if (focus === "speed") {
+      const recentKnown = swimAlgoWindow(rows, day, 1, 13)
+        .filter(row => row.rpe !== null);
+      const ready = recentKnown.slice(-2);
+      if (ready.length === 2 && ready.every(row => row.rpe <= 6 &&
+          swimAlgoCompletion(row) !== null && swimAlgoCompletion(row) >= 0.95)) {
+        intensityCap = "fast";
+        if (profile.goal === "team" && profile.level === "l1500" &&
+            ready.every(row => row.rpe <= 5)) intensityCap = "sprint";
+      }
+    }
+    if (state.hardGap < rules.hardDayGap || state.missing) intensityCap = "easy";
+    if (state.recovery) {
+      minutes = swimAlgoFloorMinutes(Math.min(base, state.recovery.baseMinutes) * state.recovery.factor);
+      intensityCap = state.recovery.gap >= 14 ? "easy" : intensityCap;
+      if (state.recovery.gap >= 14 && state.recovery.anchor === day) focus = "technique";
+      why = "回来先找水感，慢慢恢复";
+    } else if (state.missing) {
+      minutes = swimAlgoFloorMinutes(base * 0.80); // 缺RPE时少20%，经验值。
+      why = "累度还不清楚，先轻松游";
+    } else if (state.recent.length < profile.weekly &&
+        state.gap >= Math.ceil(7 / profile.weekly)) {
+      why = "按自己的节奏，慢慢续上";
+    }
+    // 不把“本周少游”解释为欠账。单次时长也不直接跳到用户新设的大时长。
+    if (!state.recovery && state.latest) {
+      minutes = swimAlgoFloorMinutes(Math.min(minutes, state.latest.mins * rules.growth));
+    }
+    // 加入候选课后超出周预算时，先降强度、再缩短，不试图用高强度补量。
+    if (state.load.complete && state.load.lastWeek > 0 &&
+        state.load.thisWeek + state.plannedLoad +
+        swimAlgoEstimatedRpe(focus, intensityCap) * minutes > state.load.lastWeek * rules.growth) {
+      budgetLimited = true;
+      focus = "technique";
+      intensityCap = "easy";
+      const remaining = state.load.lastWeek * rules.growth - state.load.thisWeek - state.plannedLoad;
+      minutes = swimAlgoFloorMinutes(Math.min(minutes, remaining / 2));
+      why = "这周慢慢加，先轻松练技术";
+    }
+  }
+  return { recommendation: { focus, minutes, intensityCap, why }, budgetLimited };
+}
+
+function recommendToday(profile, logs, today) {
+  swimAlgoProfile(profile);
+  const day = swimAlgoDay(today);
+  return swimAlgoDecision(profile, swimAlgoLogs(logs, day), day, []).recommendation;
+}
+
+function mainSetAdjust(profile, logs, focus, today) {
+  swimAlgoProfile(profile);
+  if (!["endurance", "speed", "technique"].includes(focus)) {
+    throw new TypeError("focus 不符合约定格式");
+  }
+  const day = swimAlgoDay(today);
+  const rows = swimAlgoLogs(logs, day);
+  const state = swimAlgoState(profile, rows, day, []);
+  const same = rows.filter(row => row.focus === focus);
+  const last = same[same.length - 1];
+  const ratio = swimAlgoCompletion(last);
+  // 恢复/周预算优先，不能因同类旧课很轻松而忽略昨天另一课很累。
+  if (state.fatigue || state.gap === 0 || state.enough || state.overloaded ||
+      (state.recovery && state.recovery.gap >= 14)) return -2;
+  if (state.recovery || (focus === "speed" && state.hardGap < swimAlgoRules().hardDayGap)) return -1;
+  if (!last) return 0;
+  if (last.rpe >= 8 || (ratio !== null && ratio < 0.75)) return -2;
+  if (last.rpe === 7 || (ratio !== null && ratio < 0.95)) return -1;
+  // 无计划距离、无RPE、记录太旧，不加量。超过100%不另奖额外组数。
+  if (ratio === null || last.rpe === null || state.missing || day - last.day >= 14) return 0;
+  if (last.rpe >= 6) return 0;
+  if (swimAlgoDecision(profile, rows, day, []).budgetLimited) return -1;
+  // 连续两次轻松完成才能加2/3组；初级每次最多加1组，均为经验值。
+  const prior = same[same.length - 2];
+  if ((profile.level === "l800" || profile.level === "l1500") && prior &&
+      day - prior.day < 14 && prior.rpe !== null && prior.rpe <= 4 &&
+      swimAlgoCompletion(prior) !== null && swimAlgoCompletion(prior) >= 0.95 && last.rpe <= 4) {
+    return profile.level === "l1500" && prior.rpe <= 3 && last.rpe <= 3 ? 3 : 2;
+  }
+  return 1;
+}
+
+function weekPlan(profile, logs, today) {
+  swimAlgoProfile(profile);
+  const day = swimAlgoDay(today);
+  const rows = swimAlgoLogs(logs, day);
+  const state = swimAlgoState(profile, rows, day, []);
+  // 默认均匀铺开；刚游过/很累则把第一课后移，其余仍满足weekly课次。
+  let start = state.gap !== null && state.gap <= 1 ? 1 : 0;
+  if (state.fatigue) start = Math.max(start, 3 - state.gap);
+  start = Math.min(start, 7 - profile.weekly);
+  const offsets = Array.from({ length: profile.weekly }, (_, i) =>
+    start + Math.floor(i * (7 - start) / profile.weekly));
+  const projected = [];
+  const plan = [];
+  for (let offset = 0; offset < 7; offset += 1) {
+    const date = swimAlgoDate(day + offset);
+    if (!offsets.includes(offset)) {
+      plan.push({ date, rest: true, focus: null, minutes: 0, why: "歇一歇，下次更有精神" });
+      continue;
+    }
+    const recommendation = swimAlgoDecision(profile, rows, day + offset, projected).recommendation;
+    plan.push({ date, rest: false, focus: recommendation.focus,
+      minutes: recommendation.minutes, why: recommendation.why });
+    // 仅用于后续课的课型平衡、间隔和预算；不冒充真实日志，不传给weeklyLoad。
+    projected.push({ day: day + offset, focus: recommendation.focus,
+      estimatedLoad: recommendation.minutes *
+        swimAlgoEstimatedRpe(recommendation.focus, recommendation.intensityCap),
+      hard: recommendation.focus === "speed" &&
+        ["fast", "sprint"].includes(recommendation.intensityCap) });
+  }
+  return plan;
+}
+
+/* 文件末尾：8个可执行测试（输入+独立写定的期望输出），不在加载时自动运行。
+ * 调用 swimRecommendationTests() 得到 {name,input,expected,actual,passed}[]。
+ * 主项增减仍须由实际课表生成器约束组长；这里测试的是推荐接口。
+ */
+function swimRecommendationTests() {
+  const today = "2026-10-13";
+  const profile = { goal: "fit", level: "l800", strokes: ["自由泳", "蛙泳"],
+    pace: { "自由泳": 100 }, paceUnit: "米", weekly: 3, minutes: 60 };
+  function log(date, focus, rpe, mins, dist, planned) {
+    return { date, focus, dist: dist === undefined ? 1800 : dist,
+      planned: planned === undefined ? 1800 : planned, mins: mins === undefined ? 60 : mins, rpe };
+  }
+  function pair(p, logs, focus) {
+    return { recommendation: recommendToday(p, logs, today),
+      adjustment: mainSetAdjust(p, logs, focus, today) };
+  }
+  const cases = [
+    { name: "1 新用户无记录", input: { profile, logs: [], today },
+      expected: { focus: "technique", minutes: 30, intensityCap: "easy", why: "先找找水感，轻松开始" },
+      run: () => recommendToday(profile, [], today) },
+    { name: "2 昨天练完很累，即使同类旧课轻松也减量",
+      input: { profile, logs: [log("2026-10-09", "technique", 3), log("2026-10-12", "speed", 9)], today, focus: "technique" },
+      expected: { recommendation: { focus: "technique", minutes: 30, intensityCap: "easy", why: "上次有点累，今天轻松点" }, adjustment: -2 },
+      run: () => pair(profile, [log("2026-10-09", "technique", 3), log("2026-10-12", "speed", 9)], "technique") },
+    { name: "3 一周只游一次，不追补漏掉的课",
+      input: { profile, logs: [log("2026-10-10", "technique", 3, 45)], today, focus: "endurance" },
+      expected: { recommendation: { focus: "endurance", minutes: 45, intensityCap: "mod", why: "按自己的节奏，慢慢续上" }, adjustment: 0 },
+      run: () => pair(profile, [log("2026-10-10", "technique", 3, 45)], "endurance") },
+    { name: "4 一周游太多，滚动负荷上涨50%",
+      input: { logs: [log("2026-10-02", "endurance", 4, 30), log("2026-10-04", "technique", 4, 30),
+        log("2026-10-08", "endurance", 4, 30), log("2026-10-10", "technique", 4, 30),
+        log("2026-10-12", "endurance", 4, 30)], today },
+      expected: { thisWeek: 360, lastWeek: 240, changePct: 50, warning: "这周训练量涨得有点快，轻松些吧" },
+      run: () => weeklyLoad([log("2026-10-02", "endurance", 4, 30), log("2026-10-04", "technique", 4, 30),
+        log("2026-10-08", "endurance", 4, 30), log("2026-10-10", "technique", 4, 30),
+        log("2026-10-12", "endurance", 4, 30)], today) },
+    { name: "5 停训两周回来，按旧60分钟的60%向下取档",
+      input: { profile, logs: [log("2026-09-29", "endurance", 3)], today, focus: "endurance" },
+      expected: { recommendation: { focus: "technique", minutes: 30, intensityCap: "easy", why: "回来先找水感，慢慢恢复" }, adjustment: -2 },
+      run: () => pair(profile, [log("2026-09-29", "endurance", 3)], "endurance") },
+    { name: "6 准备进队且连续轻松完成，补速度短段",
+      input: { profile: { ...profile, goal: "team", level: "l1500", weekly: 4 },
+        logs: [log("2026-10-04", "endurance", 5, 90), log("2026-10-02", "technique", 5, 90),
+          log("2026-10-07", "endurance", 3), log("2026-10-08", "technique", 3),
+          log("2026-10-10", "technique", 3)], today, focus: "technique" },
+      expected: { recommendation: { focus: "speed", minutes: 60, intensityCap: "sprint", why: "按自己的节奏，慢慢续上" }, adjustment: 3 },
+      run: () => pair({ ...profile, goal: "team", level: "l1500", weekly: 4 },
+        [log("2026-10-04", "endurance", 5, 90), log("2026-10-02", "technique", 5, 90),
+          log("2026-10-07", "endurance", 3), log("2026-10-08", "technique", 3),
+          log("2026-10-10", "technique", 3)], "technique") },
+    { name: "7 新用户未来7天恰好三课，预计课不伪造训练记录",
+      input: { profile, logs: [], today },
+      expected: [
+        { date: "2026-10-13", rest: false, focus: "technique", minutes: 30, why: "先找找水感，轻松开始" },
+        { date: "2026-10-14", rest: true, focus: null, minutes: 0, why: "歇一歇，下次更有精神" },
+        { date: "2026-10-15", rest: false, focus: "technique", minutes: 30, why: "先找找水感，轻松开始" },
+        { date: "2026-10-16", rest: true, focus: null, minutes: 0, why: "歇一歇，下次更有精神" },
+        { date: "2026-10-17", rest: false, focus: "technique", minutes: 30, why: "先找找水感，轻松开始" },
+        { date: "2026-10-18", rest: true, focus: null, minutes: 0, why: "歇一歇，下次更有精神" },
+        { date: "2026-10-19", rest: true, focus: null, minutes: 0, why: "歇一歇，下次更有精神" }
+      ], run: () => weekPlan(profile, [], today) },
+    { name: "8 RPE缺失不当零，RPE=0有效，未来记录忽略",
+      input: { logs: [log("2026-10-13", "technique", null, 30), log("2026-10-12", "endurance", 0, 30),
+        log("2026-10-05", "endurance", 4, 30), log("2026-10-14", "speed", 10, 90)], today },
+      expected: { thisWeek: 0, lastWeek: 120, changePct: null, warning: "有记录未填累度，训练量仅为已知部分" },
+      run: () => weeklyLoad([log("2026-10-13", "technique", null, 30), log("2026-10-12", "endurance", 0, 30),
+        log("2026-10-05", "endurance", 4, 30), log("2026-10-14", "speed", 10, 90)], today) }
+  ];
+  return cases.map(test => {
+    const actual = test.run();
+    return { name: test.name, input: test.input, expected: test.expected, actual,
+      passed: JSON.stringify(actual) === JSON.stringify(test.expected) };
+  });
+}
+
+// ================= 3.0：档案、推荐、页面 =================
+const VERSION = "3.2";
+const TEST_TOOLS = false;   // 测试模式开关：改成 true 才会在“我的”里出现
+const GOALS = { fit: "健身", endur: "提高耐力", stroke: "练好泳姿", team: "准备进泳队" };
+const LEVELS = { l50: ["50 以内", 50], l200: ["200 左右", 200], l800: ["800 左右", 800], l1500: ["1500 以上", 1500] };
+const LEVEL_MAXD = { l50: 50, l200: 100, l800: 200, l1500: 400 };     // 单组最长距离
+const LEVEL_PACE = { l50: 170, l200: 135, l800: 110, l1500: 92 };     // 不知道速度时的估计（自由泳每 100 秒）
+const SPEEDS = [[160, "2:30 以上"], [120, "2:00 左右"], [100, "1:40 左右"], [85, "1:25 左右"], [72, "1:15 以内"]];
+const STROKES = ["自由泳", "仰泳", "蛙泳", "蝶泳"];
+// 一周里三种训练的目标比例：按用户的目标来定
+const TARGET = {
+  fit:    { endurance: .5,  technique: .3,  speed: .2 },
+  endur:  { endurance: .6,  technique: .2,  speed: .2 },
+  stroke: { endurance: .3,  technique: .55, speed: .15 },
+  team:   { endurance: .4,  technique: .3,  speed: .3 }
+};
+const DEFAULT_PROFILE = { onboarded: false, pool: "25y", goal: "fit", level: "l200", strokes: ["自由泳", "蛙泳"], pace: {}, paceUnit: "码", weekly: 2, minutes: 45, equip: [] };
+const FCOLOR = { endurance: "var(--blue)", technique: "var(--purple)", speed: "var(--coral)" };
+const PH_TINT = { warm: "var(--ph-warm)", drill: "var(--ph-drill)", main: "var(--blue)", extra: "var(--blue)", cool: "var(--ph-cool)" };
+
+const P = () => S.profile;
+const unitOf = () => POOLS[P().pool][1];
+function convPace(sec, from, to) { return from === to ? sec : to === "米" ? sec * 1.0936 : sec / 1.0936; }
+
+// 每种泳姿的速度：填了就用；没填就按其他泳姿推算；都没有就按水平估计
+function strokePace(o, stroke) {
+  const pr = P(), unit = (o && o.unit) || unitOf(), own = pr.pace || {};
+  const key = STROKE_ADJ[stroke] !== undefined ? stroke : "自由泳";
+  let base;
+  if (own[key]) base = own[key];
+  else {
+    const known = Object.keys(own).filter(k => own[k] && STROKE_ADJ[k] !== undefined);
+    base = known.length
+      ? known.reduce((a, k) => a + own[k] - STROKE_ADJ[k], 0) / known.length + STROKE_ADJ[key]
+      : LEVEL_PACE[pr.level] + STROKE_ADJ[key];
+    return convPace(base, "码", unit);
+  }
+  return convPace(base, pr.paceUnit || "码", unit);
+}
+function mainPace() { const st = P().strokes.length ? P().strokes : ["自由泳"]; return Math.min(...st.map(s => strokePace({ unit: unitOf() }, s))); }
+
+// 按水平过滤练法：单组不超过能力范围，连续游不超过能连续游的距离
+function optionsFor(type) {
+  const lv = P().level, maxD = LEVEL_MAXD[lv], cont = LEVELS[lv][1];
+  let list = baseOptionsFor(type).filter(op => op.key !== "hypo");       // 不安排憋气类的控制呼吸
+  const longest = op => Math.max(...op.sets.map(s => s.ladder ? Math.max(...s.ladder) : s.n === 1 ? 0 : s.d));
+  const ok = list.filter(op => longest(op) <= maxD);
+  if (ok.length) list = ok;
+  const cap = S.o.cap ? INT_ORDER.indexOf(S.o.cap) : 3;
+  if (cap < 3) list = list.map(op => op.sets.some(s => INT_ORDER.indexOf(s.inten) > cap)
+    ? { ...op, capped: true, sets: op.sets.map(s => INT_ORDER.indexOf(s.inten) > cap ? { ...s, inten: INT_ORDER[cap], tip: s.tip + "。今天强度控制在“" + INT[INT_ORDER[cap]].label + "”就好，别用全力" } : s) } : op);
+  return list.map(op => op.sets.some(s => s.n === 1 && !s.ladder && s.d > cont)
+    ? { ...op, sets: op.sets.map(s => s.n === 1 && !s.ladder && s.d > cont ? { ...s, d: Math.max(S.o.pool, Math.floor(cont / S.o.pool) * S.o.pool) } : s) }
+    : op);
+}
+
+// ---------- 推荐：一周平衡 + 目标 + 打分 ----------
+function logsIn(days) { const from = nowDate(); from.setDate(from.getDate() - days + 1); const f = ymd(from); return S.logs.filter(l => l.date >= f); }
 function weekDays() {
-  const now = new Date(), day = (now.getDay() + 6) % 7, out = [];
+  const now = nowDate(), day = (now.getDay() + 6) % 7, out = [];
   for (let i = 0; i < 7; i++) out.push(ymd(new Date(now.getFullYear(), now.getMonth(), now.getDate() - day + i)));
   return out;
 }
-function weekStats() {
-  const days = weekDays(), today = ymd(new Date());
-  const list = S.logs.filter(l => l.date >= days[0] && l.date <= today);
-  return { dist: list.reduce((a, l) => a + l.dist, 0), n: list.length };
+function weekLogs() { const d = weekDays(); return S.logs.filter(l => l.date >= d[0] && l.date <= d[6]); }
+function focusOf(l) { return (l.cfg && l.cfg.o && l.cfg.o.focus) || l.focus || "endurance"; }
+// ---------- 推荐：交给 swim-recommendation.js（算法文件）----------
+const INT_ORDER = ["easy", "mod", "fast", "sprint"];
+function algoProfile() {
+  const p = P(), st = p.strokes.filter(s => STROKES.includes(s)), pace = {};
+  Object.keys(p.pace || {}).forEach(s => { if (STROKES.includes(s) && p.pace[s] > 0) pace[s] = p.pace[s]; });
+  return { goal: p.goal, level: p.level, strokes: st, pace, paceUnit: p.paceUnit === "米" ? "米" : "码",
+    weekly: clamp(Math.round(p.weekly) || 2, 1, 4), minutes: [30, 45, 60, 90].includes(p.minutes) ? p.minutes : 45 };
 }
-const ICON = {
-  home: '<path d="M4 11l8-7 8 7v9h-5v-6h-6v6H4z"/>',
-  plan: '<path d="M8 6h12M8 12h12M8 18h12"/><circle cx="4" cy="6" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="18" r="1"/>',
-  cal: '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
-  favs: '<path d="M12 4l2.5 5.2 5.5.8-4 3.9 1 5.6-5-2.7-5 2.7 1-5.6-4-3.9 5.5-.8z"/>'
+function algoLogs() {
+  return S.logs.filter(l => /^\d{4}-\d{2}-\d{2}$/.test(l.date)).map(l => ({
+    date: l.date, focus: focusOf(l), dist: Math.max(0, +l.dist || 0), planned: Math.max(0, +(l.planned ?? l.dist) || 0),
+    mins: +l.mins > 0 ? +l.mins : 45, rpe: Number.isFinite(l.rpe) ? clamp(l.rpe, 0, 10) : null }));
+}
+function recommendFocus() {
+  try { const r = recommendToday(algoProfile(), algoLogs(), todayStr()); return { ...r, why: r.why }; }
+  catch (e) { return { focus: "endurance", minutes: P().minutes, intensityCap: "mod", why: "先从基础开始" }; }
+}
+function progressionAdj() {
+  try { return mainSetAdjust(algoProfile(), algoLogs(), S.o.focus, todayStr()); } catch (e) { return 0; }
+}
+function loadInfo() { try { return weeklyLoad(algoLogs(), todayStr()); } catch (e) { return null; } }
+function planWeek() { try { return weekPlan(algoProfile(), algoLogs(), todayStr()); } catch (e) { return []; } }
+function nowDate() { const d = new Date(); if (S.dayOffset) d.setDate(d.getDate() + S.dayOffset); return d; }
+function todayStr() { return ymd(nowDate()); }
+function freshO(focus) {
+  const pr = P(), [len, u] = POOLS[pr.pool];
+  return { time: pr.minutes, focus, pool: len, unit: u, strokes: pr.strokes.length ? pr.strokes.slice() : ["自由泳"], useEquip: pr.equip.length > 0, equip: pr.equip.slice() };
+}
+function makeRecommended() { S.planCustom = false; const r = recommendFocus(); S.o = freshO(r.focus); S.o.time = r.minutes; S.o.cap = r.intensityCap; smartPlan(); S.planDate = todayStr(); S.planWhy = r.why; }
+
+// ---------- 文字小工具 ----------
+function unitize(str) { return unitOf() === "米" ? str.replace(/码/g, "米") : str; }
+function condText(o) { return `${o.time} 分钟 · ${FOCUS[o.focus]} · ${o.pool} ${o.unit}池`; }
+function greet() { const h = nowDate().getHours(); return h < 5 ? "夜深了" : h < 11 ? "早上好" : h < 14 ? "中午好" : h < 18 ? "下午好" : "晚上好"; }
+function dateLine() { const d = nowDate(); return `${d.getMonth() + 1} 月 ${d.getDate()} 日 · 星期${"日一二三四五六"[d.getDay()]}`; }
+const IC = {
+  home: '<path d="M3.5 10.6 12 3.8l8.5 6.8V20a1.2 1.2 0 0 1-1.2 1.2H15v-6.4H9v6.4H4.7A1.2 1.2 0 0 1 3.5 20z"/>',
+  plans: '<rect x="4.5" y="3.5" width="15" height="18" rx="3"/><path class="ln" d="M8.5 9h7M8.5 13h7M8.5 17h4.5"/>',
+  hist: '<rect x="3.5" y="12" width="4" height="8.5" rx="1.4"/><rect x="10" y="7" width="4" height="13.5" rx="1.4"/><rect x="16.5" y="3.5" width="4" height="17" rx="1.4"/>',
+  me: '<circle cx="12" cy="8.2" r="4.2"/><path d="M3.8 20.6c.9-4.3 4.2-6.6 8.2-6.6s7.3 2.3 8.2 6.6z"/>'
 };
+const ROOTS = ["home", "plans", "hist", "me"];
 function tabs() {
-  const t = [["home", "首页"], ["plan", "课表"], ["cal", "日历"], ["favs", "收藏"]];
-  return `<nav class="tabs">${t.map(([v, l]) => `<button data-go="${v}" aria-current="${S.view === v ? "page" : "false"}"><svg viewBox="0 0 24 24" aria-hidden="true">${ICON[v]}</svg>${l}</button>`).join("")}</nav>`;
+  return `<nav class="tabs">${[["home", "首页"], ["plans", "计划"], ["hist", "记录"], ["me", "我的"]].map(([v, l]) =>
+    `<button data-go="${v}" class="${S.view === v ? "on" : ""}" aria-label="${l}"><svg viewBox="0 0 24 24" aria-hidden="true">${IC[v]}</svg><span>${l}</span></button>`).join("")}</nav>`;
+}
+function topBar(title, back, right = "") {
+  if (!back) return `<header class="hd"><h1>${title}</h1>${right}</header>`;
+  return `<header class="nav"><button class="back" data-go="${back}">返回</button><b>${title}</b><span>${right}</span></header>`;
+}
+function segs(key, items) {
+  const cur = S.seg[key] || items[0][0];
+  return `<div class="segs">${items.map(([v, l]) => `<button data-act="seg" data-k="${key}" data-v="${v}" class="${cur === v ? "on" : ""}">${l}</button>`).join("")}</div>`;
+}
+function phaseBar(rows, h = 6) {
+  return `<div class="pbar" style="height:${h}px">${rows.map(x => `<i style="flex:${Math.max(1, x.dist)};background:${PH_TINT[x.r.type]}"></i>`).join("")}</div>`;
+}
+function cfgBar(c) {
+  const keep = { o: S.o, ms: S.ms, rows: S.rows };
+  try { loadCfg(c); return phaseBar(compute().rows, 5); } catch (e) { return ""; } finally { S.o = keep.o; S.ms = keep.ms; S.rows = keep.rows; }
 }
 
-const VIEWS = {
+// ---------- 水波打卡 ----------
+function ripple(size) {
+  const r = size / 2, days = weekDays(), logged = new Set(S.logs.map(l => l.date)), today = todayStr();
+  let o = `<div class="rip" style="width:${size}px;height:${size}px">`;
+  [[1, .4], [.8, .6], [.6, .85]].forEach(([f, a]) => { const s = size * f; o += `<i style="left:${(size - s) / 2}px;top:${(size - s) / 2}px;width:${s}px;height:${s}px;opacity:${a}"></i>`; });
+  const s = size * .6; o += `<b class="core" style="left:${(size - s) / 2}px;top:${(size - s) / 2}px;width:${s}px;height:${s}px"></b>`;
+  days.forEach((d, k) => {
+    const a = -Math.PI / 2 + k * 2 * Math.PI / 7, x = r + r * Math.cos(a), y = r + r * Math.sin(a);
+    const cls = logged.has(d) ? "on" : d === today ? "now" : "";
+    o += `<span class="dot ${cls}" style="left:${x - 8}px;top:${y - 8}px"></span>`;
+    const lx = r + (r + 20) * Math.cos(a), ly = r + (r + 20) * Math.sin(a);
+    o += `<span class="dl ${d === today ? "now" : ""}" style="left:${lx - 14}px;top:${ly - 9}px">${d === today ? "今天" : "一二三四五六日"[k]}</span>`;
+  });
+  const n = weekLogs().length, swamToday = S.logs.some(l => l.date === today);
+  const mid = swamToday ? `<span>今天已经下过水</span><strong>${n}</strong><span>这周第 ${n} 次</span>`
+    : `<span>这周第</span><strong>${n + 1}</strong><span>次下水?</span>`;
+  return o + `<div class="mid">${mid}</div></div>`;
+}
+
+
+// ---------- 公共组件：课表卡片、泳道列表、练法详情（今天的和过去的都用同一套） ----------
+function withCfg(c, fn) { const keep = { o: S.o, ms: S.ms, rows: S.rows }; try { loadCfg(c); return fn(); } finally { S.o = keep.o; S.ms = keep.ms; S.rows = keep.rows; } }
+function planCard(p, o, { label = "", title = "", why = "", attrs = "", foot = "" } = {}) {
+  return `<div class="card plancard"><button class="pc-main" ${attrs}><small class="muted">${label}</small>
+    <div class="flexrow"><b>${title || FOCUS[o.focus] + "课 · " + o.time + " 分钟"}</b><span class="num big">${p.dist.toLocaleString()}</span></div>
+    ${why ? `<small class="pc-why">${esc(why)}</small>` : ""}${phaseBar(p.rows)}
+    <small class="muted">${FOCUS[o.focus]} · ${p.rows.length} 项 · 约 ${p.mins} 分钟 · ${p.dist / o.pool} 趟</small></button>${foot}</div>`;
+}
+function laneRows(p, live) {
+  return p.rows.map((x, i) => {
+    const s = x.sets[0], comp = x.opt.composite, mins = Math.max(1, Math.round(x.secs / 60));
+    const main = x.r.type === "main" || x.r.type === "extra";
+    const name = comp ? `${esc(x.opt.title)} <em>${esc(x.opt.sub)}</em>` : `${esc(s.label || s.stroke)}${s.label ? ` <em>${esc(s.stroke)}</em>` : ""}`;
+    const big = comp ? (s.outer > 1 ? `${s.outer}轮` : `${x.dist}`) : bigQty(s);
+    const btn = `<button class="row${main ? " main" : ""}" data-act="${live ? "open" : "pastOpen"}" data-id="${x.r.id}" data-i="${i}">
+        <span class="no" style="--c:${PH_TINT[x.r.type]}">${i + 1}</span>
+        <span class="g"><small>${x.def.name} · ${comp ? "组合主项" : INT[s.inten].label} · ${mins} 分钟</small><b>${name}</b><small class="pl">${esc(comp ? chainText(x) : subText(s))}</small></span>
+        <span class="bq num">${big}</span></button>`;
+    return live ? `<div class="swipe${S.swiped === x.r.id ? " open" : ""}" data-id="${x.r.id}">
+        <div class="acts"><button class="r" data-act="swRand" data-id="${x.r.id}">换一个</button><button class="d" data-act="swDel" data-id="${x.r.id}">删除</button></div>${btn}</div>`
+      : `<div class="prow">${btn}</div>`;
+  }).join("");
+}
+function detailTop(x) {
+  const s = x.sets[0], comp = x.opt.composite, P0 = S.o.pool, U = unitOf();
+  const how = comp
+    ? `<ol class="steps">${x.sets.map(e => `<li><b class="num">${e.n > 1 ? e.n + "×" : ""}${e.d}${e.label ? " " + esc(e.label) : ""}</b><small>${e.d / P0} 趟${e.n > 1 ? ` · @${fmtPace(sendoff(e))} 出发` : ""} · 歇 ${e.rest} 秒 · ${INT[e.inten].label}</small></li>`).join("")}</ol>`
+    : `<p>${esc(plainText(s))}。</p>`;
+  const extraSets = !comp && x.sets.length > 1 ? `<p class="muted">接着：${x.sets.slice(1).map(e => esc(plainText(e))).join("；")}</p>` : "";
+  return `<div class="dhero"><small>${x.def.name}${comp && x.opt.src ? " · 来自 USMS / Swim England 公开课表" : ""}</small>
+      <h2>${comp ? esc(x.opt.title) + " · " + esc(x.opt.sub) : esc(nameOf(s))}</h2>
+      <div class="dq num">${comp ? (s.outer > 1 ? `${s.outer} 轮` : x.dist.toLocaleString()) : bigQty(s)}<small>${comp && s.outer > 1 ? `共 ${x.dist.toLocaleString()} ${U}` : U}</small></div>
+      <small>约 ${Math.max(1, Math.round(x.secs / 60))} 分钟</small></div>
+    <div class="card info">
+      <div><span class="lab">怎么游</span>${how}${extraSets}</div>
+      <div><span class="lab">用多大力</span><p>${[...new Set(x.sets.map(e => e.inten))].map(k => `${INT[k].label}：${INT_DESC[k]}`).join("<br>")}。</p></div>
+      <div><span class="lab">动作要点</span><p>${esc(s.tip)}。</p></div>
+    </div>`;
+}
+function ensureToday() { if (!S.rows.length || S.planDate !== todayStr()) makeRecommended(); }
+function pctOf(l) { return l.pct != null ? l.pct : l.planned ? Math.round(l.dist / l.planned * 100) : 100; }
+
+// ---------- 页面 ----------
+const V = {
   home() {
-    const w = weekStats(), days = weekDays(), today = ymd(new Date());
-    const logged = new Set(S.logs.map(l => l.date));
-    const d = new Date();
-    const favs = S.favs.slice(0, 3).map(f => `<button class="li" data-act="loadFav" data-id="${f.id}"><span class="grow"><b>${esc(f.name)}</b><small>${f.dist} 码 · 约 ${f.mins} 分钟</small></span><span class="chev">›</span></button>`).join("");
-    return `<section class="hero-water">
-        <div class="hw-top"><span>${d.getMonth() + 1} 月 ${d.getDate()} 日，星期${"日一二三四五六"[d.getDay()]}</span>
-          <button class="gear" data-act="goSettings" aria-label="设置"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></svg></button></div>
-        <div class="hw-num"><b>${w.dist.toLocaleString()}</b><span>码<br>本周游了 ${w.n} 次</span></div>
-        <div class="wk">${days.map((k, i) => `<div class="${k === today ? "is-today" : ""}"><i class="${logged.has(k) ? "on" : ""}"></i>${"一二三四五六日"[i]}</div>`).join("")}</div>
-      </section>
-      <button class="pb blue big" data-act="start"><b>开始今天的训练</b><span>选好时长和目标，生成一份课表</span></button>
-      ${recCard()}
-      ${tipCard()}
-      ${todayCard()}
-      ${favs ? `<div class="sec-title"><span>最近收藏</span><button data-go="favs">全部 ›</button></div><div class="list">${favs}</div>` : ""}
-      ${recentLogs()}`;
-  },
-
-  setup() {
-    const d = S.draft;
-    const seg = (key, items) => `<div class="seg">${items.map(([v, l]) => `<button data-act="set" data-k="${key}" data-v="${v}" aria-pressed="${d[key] == v}">${l}</button>`).join("")}</div>`;
-    return topBar("安排训练", S.back || "home") + `
-      <div class="field"><span class="label">今天游多久</span>${seg("time", [[30, "30 分"], [45, "45 分"], [60, "60 分"], [90, "90 分"]])}</div>
-      <div class="field"><span class="label">今天练什么</span>${seg("focus", [["endurance", "耐力"], ["speed", "速度"], ["technique", "技术"]])}</div>
-      <div class="field"><span class="label">今天游哪些泳姿</span><div class="chips">${["自由泳", "仰泳", "蛙泳", "蝶泳"].map(s =>
-        `<button class="chip" data-act="stroke" data-v="${s}" aria-pressed="${d.strokes.includes(s)}">${s}</button>`).join("")}</div></div>
-      <div class="list">
-        <button class="li toggle" data-act="equipToggle" aria-pressed="${!!d.useEquip}"><span class="grow"><b>用器材</b><small>${d.useEquip ? (d.equip.length ? "已选：" + d.equip.join("、") : "勾选今天带了什么") : "关闭时，不安排需要器材的练法"}</small></span><span class="sw"><i></i></span></button>
-        ${d.useEquip ? `<div class="eqp">${EQUIP.map(e => `<button class="chip" data-act="equipItem" data-v="${e}" aria-pressed="${d.equip.includes(e)}">${e}</button>`).join("")}</div>` : ""}
+    const wl = weekLogs(), yd = wl.reduce((a, l) => a + l.dist, 0), mins = wl.reduce((a, l) => a + (l.mins || 0), 0);
+    const cnt = { endurance: 0, technique: 0, speed: 0 }; wl.forEach(l => cnt[focusOf(l)]++);
+    const rec = recommendFocus(), tip = dailyTip(), U = unitOf();
+    const recent = logsDesc().slice(0, 2);
+    const favs = S.favs.slice(0, 2);
+    const hasToday = S.rows.length && S.planDate === todayStr();
+    const goal = P().weekly;
+    return testBanner() + `<div class="date">${dateLine()}</div><h1 class="hi">${greet()}</h1>
+      ${ripple(Math.round(clamp((window.innerHeight || 844) * 0.27, 176, 244)))}
+      <button class="go" data-act="start">${hasToday ? "继续今天的训练" : "开始今天的训练"}</button>
+      <div class="tiles">
+        <div class="tl"><small>本周</small><b class="num">${yd.toLocaleString()}</b><em>${U}</em></div>
+        <div class="tl"><small>本周时长</small><b class="num">${mins}</b><em>分钟</em></div>
+        <div class="tl"><small>我的速度</small><b class="num">${fmtPace(mainPace())}</b><em>每 100 ${U}</em></div>
       </div>
-      <button class="pb blue full" data-act="gen">生成课表</button>
-      <button class="poolline" data-act="goSettings">泳池：${S.prefs.pool.slice(0, 2)} ${POOLS[S.prefs.pool][1]} · 我的速度 ${fmtPace(S.prefs.pace)}/100${S.prefs.paceUnit} <b>修改 ›</b></button>`;
+      <div class="sec"><b>今日小贴士</b><span>每天换一条</span></div>
+      <div class="card tip"><div class="tic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 14c2 0 2-2 4.5-2S10 14 12 14s2-2 4.5-2S19 14 21 14M7 9l3-3 3 3"/></svg></div>
+        <div><b>${esc(tip.n)}</b><p>${esc(tip.st)}：${esc(tip.t)}。</p></div></div>
+      <div class="sec"><b>本周练了什么</b><span>目标 ${goal} 次</span></div>
+      <div class="card"><div class="bal">${FOCI.map(f => `<div class="bl"><span>${FOCUS[f]}</span><div class="tr"><i style="width:${Math.min(100, cnt[f] / Math.max(1, goal) * 100)}%;background:${FCOLOR[f]}"></i></div><b class="num ${cnt[f] ? "" : "zero"}">${cnt[f]}</b></div>`).join("")}</div>
+        <p class="hint">${wl.length >= goal ? "这周的目标已经完成了，多游一次也很好。" : `下一次建议练${FOCUS[rec.focus]}：${rec.why}。`}</p></div>
+      <div class="sec"><b>最近训练</b>${S.logs.length ? `<button data-go="hist">全部 ›</button>` : ""}</div>
+      ${recent.length ? `<div class="card list">${recent.map(l => logRow(l)).join("")}</div>`
+        : `<div class="card empty">游完点“完成训练”，记录会出现在这里。</div>`}
+      <div class="sec"><b>我的收藏</b>${S.favs.length ? `<button data-act="goFavs">全部 ›</button>` : ""}</div>
+      ${favs.length ? `<div class="favs">${favs.map(f => `<button class="fav" data-act="loadFav" data-id="${f.id}"><b>${esc(f.name)}</b><small>${f.mins} 分钟 · ${f.dist.toLocaleString()} ${U}</small>${cfgBar(f.cfg)}</button>`).join("")}</div>`
+        : `<div class="card empty">在课表页点“收藏”，喜欢的课表会放在这里。</div>`}`;
   },
 
-  settings() {
-    const pr = S.prefs;
-    return topBar("设置", S.setBack || "home") + `
-      <div class="field"><span class="label">训练模式</span>
-        <div class="seg"><button aria-pressed="true">休闲</button><button disabled style="opacity:.45">系统训练</button></div>
-        <p class="note">休闲模式适合一周游一到三次：按规则挑合适的练法，不重复最近练过的，泳姿和目标轮着来，游完了下次稍微加一点量。系统训练模式（游泳队、备赛用）正在整理资料，之后开放。</p></div>
-      <div class="field"><span class="label">常用泳池</span>
-        <div class="seg seg2">${Object.entries(POOLS).map(([k, [len, u]]) => `<button data-act="setPool" data-v="${k}" aria-pressed="${pr.pool === k}">${len} ${u}</button>`).join("")}</div>
-        <p class="note">平时在哪个泳池游就选哪个。去别的泳池时回这里改一下，所有距离和单位都会跟着变。</p></div>
-      <div class="field"><span class="label">我的速度</span>
-        <div class="panel"><span>中等强度游 100 ${pr.paceUnit}，大概用时</span>
-          <div class="stepper"><button data-act="paceDec" aria-label="快 5 秒">−</button><span class="num" style="font-size:26px">${fmtPace(pr.pace)}</span><button data-act="paceInc" aria-label="慢 5 秒">＋</button></div>
-          <button class="linkish" data-act="paceReset">恢复默认（${fmtPace(pr.paceUnit === "米" ? Math.round(95 * 1.0936) : 95)}）</button></div>
-        <p class="note">每按一下改 5 秒。课表的组数和预计时间会按这个速度来算：游得快的人同样时间会排更多组。</p></div>`;
+  plans() {
+    const seg = S.seg.plans || "mine";
+    let body = "";
+    if (seg === "mine") {
+      ensureToday();
+      const p = compute();
+      body += planCard(p, S.o, { label: S.planCustom ? "今天的课表 · 自己安排的" : "今天的推荐", why: S.planCustom ? "" : S.planWhy, attrs: `data-go="plan"`,
+        foot: `<div class="pc-foot"><button class="txt" data-act="reroll">换一份</button><button class="txt" data-go="plan">打开课表 ›</button></div>` });
+      body += `<button class="btn soft wide" data-act="custom">自己安排</button>`;
+      const wk = planWeek();
+      if (wk.length) body += `<div class="sec"><b>接下来 7 天</b><span>每周 ${P().weekly} 次</span></div><div class="card list">${wk.map(d => {
+        const dt = new Date(d.date + "T00:00:00"), lab = d.date === todayStr() ? "今天" : `${dt.getMonth() + 1}/${dt.getDate()}`;
+        return `<div class="li wk"><span class="badge${d.rest ? " rest" : ""}" style="color:${d.rest ? "var(--muted)" : FCOLOR[d.focus]}">${lab}</span><span class="g"><b>${d.rest ? "休息" : FOCUS[d.focus] + "课 · " + d.minutes + " 分钟"}</b><small>${esc(d.why)} · 星期${"日一二三四五六"[dt.getDay()]}</small></span></div>`; }).join("")}</div>
+        <p class="hint">这是暂定安排，每次训练前会按最新的记录重新算。</p>`;
+    } else if (seg === "tpl") {
+      body += FOCI.map(f => `<div class="sec"><b>${FOCUS[f]}</b></div><div class="card list">${COMPOSITES.filter(c => c.focus === f).map(c =>
+        `<button class="li" data-act="tpl" data-key="${c.key}"><span class="dotc" style="background:${FCOLOR[f]}"></span><span class="g"><b>${esc(c.title)}${c.stroke ? ` · ${c.stroke}` : ""}</b><small>${esc(c.tip)}</small></span><span class="chev">›</span></button>`).join("")}</div>`).join("")
+        + `<p class="hint">模板的主项来自 USMS 和 Swim England 公开课表，热身、技术练习和放松会按你的档案自动配好。</p>`;
+    } else {
+      body += S.favs.length ? S.favs.map(f => {
+        const p = withCfg(f.cfg, () => compute()), o = f.cfg.o;
+        const foot = S.renaming === f.id
+          ? `<div class="pc-foot"><input class="input" id="rn" maxlength="30" value="${esc(f.name)}"><button class="txt" data-act="renameOk" data-id="${f.id}">保存</button></div>`
+          : `<div class="pc-foot"><button class="txt" data-act="rename" data-id="${f.id}">改名</button><button class="txt red" data-act="delFav" data-id="${f.id}">${S.confirm === f.id ? "再点一次确认" : "删除"}</button></div>`;
+        return planCard(p, o, { label: "收藏", title: esc(f.name), attrs: `data-act="loadFav" data-id="${f.id}"`, foot });
+      }).join("") : `<div class="card empty">还没有收藏。在课表页点“收藏”，喜欢的课表就会存在这里。</div>`;
+    }
+    return topBar("计划") + segs("plans", [["mine", "我的课表"], ["tpl", "课表模板"], ["fav", "收藏"]]) + body;
   },
 
   plan() {
-    if (!S.rows.length) return topBar("今日课表") + `<p class="empty-note">还没有课表。</p><button class="pb blue full" data-act="start">开始今天的训练</button>`;
-    const p = compute();
-    const rows = p.rows.map((x, i) => {
-      const s = x.sets[0], mins = Math.max(1, Math.round(x.secs / 60)), comp = x.opt.composite;
-      const name = comp ? `${esc(x.opt.title)} <em>${esc(x.opt.sub)}</em>` : `${esc(s.label || s.stroke)}${s.label ? ` <em>${esc(s.stroke)}</em>` : ""}`;
-      const after = !comp && x.sets.length > 1 ? `<span class="pl">接着 ${bigQty(x.sets[1])} ${esc(x.sets[1].label || x.sets[1].stroke)} · ${INT[x.sets[1].inten].label}</span>` : "";
-      const big = comp ? (s.outer > 1 ? `${s.outer}轮` : `${x.dist}`) : bigQty(s);
-      const body = `<span class="no">${i + 1}</span>
-          <span class="grow"><span class="ph">${x.def.name} · ${comp ? "组合主项" : INT[s.inten].label} · 约 ${mins} 分钟</span><span class="nm">${name}</span>
-            <span class="pl">${esc(comp ? chainText(x) : subText(s))}</span>${after}</span>
-          <span class="bq">${big}</span>`;
-      const mainCls = x.r.type === "main" || x.r.type === "extra" ? " is-main" : "";
-      const phaseCls = " ph-" + (x.r.type === "extra" ? "main" : x.r.type);
-      if (S.editing) return `<div class="erow${mainCls}${phaseCls}" style="--seg:var(${x.def.color})">${body}
-          <span class="eb"><button data-act="swRand" data-id="${x.r.id}">换</button><button class="d" data-act="swDel" data-id="${x.r.id}">删</button></span></div>`;
-      return `<div class="swipe${S.swiped === x.r.id ? " open" : ""}" data-id="${x.r.id}">
-        <div class="acts"><button class="r" data-act="swRand" data-id="${x.r.id}">随机</button><button class="d" data-act="swDel" data-id="${x.r.id}">删除</button></div>
-        <button class="row${mainCls}${phaseCls}" style="--seg:var(${x.def.color})" data-act="open" data-id="${x.r.id}">${body}</button></div>`;
-    }).join("");
-    const saved = isSaved();
-    return topBar("今日课表", null, `<button class="right" data-act="editToggle">${S.editing ? "完成" : "编辑"}</button>`) + `
-      <div class="sum">
-        <div class="sum-row"><b>${p.dist.toLocaleString()}<small>码</small></b><b>${p.mins}<small>分钟</small></b><b>${p.dist / S.o.pool}<small>趟</small></b></div>
-        <div class="cond"><span>${condText(S.o)}</span><button data-act="edit">修改条件</button></div>
-      </div>
-      <p class="guide">${S.editing ? "点「换」随机换一个练法，点「删」去掉这一项。改完点右上角「完成」。" : `按顺序从 1 游到 ${p.rows.length}。点任意一项看动作怎么做；往左滑可以换掉或删除。`}</p>
-      <div class="list lane">${rows}<button class="add" data-act="add">＋ 加一组</button></div>
-      <button class="linkish" data-act="copy">复制课表文字</button>
-      <div class="bar"><button class="pb yellow" data-act="reroll">全部随机</button><button class="pb pink" data-act="fav">${saved ? "已收藏 ✓" : "收藏"}</button><button class="pb green" data-go="done">完成训练</button></div>`;
+    if (!S.rows.length) { S.view = "plans"; return V.plans(); }
+    const p = compute(), U = unitOf(), saved = isSaved();
+    const rows = laneRows(p, true);
+    return topBar("今日课表", S.planBack || "home", `<button class="txt" data-act="custom">修改</button>`) + `
+      <div class="sum"><div><b class="num">${p.dist.toLocaleString()}</b><small>${U}</small></div><div><b class="num">${p.mins}</b><small>分钟</small></div><div><b class="num">${p.dist / S.o.pool}</b><small>趟</small></div></div>
+      <p class="hint plan-hint">${FOCUS[S.o.focus]}课${S.planWhy ? " · " + esc(S.planWhy) : ""}。按顺序从 1 游到 ${p.rows.length}，点任意一项看怎么练，往左滑可以换掉或删除。</p>
+      <div class="card list lane">${rows}<button class="add" data-act="add">＋ 加一组</button></div>
+      <button class="txt center" data-act="copy">复制课表文字</button>
+      <div class="bar"><button class="btn soft" data-act="reroll">换一份</button><button class="btn soft" data-act="fav">${saved ? "已收藏" : "收藏"}</button><button class="btn" data-go="done">完成训练</button></div>`;
   },
 
   detail() {
     const p = compute(), x = p.rows.find(r => r.r.id === S.cur);
-    if (!x) { S.view = "plan"; return VIEWS.plan(); }
-    const s = x.sets[0];
-    if (x.opt.composite) return compositeDetail(x);
-    const more = x.sets.slice(1).map(e => `<div class="extra-line">接着：${qtyPlain(e)} ${esc(nameOf(e))}，${INT[e.inten].label}，${restText(e)}</div>`).join("");
-    const isMain = x.r.type === "main" || x.r.type === "extra";
-    const st = strokesOf(S.o);
-    const strokeChips = isMain && st.length > 1 ? `<div class="field"><span class="label">主项泳姿</span><div class="chips">${st.map(v =>
-      `<button class="chip" data-act="ms" data-v="${v}" aria-pressed="${v === S.ms}">${v}</button>`).join("")}</div></div>` : "";
-    const t = tools(S.o);
+    if (!x) { S.view = "plan"; return V.plan(); }
+    const s = x.sets[0], comp = x.opt.composite, P0 = S.o.pool, U = unitOf();
+    const st = strokesOf(S.o), isMain = x.r.type === "main" || x.r.type === "extra";
     const opts = x.opts.map(op => {
-      const f = finishSet({ ...op.sets[0] }, t);
-      return `<button class="li" data-act="pick" data-key="${esc(op.key)}" aria-pressed="${op.key === x.r.key}"><span class="grow"><b>${esc(op.title)}</b><small>${esc(op.sub || op.sets[0].stroke)}</small></span><span class="side num">${qtyPlain(f)}</span></button>`;
+      const t = tools(S.o), total = op.sets.reduce((a, e) => a + finishSet({ ...e }, t).total, 0);
+      return `<button class="li${op.key === x.r.key ? " sel" : ""}" data-act="pick" data-key="${esc(op.key)}"><span class="g"><b>${esc(op.title)}${op.composite ? ' <i class="tag">组合</i>' : ""}</b><small>${esc(op.sub || op.sets[0].stroke)}</small></span><span class="num muted">${op.outer > 1 ? op.outer + " 轮 · " : ""}${total.toLocaleString()} ${U}</span></button>`;
     }).join("");
-    return topBar(x.def.name, "plan") + `
-      <div class="hero">
-        <span class="ph">${x.def.name}</span>
-        <h2>${esc(nameOf(s))}</h2>
-        <span class="q">${qty(s)}</span>
-        <div class="facts"><span>${dots(INT[s.inten].lv)}${INT[s.inten].label}</span><span>${restText(s)}</span><span>约 ${Math.max(1, Math.round(x.secs / 60))} 分钟</span></div>
-      </div>
-      <div class="panel steps">
-        <div><span class="label">怎么游</span><p>${esc(plainText(s))}。</p></div>
-        <div><span class="label">用多大力</span><p>${INT[s.inten].label}：${INT_DESC[s.inten]}。</p></div>
-        <div><span class="label">动作要点</span><p>${esc(s.tip)}。</p></div>${more}
-      </div>
-      <div class="field"><span class="label">调整</span>
-        <div class="stepper"><button data-act="dec" aria-label="减少">−</button><span>${stepText(s)}</span><button data-act="inc" aria-label="增加">＋</button></div></div>
-      ${optListHtml(x)}`;
+    const atMin = comp ? (x.opt.roundsAdj ? s.outer <= 1 : x.sets.every(e => e.n <= 1)) : s.ladder ? s.rounds <= 1 : (s.adjust === "d" || s.n === 1) ? s.d <= P0 : s.n <= 1;
+    const stepLabel = comp ? (x.opt.roundsAdj ? `${s.outer} 轮` : `每段组数 ${x.r.adj >= 0 ? "+" : ""}${x.r.adj}`) : stepText(s);
+    return topBar(x.def.name, "plan") + detailTop(x) + `
+      <div class="sec"><b>调整</b></div>
+      <div class="stepper"><button data-act="dec" ${atMin ? "disabled" : ""} aria-label="减少">−</button><span>${stepLabel}</span><button data-act="inc" aria-label="增加">＋</button></div>
+      ${isMain && st.length > 1 ? `<div class="sec"><b>主项泳姿</b></div><div class="chips">${st.map(v => `<button class="chip${v === S.ms ? " on" : ""}" data-act="ms" data-v="${v}">${v}</button>`).join("")}</div>` : ""}
+      <div class="sec"><b>换一个练法</b><span>${x.opts.length} 种</span></div>
+      <div class="card list">${opts}</div>
+      <button class="btn danger" data-act="del">${S.confirm === x.r.id ? "再点一次确认删除" : "删除这一项"}</button>`;
+  },
+
+  setup() {
+    const d = S.draft;
+    const seg = (k, items) => `<div class="choose">${items.map(([v, l]) => `<button class="${d[k] == v ? "on" : ""}" data-act="set" data-k="${k}" data-v="${v}">${l}</button>`).join("")}</div>`;
+    return topBar("安排训练", S.setupBack || "plans") + `
+      <div class="sec first"><b>今天游多久</b></div>${seg("time", [[30, "30 分"], [45, "45 分"], [60, "60 分"], [90, "90 分"]])}
+      <div class="sec"><b>今天练什么</b></div>${seg("focus", [["endurance", "耐力"], ["speed", "速度"], ["technique", "技术"]])}
+      <div class="sec"><b>今天游哪些泳姿</b></div><div class="chips">${STROKES.map(s => `<button class="chip${d.strokes.includes(s) ? " on" : ""}" data-act="stroke" data-v="${s}">${s}</button>`).join("")}</div>
+      <div class="sec"><b>器材</b><span>不选就不安排需要器材的练法</span></div><div class="chips">${EQUIP.map(e => `<button class="chip${d.equip.includes(e) ? " on" : ""}" data-act="equip" data-v="${e}">${e}</button>`).join("")}</div>
+      <button class="go" data-act="gen">生成课表</button>`;
   },
 
   done() {
-    const p = compute();
+    const p = compute(), r = S.rpe, pct = S.pct == null ? 100 : S.pct;
+    const lab = r == null ? "选一个分数" : r <= 3 ? "很轻松" : r <= 5 ? "适中" : r <= 7 ? "有点累" : r <= 8 ? "很累" : "累到极限";
+    const got = Math.round(p.dist * pct / 100 / S.o.pool) * S.o.pool;
     return topBar("完成训练", "plan") + `
-      <div class="panel"><span class="label">日期</span><input class="input" type="date" id="dDate" value="${ymd(new Date())}">
-        <span class="label">实际游了多少码</span><input class="input num" type="number" inputmode="numeric" id="dDist" value="${p.dist}" min="0" step="25">
-        <span class="label">备注（可不填）</span><textarea class="input" id="dNote" maxlength="200" placeholder="比如：最后两组没游完，肩膀有点酸"></textarea></div>
-      <button class="pb green full" data-act="log">记到日历里</button>`;
+      <div class="dhero"><small>辛苦了</small><h2>今天游得怎么样?</h2></div>
+      <div class="sec first"><b>完成了多少</b><span id="pctLab" class="num">${pct}% · 约 ${got.toLocaleString()} ${unitOf()}</span></div>
+      <input class="range" type="range" id="dPct" min="0" max="100" step="5" value="${pct}" data-plan="${p.dist}" data-pool="${S.o.pool}" style="--v:${pct}%" aria-label="完成度">
+      <div class="rpel"><span>0%</span><span>50%</span><span>全部完成</span></div>
+      <div class="sec"><b>整体有多累</b><span>${lab}</span></div>
+      <div class="rpe">${Array.from({ length: 11 }, (_, i) => `<button class="${r === i ? "on" : ""}" data-act="rpe" data-v="${i}">${i}</button>`).join("")}</div>
+      <div class="rpel"><span>0 完全不累</span><span>10 累到极限</span></div>
+      <div class="sec"><b>日期</b></div><input class="input" type="date" id="dDate" value="${S.dDate || todayStr()}">
+      <div class="sec"><b>备注</b><span>可以不填</span></div>
+      <textarea class="input" id="dNote" maxlength="200" placeholder="比如：最后两组没游完，肩膀有点酸">${esc(S.dNote || "")}</textarea>
+      <button class="go" data-act="log">记下来</button>
+      <p class="hint center">完成度和累度都会影响下一次的推荐：没游完或太累就少排一点。</p>`;
   },
 
-  favs() {
-    const items = S.favs.map(f => S.renaming === f.id
-      ? `<div class="li"><input class="input" id="rn" maxlength="30" value="${esc(f.name)}"><button class="side" data-act="renameOk" data-id="${f.id}" style="min-height:44px;color:var(--aqua);font-weight:700">保存</button></div>`
-      : `<div class="li"><button class="grow" style="text-align:left" data-act="loadFav" data-id="${f.id}"><b>${esc(f.name)}</b><small>${f.dist} 码 · 约 ${f.mins} 分钟 · ${condText(f.cfg.o)}</small></button>
-      <button class="side" data-act="rename" data-id="${f.id}" style="min-height:44px;color:var(--aqua)">改名</button>
-      <button class="side" data-act="delFav" data-id="${f.id}" style="min-height:44px;color:var(--rope)">${S.confirm === f.id ? "确认删除" : "删除"}</button></div>`).join("");
-    return topBar("我的收藏") + (items ? `<div class="list">${items}</div>` : `<p class="empty-note">还没有收藏。在课表页点「收藏」，喜欢的课表就会存在这里。</p>`);
-  },
-
-  cal() {
-    const [y, m] = S.calMonth.split("-").map(Number);
-    const first = new Date(y, m - 1, 1), days = new Date(y, m, 0).getDate(), lead = (first.getDay() + 6) % 7;
-    const byDay = {}; for (const l of S.logs) (byDay[l.date] = byDay[l.date] || []).push(l);
-    const mk = `${y}-${String(m).padStart(2, "0")}`;
-    const monthLogs = S.logs.filter(l => l.date.startsWith(mk));
-    const w = weekStats(), today = ymd(new Date());
-    let cells = "一二三四五六日".split("").map(d => `<span class="wd">${d}</span>`).join("");
-    for (let i = 0; i < lead; i++) cells += `<span class="day empty"></span>`;
-    for (let d = 1; d <= days; d++) {
-      const key = `${mk}-${String(d).padStart(2, "0")}`, list = byDay[key] || [];
-      const dist = list.reduce((a, l) => a + l.dist, 0);
-      const lv = dist ? Math.min(4, 1 + Math.floor(dist / 1000)) : 0;
-      cells += `<button class="day${list.length ? " has" : ""}${key === today ? " today" : ""}" style="--lv:${lv}" data-act="day" data-d="${key}"><span>${d}</span>${dist ? `<small>${dist}</small>` : ""}</button>`;
-    }
-    return topBar("训练日历") + `
-      <div class="stats"><div class="stat"><b>${w.dist}</b><small>本周 · ${w.n} 次</small></div><div class="stat"><b>${monthLogs.reduce((a, l) => a + l.dist, 0)}</b><small>${m} 月 · ${monthLogs.length} 次</small></div></div>
-      <div class="mon"><button data-act="mon" data-d="-1" aria-label="上个月">‹</button><b>${y} 年 ${m} 月</b><button data-act="mon" data-d="1" aria-label="下个月">›</button></div>
-      <div class="cal">${cells}</div>
-      ${S.logs.length ? "" : `<p class="empty-note">游完之后在课表页点「完成训练」，这里就会记下来。</p>`}`;
+  hist() {
+    const seg = S.seg.hist || "log";
+    return topBar("记录") + segs("hist", [["log", "训练记录"], ["stat", "训练统计"], ["trend", "进步趋势"]]) + (seg === "log" ? histLog() : seg === "stat" ? histStat() : histTrend());
   },
 
   day() {
-    const list = S.logs.filter(l => l.date === S.day);
-    const [y, m, d] = S.day.split("-").map(Number);
-    const items = list.map(l => `<div class="panel entry">
-        <b>${l.dist} 码 · ${FOCUS[l.cfg.o.focus]} · 计划约 ${l.mins} 分钟</b>
-        ${l.note ? `<span>${esc(l.note)}</span>` : ""}
-        <ul>${l.lines.map(x => `<li>${esc(x)}</li>`).join("")}</ul>
-        <div class="two"><button class="btn alt" data-act="again" data-id="${l.id}">再练一次</button><button class="btn warn" data-act="delLog" data-id="${l.id}">${S.confirm === l.id ? "确认删除" : "删除记录"}</button></div>
-      </div>`).join("");
-    return topBar(`${m} 月 ${d} 日`, "cal") + (items || `<p class="empty-note">这一天没有训练记录。</p>`);
-  }
+    const list = S.logs.filter(l => l.date === S.day), [, m, d] = S.day.split("-").map(Number);
+    return topBar(`${m} 月 ${d} 日`, "hist") + (list.length ? list.map(l => `<div class="card info">
+        <div class="flexrow"><b>${FOCUS[focusOf(l)]}课 · ${l.dist.toLocaleString()} ${unitOf()}</b><span class="muted">${l.rpe != null ? `累 ${l.rpe}/10` : ""}</span></div>
+        ${l.note ? `<p>${esc(l.note)}</p>` : ""}
+        <ul class="ul">${l.lines.map(x => `<li>${esc(x)}</li>`).join("")}</ul>
+        <div class="two"><button class="btn soft" data-act="again" data-id="${l.id}">再练一次</button><button class="btn soft red" data-act="delLog" data-id="${l.id}">${S.confirm === l.id ? "确认删除" : "删除记录"}</button></div></div>`).join("")
+      : `<div class="card empty">这一天没有训练记录。</div>`);
+  },
+
+  me() {
+    const pr = P(), U = unitOf();
+    const paces = (pr.strokes.length ? pr.strokes : ["自由泳"]).map(s => `${s} ${fmtPace(strokePace({ unit: U }, s))}${pr.pace[s] ? "" : "(估计)"}`).join(" · ");
+    const row = (k, label, val) => `<button class="li" data-act="editQ" data-q="${k}"><span class="g"><small>${label}</small><b>${val}</b></span><span class="chev">›</span></button>`;
+    return topBar("我的") + (pr.onboarded ? "" : `<button class="card invite" data-act="redoQuiz"><b>填一下你的游泳档案</b><small>6 个问题，大概 30 秒。填完以后，推荐的课表会更适合你。</small><span class="go small">开始填写</span></button>`) + `
+      <div class="sec ${pr.onboarded ? "first" : ""}"><b>我的游泳档案</b><span>${pr.onboarded ? "推荐会按这些来排" : "现在用的是默认值"}</span></div>
+      <div class="card list">
+        ${row("goal", "目标", GOALS[pr.goal])}
+        ${row("level", "现在能连续游", LEVELS[pr.level][0] + " " + U)}
+        ${row("strokes", "会的泳姿", pr.strokes.join("、") || "还没选")}
+        ${row("speed", "每 100 " + U + " 大概多久", paces)}
+        ${row("weekly", "每周", `${pr.weekly} 次 · 每次 ${pr.minutes} 分钟`)}
+      </div>
+      <div class="sec"><b>训练偏好</b></div>
+      <div class="card list">
+        <div class="li col"><span class="g"><small>常带的器材</small></span><div class="chips">${EQUIP.map(e => `<button class="chip${pr.equip.includes(e) ? " on" : ""}" data-act="prefEquip" data-v="${e}">${e}</button>`).join("")}</div></div>
+      </div>
+      <div class="sec"><b>单位设置</b></div>
+      <div class="card list">${row("pool", "常用泳池", POOLS[pr.pool][0] + " " + POOLS[pr.pool][1])}</div>
+      <div class="sec"><b>应用设置</b></div>
+      <div class="card list">
+        <button class="li" data-act="redoQuiz"><span class="g"><b>${pr.onboarded ? "重新做一遍问卷" : "做问卷"}</b></span><span class="chev">›</span></button>
+        <button class="li" data-act="wipe"><span class="g"><b class="red">${S.confirm === "wipe" ? "再点一次，清除所有数据" : "清除所有数据"}</b><small>训练记录、收藏和档案都会删掉</small></span></button>
+        <div class="li"><span class="g"><small>版本</small><b>泳池课表 ${VERSION}</b></span></div>
+      </div>
+      ${!TEST_TOOLS ? "" : `<div class="sec"><b>测试模式</b><span>模拟一周，看推荐怎么变</span></div>
+      <div class="card list">
+        <button class="li toggle" data-act="testToggle"><span class="g"><b>测试模式</b><small>${S.testMode ? `已打开，App 里的“今天”是 ${nowDate().getMonth() + 1} 月 ${nowDate().getDate()} 日` : "打开后可以一天一天往后模拟"}</small></span><span class="sw${S.testMode ? " on" : ""}"><i></i></span></button>
+        ${S.testMode ? `<button class="li" data-act="nextDay"><span class="g"><b>下一天</b><small>App 当成过了一天，推荐和打卡都会变</small></span><span class="chev">›</span></button>
+        <button class="li" data-act="realDay"><span class="g"><b>回到真实日期</b><small>测试记录会保留，直到你清除</small></span><span class="chev">›</span></button>` : ""}
+        <button class="li" data-act="clearTest"><span class="g"><b class="red">${S.confirm === "clearTest" ? "再点一次确认" : "清除测试记录"}</b><small>只删测试模式下记的 ${S.logs.filter(l => l.test).length} 条，真实记录不动</small></span></button>
+      </div>`}
+      <p class="hint center">所有数据只存在这台手机里。</p>`;
+  },
+
+  past() {
+    const l = S.logs.find(x => x.id === S.pastId);
+    if (!l) { S.view = "hist"; return V.hist(); }
+    const [, m, d] = l.date.split("-").map(Number), U = unitOf();
+    return withCfg(l.cfg, () => {
+      const p = compute();
+      return topBar(`${m} 月 ${d} 日`, "hist") + `
+        <div class="sum"><div><b class="num">${l.dist.toLocaleString()}</b><small>${U}</small></div><div><b class="num">${pctOf(l)}%</b><small>完成</small></div><div><b class="num">${l.rpe != null ? l.rpe : "—"}</b><small>累度</small></div></div>
+        <p class="hint plan-hint">${FOCUS[focusOf(l)]}课 · 计划 ${p.dist.toLocaleString()} ${U}、约 ${l.mins || p.mins} 分钟${l.note ? "。备注：" + esc(l.note) : ""}。点任意一项看当时怎么练。</p>
+        <div class="card list lane">${laneRows(p, false)}<div class="add end"></div></div>
+        <div class="two"><button class="btn soft red" data-act="delLog" data-id="${l.id}">${S.confirm === l.id ? "再点一次确认" : "删除记录"}</button><button class="btn" data-act="again" data-id="${l.id}">再练一次</button></div>`;
+    });
+  },
+  pastDetail() {
+    const l = S.logs.find(x => x.id === S.pastId);
+    if (!l) { S.view = "hist"; return V.hist(); }
+    return withCfg(l.cfg, () => {
+      const p = compute(), x = p.rows[S.pastIdx] || p.rows[0];
+      return topBar(x.def.name, "past") + detailTop(x) + `<button class="go" data-act="again" data-id="${l.id}">把这份课表再练一次</button>`;
+    });
+  },
+
+  quiz() { return quizView(); }
 };
 
-function todayCard() {
-  if (!S.rows.length) return "";
-  const p = compute();
-  const items = p.rows.map((x, i) => `<li><span>${i + 1}. ${x.def.name}</span><span class="num">${qtyPlain(x.sets[0])}</span></li>`).join("");
-  return `<div class="sec-title"><span>当前课表</span><button data-go="plan">去看 ›</button></div>
-    <div class="list today-card" data-go="plan" role="button" tabindex="0"><span class="tc-h"><b class="num">${p.dist} 码</b><span>约 ${p.mins} 分钟 · ${FOCUS[S.o.focus]}</span></span><ul>${items}</ul></div>`;
+function testBanner() {
+  if (!TEST_TOOLS || !S.testMode) return "";
+  const d = nowDate();
+  return `<div class="testbar"><span>测试模式：今天是 ${d.getMonth() + 1} 月 ${d.getDate()} 日</span><button data-act="nextDay">下一天 ›</button></div>`;
 }
-function recentLogs() {
-  const l = [...S.logs].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 3);
-  if (!l.length) return "";
-  return `<div class="sec-title"><span>最近训练</span><button data-go="cal">日历 ›</button></div><div class="list">${l.map(x => {
-    const [, m, d] = x.date.split("-").map(Number);
-    return `<button class="li" data-act="day" data-d="${x.date}"><span class="grow"><b>${m} 月 ${d} 日 · ${FOCUS[x.cfg.o.focus]}</b><small>${x.note ? esc(x.note) : `计划约 ${x.mins} 分钟`}</small></span><span class="side num">${x.dist} 码</span><span class="chev">›</span></button>`;
-  }).join("")}</div>`;
+function logRow(l) {
+  const [, m, d] = l.date.split("-").map(Number), f = focusOf(l);
+  const feel = l.rpe == null ? "" : ` · ${l.rpe <= 3 ? "很轻松" : l.rpe <= 5 ? "刚好" : l.rpe <= 7 ? "有点累" : "很累"}`;
+  return `<button class="li" data-act="day" data-d="${l.date}"><span class="badge" style="color:${FCOLOR[f]}">${m}/${d}</span><span class="g"><b>${FOCUS[f]}课</b><small>${l.mins || "—"} 分钟${feel}</small></span><span class="num">${l.dist.toLocaleString()}</span></button>`;
 }
-function compositeDetail(x) {
-  const s0 = x.sets[0], P = S.o.pool;
-  const segs = x.sets.map((s, i) => `<li><b>${s.n > 1 ? s.n + "×" : ""}${s.d}${s.label ? " " + esc(s.label) : ""}</b>
-      <span>${s.d / P} 趟${s.n > 1 ? ` · @${fmtPace(sendoff(s))} 出发` : ""} · 歇 ${s.rest} 秒 · ${INT[s.inten].label}${s.stroke !== x.opt.sub ? " · " + esc(s.stroke) : ""}</span></li>`).join("");
-  const opts = optListHtml(x);
-  return topBar(x.def.name, "plan") + `
-    <div class="hero">
-      <span class="ph">${x.def.name}${x.opt.src ? " · 组合主项 · 来自 USMS / Swim England 公开课表" : ` · 分 ${s0.outer} 轮`}</span>
-      <h2>${esc(x.opt.title)} · ${esc(x.opt.sub)}</h2>
-      <span class="q">${s0.outer > 1 ? `${s0.outer} 轮<small>共 ${x.dist} 码</small>` : `${x.dist}<small>码</small>`}</span>
-      <div class="facts"><span>约 ${Math.max(1, Math.round(x.secs / 60))} 分钟</span>${s0.outer > 1 ? "<span>每轮之间多歇 20 秒左右</span>" : ""}</div>
-    </div>
-    <div class="panel steps">
-      <div><span class="label">${s0.outer > 1 ? "每一轮按顺序游" : "按顺序游"}</span><ol class="segs">${segs}</ol></div>
-      <div><span class="label">要点</span><p>${esc(s0.tip)}。</p></div>
-      <div><span class="label">强度说明</span><p>${[...new Set(x.sets.map(s => s.inten))].map(k => `${INT[k].label}：${INT_DESC[k]}`).join("<br>")}。</p></div>
-    </div>
-    <div class="field"><span class="label">调整</span>
-      <div class="stepper"><button data-act="dec" aria-label="减少">−</button><span>${x.opt.roundsAdj ? `${s0.outer} 轮` : `每段组数 ${x.r.adj > 0 ? "+" : ""}${x.r.adj}`}</span><button data-act="inc" aria-label="增加">＋</button></div></div>
-    ${opts}`;
-}
-function optListHtml(x) {
-  const t = tools(S.o);
-  const st = strokesOf(S.o), isMain = x.r.type === "main" || x.r.type === "extra";
-  const chips = isMain && st.length > 1 ? `<div class="field"><span class="label">主项泳姿</span><div class="chips">${st.map(v =>
-    `<button class="chip" data-act="ms" data-v="${v}" aria-pressed="${v === S.ms}">${v}</button>`).join("")}</div></div>` : "";
-  const items = x.opts.map(op => {
-    const total = op.sets.reduce((a, s) => a + finishSet({ ...s }, t).total, 0);
-    const q = op.composite ? (op.outer > 1 ? `${op.outer} 轮 · ${total} 码` : `${total} 码`) : qtyPlain(finishSet({ ...op.sets[0] }, t));
-    return `<button class="li" data-act="pick" data-key="${esc(op.key)}" aria-pressed="${op.key === x.r.key}"><span class="grow"><b>${esc(op.title)}${op.composite ? ' <em class="tag">组合</em>' : ""}</b><small>${esc(op.sub || op.sets[0].stroke)}</small></span><span class="side num">${q}</span></button>`;
+function dayDetail(key) {
+  const list = S.logs.filter(l => l.date === key), [, m, d] = key.split("-").map(Number);
+  const head = `<div class="sec"><b>${m} 月 ${d} 日${key === todayStr() ? " · 今天" : ""}</b><span>${list.length ? list.length + " 次训练" : ""}</span></div>`;
+  if (!list.length) return head + `<div class="card empty">这一天没有训练。${key === todayStr() ? "游完点“完成训练”就会记在这里。" : ""}</div>`;
+  return head + list.map(l => {
+    const p = withCfg(l.cfg, () => compute());
+    const lab = `完成 ${pctOf(l)}%${l.rpe != null ? ` · 累度 ${l.rpe}/10` : ""}${l.note ? " · " + l.note : ""}`;
+    return planCard({ ...p, dist: l.dist }, l.cfg.o, { label: esc(lab), attrs: `data-act="past" data-id="${l.id}"`,
+      foot: `<div class="pc-foot"><button class="txt" data-act="past" data-id="${l.id}">查看课表 ›</button><button class="txt" data-act="again" data-id="${l.id}">再练一次</button></div>` });
   }).join("");
-  return `${chips}<div class="field"><span class="label">换一个练法 · ${x.opts.length} 种</span><div class="list opts">${items}</div></div>`;
 }
-function recCard() {
-  const r = recommend();
-  return `<button class="quick" data-act="recGo" data-v="${r.focus}"><span><b>今日推荐：${FOCUS[r.focus]}</b><small>${r.why}</small></span><b class="go">按推荐生成 ›</b></button>`;
+function histLog() {
+  const [y, m] = S.calMonth.split("-").map(Number), first = new Date(y, m - 1, 1), days = new Date(y, m, 0).getDate(), lead = (first.getDay() + 6) % 7;
+  const mk = `${y}-${String(m).padStart(2, "0")}`, byDay = {}; S.logs.forEach(l => (byDay[l.date] = byDay[l.date] || []).push(l));
+  const today = todayStr(), sel = S.selDay || today;
+  let cells = "一二三四五六日".split("").map(d => `<span class="wd">${d}</span>`).join("");
+  for (let i = 0; i < lead; i++) cells += `<span></span>`;
+  for (let d = 1; d <= days; d++) {
+    const key = `${mk}-${String(d).padStart(2, "0")}`;
+    cells += `<button class="day${byDay[key] ? " has" : ""}${key === today ? " today" : ""}${key === sel ? " sel" : ""}" data-act="day" data-d="${key}" aria-pressed="${key === sel}">${d}</button>`;
+  }
+  const month = S.logs.filter(l => l.date.startsWith(mk));
+  return `<div class="card"><div class="mon"><button data-act="mon" data-d="-1" aria-label="上个月">‹</button><b>${y} 年 ${m} 月</b><button data-act="mon" data-d="1" aria-label="下个月">›</button></div><div class="cal">${cells}</div>
+      <p class="hint center">这个月游了 ${month.length} 次，共 ${month.reduce((a, l) => a + l.dist, 0).toLocaleString()} ${unitOf()}</p></div>
+    ${dayDetail(sel)}`;
 }
-function tipCard() {
-  const t = dailyTip();
-  return `<div class="tip-card"><span class="label">今日小贴士 · ${t.st}</span><b>${esc(t.n)}</b><p>${esc(t.t)}。</p></div>`;
+function histStat() {
+  const U = unitOf(), w = weekLogs(), m30 = logsIn(30);
+  const sum = (a, k) => a.reduce((s, l) => s + (l[k] || 0), 0);
+  const rpes = m30.filter(l => l.rpe != null), avgR = rpes.length ? (rpes.reduce((a, l) => a + l.rpe, 0) / rpes.length).toFixed(1) : "—";
+  const cnt = { endurance: 0, technique: 0, speed: 0 }; m30.forEach(l => cnt[focusOf(l)]++);
+  const tot = Math.max(1, m30.length), tgt = TARGET[P().goal];
+  return `<div class="tiles">
+      <div class="tl"><small>本周</small><b class="num">${sum(w, "dist").toLocaleString()}</b><em>${U} · ${w.length} 次</em></div>
+      <div class="tl"><small>近 30 天</small><b class="num">${sum(m30, "dist").toLocaleString()}</b><em>${U} · ${m30.length} 次</em></div>
+      <div class="tl"><small>平均累度</small><b class="num">${avgR}</b><em>满分 10</em></div></div>
+    <div class="sec"><b>近 30 天练了什么</b><span>灰线是你目标的建议比例</span></div>
+    <div class="card"><div class="bal">${FOCI.map(f => `<div class="bl"><span>${FOCUS[f]}</span><div class="tr"><i style="width:${cnt[f] / tot * 100}%;background:${FCOLOR[f]}"></i><u style="left:${tgt[f] * 100}%"></u></div><b class="num">${cnt[f]}</b></div>`).join("")}</div>
+      <p class="hint">目标是“${GOALS[P().goal]}”，建议耐力 ${Math.round(tgt.endurance * 100)}%、技术 ${Math.round(tgt.technique * 100)}%、速度 ${Math.round(tgt.speed * 100)}%。</p></div>
+    <div class="sec"><b>训练量</b><span>累度 × 分钟，最近 7 天</span></div>
+    ${(() => { const L = loadInfo(); if (!L) return `<div class="card empty">暂时算不出训练量。</div>`;
+      return `<div class="card"><div class="flexrow"><span class="muted">最近 7 天</span><b class="num">${L.thisWeek}</b></div>
+        <div class="flexrow" style="margin-top:8px"><span class="muted">再往前 7 天</span><b class="num">${L.lastWeek}</b></div>
+        ${L.changePct != null ? `<div class="flexrow" style="margin-top:8px"><span class="muted">变化</span><b class="num">${L.changePct > 0 ? "+" : ""}${L.changePct}%</b></div>` : ""}
+        <p class="hint">${L.warning ? esc(L.warning) + "。" : "增长很平稳。"}每周加量最好不超过 10%，突然加太多容易受伤。</p></div>`; })()}`;
 }
-function cfgKey(c) { return JSON.stringify([c.o, c.ms, c.rows.map(r => [r.type, r.key, r.adj])]); }
-function isSaved() { const k = cfgKey(cfg()); return S.favs.some(f => cfgKey(f.cfg) === k); }
+function histTrend() {
+  const weeks = [], now = nowDate(), mon = new Date(now.getFullYear(), now.getMonth(), now.getDate() - (now.getDay() + 6) % 7);
+  for (let i = 7; i >= 0; i--) {
+    const a = new Date(mon); a.setDate(a.getDate() - i * 7); const b = new Date(a); b.setDate(b.getDate() + 6);
+    const A = ymd(a), Bd = ymd(b), ls = S.logs.filter(l => l.date >= A && l.date <= Bd);
+    weeks.push({ label: `${a.getMonth() + 1}/${a.getDate()}`, dist: ls.reduce((s, l) => s + l.dist, 0), n: ls.length });
+  }
+  const max = Math.max(1000, ...weeks.map(w => w.dist)), step = max > 6000 ? 2000 : 1000, top = Math.ceil(max / step) * step;
+  const W = 340, H = 190, L = 34, Bt = 24, bw = (W - L) / weeks.length;
+  let svg = `<svg viewBox="0 0 ${W} ${H + Bt}" class="chart" role="img" aria-label="最近 8 周每周游的距离">`;
+  for (let v = 0; v <= top; v += step) { const y = H - v / top * (H - 10); svg += `<line x1="${L}" x2="${W}" y1="${y}" y2="${y}" class="gl"/><text x="${L - 6}" y="${y + 4}" text-anchor="end" class="tx">${v >= 1000 ? v / 1000 + "k" : v}</text>`; }
+  weeks.forEach((w, i) => {
+    const h = w.dist / top * (H - 10), x = L + i * bw + bw * .2;
+    svg += `<rect x="${x}" y="${H - h}" width="${bw * .6}" height="${Math.max(h, 0)}" rx="5" class="${i === weeks.length - 1 ? "cur" : "bar"}"/>`;
+    svg += `<text x="${x + bw * .3}" y="${H + 16}" text-anchor="middle" class="tx">${w.label}</text>`;
+  });
+  svg += `</svg>`;
+  const recentP = Object.keys(P().pace).length;
+  return `<div class="sec first"><b>最近 8 周的距离</b><span>${unitOf()}</span></div><div class="card">${svg}</div>
+    <div class="sec"><b>速度</b></div><div class="card"><p class="hint" style="margin:0">${recentP ? `你现在的速度：${P().strokes.map(s => `${s} ${fmtPace(strokePace({ unit: unitOf() }, s))}`).join("、")}。用手机秒表测了新成绩，到“我的”里更新，就能看到自己变快了多少。` : "到“我的”里填上每个泳姿游 100 的时间，以后就能看到自己的速度变化。"}</p></div>`;
+}
 
-function fmtPace(sec) { sec = Math.round(sec); return `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, "0")}`; }
-function unitize(str) { return S.o && S.o.unit === "米" ? str.replace(/码/g, "米") : str; }
-function applyPool() {
-  const [len, u] = POOLS[S.prefs.pool];
-  for (const o of [S.o, S.draft]) if (o) { o.pool = len; o.unit = u; }
+// ---------- 问卷 ----------
+const QUIZ = ["pool", "goal", "level", "strokes", "speed", "weekly"];
+function quizView() {
+  const k = QUIZ[S.qi], d = S.qd, U = POOLS[d.pool][1], editing = S.qEdit;
+  const opt = (field, v, l, sub = "") => `<button class="qopt${d[field] === v ? " on" : ""}" data-act="qpick" data-f="${field}" data-v="${v}"><b>${l}</b>${sub ? `<small>${sub}</small>` : ""}</button>`;
+  let title = "", body = "", multi = false;
+  if (k === "pool") { title = "平时在哪种泳池游?"; body = Object.entries(POOLS).map(([v, [len, u]]) => opt("pool", v, `${len} ${u}`)).join(""); }
+  if (k === "goal") { title = "游泳是为了什么?"; body = Object.entries(GOALS).map(([v, l]) => opt("goal", v, l, { fit: "保持健康，轻松一点", endur: "游得更久、更远", stroke: "把动作练标准", team: "为入队测试做准备" }[v])).join(""); }
+  if (k === "level") { title = "现在能连续游多远?"; body = Object.entries(LEVELS).map(([v, [l]]) => opt("level", v, `${l} ${U}`)).join(""); }
+  if (k === "strokes") { multi = true; title = "会哪些泳姿?"; body = `<div class="qgrid">${STROKES.map(s => `<button class="qopt${d.strokes.includes(s) ? " on" : ""}" data-act="qstroke" data-v="${s}"><b>${s}</b></button>`).join("")}</div>`; }
+  if (k === "speed") {
+    multi = true; title = `游 100 ${U}大概多久?`;
+    body = (d.strokes.length ? d.strokes : ["自由泳"]).map(s => `<div class="qrow"><b>${s}</b><div class="chips">${SPEEDS.map(([v, l]) => `<button class="chip${d.pace[s] === v ? " on" : ""}" data-act="qspeed" data-s="${s}" data-v="${v}">${l}</button>`).join("")}<button class="chip${d.pace[s] == null ? " on" : ""}" data-act="qspeed" data-s="${s}" data-v="">不清楚</button></div></div>`).join("")
+      + `<p class="hint">不清楚的会按其他泳姿和你的水平推算，以后可以在“我的”里改。</p>`;
+  }
+  if (k === "weekly") {
+    multi = true; title = "一周大概游几次，每次多久?";
+    body = `<div class="qrow"><b>每周</b><div class="chips">${[1, 2, 3, 4].map(n => `<button class="chip${d.weekly === n ? " on" : ""}" data-act="qset" data-f="weekly" data-v="${n}">${n === 4 ? "4 次以上" : n + " 次"}</button>`).join("")}</div></div>
+      <div class="qrow"><b>每次</b><div class="chips">${[30, 45, 60, 90].map(n => `<button class="chip${d.minutes === n ? " on" : ""}" data-act="qset" data-f="minutes" data-v="${n}">${n} 分钟</button>`).join("")}</div></div>`;
+  }
+  if (S.qi >= QUIZ.length) {
+    return `<div class="qtop"><span></span></div><div class="qbody"><small class="muted">你的游泳档案</small><h2 class="qt">都准备好了</h2>
+      <div class="card list">${[["目标", GOALS[d.goal]], ["能连续游", LEVELS[d.level][0] + " " + U], ["会的泳姿", d.strokes.join("、") || "自由泳"], ["每周", `${d.weekly} 次 · ${d.minutes} 分钟`], ["泳池", POOLS[d.pool][0] + " " + U]].map(([a, b]) => `<div class="li"><span class="g"><small>${a}</small><b>${b}</b></span></div>`).join("")}</div>
+      <p class="hint">这些随时可以在“我的”里改。</p></div>
+      <button class="go" data-act="qfinish">生成我的第一份课表</button>`;
+  }
+  const prog = editing ? "" : `<div class="qprog"><i style="width:${(S.qi + 1) / QUIZ.length * 100}%"></i></div>`;
+  return `<div class="qtop">${editing || S.qi === 0 ? `<button class="back" data-act="qcancel">${editing ? "取消" : "返回"}</button>` : `<button class="back" data-act="qback">上一题</button>`}
+      ${editing ? "" : `<button class="txt" data-act="qskip">跳过</button>`}</div>${prog}
+    <div class="qbody"><small class="muted">${editing ? "修改档案" : `第 ${S.qi + 1} 题，共 ${QUIZ.length} 题`}</small><h2 class="qt">${title}</h2><div class="qopts">${body}</div></div>
+    ${multi || editing ? `<button class="go" data-act="qnext">${editing ? "保存" : "下一步"}</button>` : ""}`;
+}
+function startQuiz(edit) {
+  S.qd = JSON.parse(JSON.stringify(P())); if (!S.qd.pace) S.qd.pace = {};
+  S.qEdit = edit || null; S.qi = edit ? QUIZ.indexOf(edit) : 0; S.qFrom = S.view; go("quiz");
+}
+function quizNext() {
+  if (S.qEdit) { saveQuiz(); toast("已保存"); return go("me"); }
+  S.qi++; render(); window.scrollTo(0, 0);
+}
+function normPace(d) {   // 速度统一换成当前泳池的单位
+  const nu = POOLS[d.pool][1], pu = d.paceUnit || "码";
+  if (nu !== pu) Object.keys(d.pace).forEach(s => d.pace[s] = Math.round(convPace(d.pace[s], pu, nu)));
+  d.paceUnit = nu;
+}
+function saveQuiz() {
+  const d = S.qd; if (!d.strokes.length) d.strokes = ["自由泳"];
+  normPace(d); S.profile = { ...P(), ...d };
 }
 
+// ---------- 渲染与导航 ----------
 function render() {
   const root = ROOTS.includes(S.view);
-  document.getElementById("app").innerHTML = unitize(VIEWS[S.view]() + (root ? tabs() : ""));
+  const html = V[S.view]() + (root ? tabs() : "");
+  APP.innerHTML = S.view === "quiz" ? html : unitize(html);
   document.body.classList.toggle("has-tabs", root);
+  document.body.classList.toggle("has-bar", S.view === "plan");
   save();
 }
 function go(v) {
   const from = S.view;
-  if (from === "plan") S.planScroll = window.scrollY || 0;   // 记住课表看到哪里
-  S.view = v; S.confirm = null; S.renaming = null; S.swiped = null; S.editing = false; render();
+  if (from === "plan") S.planScroll = window.scrollY || 0;
+  S.view = v; S.confirm = null; S.renaming = null; S.swiped = null; render();
   window.scrollTo(0, v === "plan" && (from === "detail" || from === "done") ? (S.planScroll || 0) : 0);
 }
 let undoFn = null;
@@ -1293,51 +1783,48 @@ function toast(msg, undo) {
   undoFn = undo || null; t.hidden = false;
   clearTimeout(toast.t); toast.t = setTimeout(() => { t.hidden = true; undoFn = null; }, undo ? 4000 : 2200);
 }
-document.getElementById("toast").addEventListener("click", e => {
-  if (e.target.id === "undoBtn" && undoFn) { undoFn(); undoFn = null; document.getElementById("toast").hidden = true; render(); }
-});
-
-function save() { try { localStorage.setItem("swim2", JSON.stringify({ prefs: S.prefs, o: S.o, ms: S.ms, rows: S.rows, favs: S.favs, logs: S.logs })); } catch (e) {} }
+function save() {
+  try { localStorage.setItem("swim3", JSON.stringify({ testMode: S.testMode, dayOffset: S.dayOffset, profile: S.profile, o: S.o, ms: S.ms, rows: S.rows, planDate: S.planDate, planWhy: S.planWhy, planCustom: S.planCustom, favs: S.favs, logs: S.logs })); } catch (e) {}
+}
 function load() {
-  try {
-    const d = JSON.parse(localStorage.getItem("swim2") || "null");
-    if (d) { S.prefs = d.prefs; S.o = d.o; S.ms = d.ms; S.rows = d.rows || []; S.favs = d.favs || []; S.logs = d.logs || []; }
-  } catch (e) {}
-  if (!S.prefs) S.prefs = { ...DEFAULT_PREFS };
-  S.o = { ...DEFAULT_O, ...(S.o || {}) };
-  applyPool();
-  const n = new Date(); S.calMonth = `${n.getFullYear()}-${String(n.getMonth() + 1).padStart(2, "0")}`;
+  let d = null;
+  try { d = JSON.parse(localStorage.getItem("swim3") || "null"); } catch (e) {}
+  if (!d) {   // 从 2.0 搬过来：记录、收藏、泳池和速度
+    try {
+      const old = JSON.parse(localStorage.getItem("swim2") || "null");
+      if (old) {
+        d = { logs: old.logs || [], favs: old.favs || [], profile: { ...DEFAULT_PROFILE } };
+        if (old.prefs) { d.profile.pool = old.prefs.pool || "25y"; d.profile.paceUnit = old.prefs.paceUnit || "码"; if (old.prefs.pace && old.prefs.pace !== 95) d.profile.pace = { "自由泳": old.prefs.pace }; }
+      }
+    } catch (e) {}
+  }
+  d = d || {};
+  S.profile = { ...DEFAULT_PROFILE, ...(d.profile || {}) }; if (!S.profile.pace) S.profile.pace = {};
+  S.logs = d.logs || []; S.favs = d.favs || []; S.testMode = TEST_TOOLS && !!d.testMode; S.dayOffset = S.testMode ? (d.dayOffset || 0) : 0;
+  S.o = d.o ? { ...freshO("endurance"), ...d.o } : freshO("endurance");
+  S.ms = d.ms; S.rows = d.rows || []; S.planDate = d.planDate; S.planWhy = d.planWhy; S.planCustom = !!d.planCustom;
+  const n = nowDate(); S.calMonth = `${n.getFullYear()}-${String(n.getMonth() + 1).padStart(2, "0")}`;
 }
 
 // ---------- 左滑 ----------
 const APP = document.getElementById("app");
 let sw = null, justSwiped = false;
 APP.addEventListener("pointerdown", e => {
-  const row = e.target.closest(".swipe .row");
-  if (!row || S.editing) return;
-  const box = row.parentElement;
-  sw = { el: row, box, x: e.clientX, y: e.clientY, dx: 0, moved: false, base: box.classList.contains("open") ? -152 : 0 };
+  const row = e.target.closest(".swipe .row"); if (!row) return;
+  sw = { el: row, box: row.parentElement, x: e.clientX, y: e.clientY, dx: 0, moved: false, base: row.parentElement.classList.contains("open") ? -160 : 0 };
 });
 APP.addEventListener("pointermove", e => {
   if (!sw) return;
   const dx = e.clientX - sw.x, dy = e.clientY - sw.y;
-  if (!sw.moved) {
-    if (Math.abs(dx) < 8) return;
-    if (Math.abs(dy) > Math.abs(dx)) { sw = null; return; }
-    sw.moved = true; sw.el.classList.add("drag");
-  }
-  sw.dx = dx;
-  sw.el.style.transform = `translateX(${Math.max(-170, Math.min(0, sw.base + dx))}px)`;
+  if (!sw.moved) { if (Math.abs(dx) < 8) return; if (Math.abs(dy) > Math.abs(dx)) { sw = null; return; } sw.moved = true; sw.el.classList.add("drag"); }
+  sw.dx = dx; sw.el.style.transform = `translateX(${Math.max(-176, Math.min(0, sw.base + dx))}px)`;
 });
 function endSwipe() {
-  if (!sw) return;
-  const s = sw; sw = null;
-  if (!s.moved) return;
+  if (!sw) return; const s = sw; sw = null; if (!s.moved) return;
   s.el.classList.remove("drag"); s.el.style.transform = "";
   const open = s.base + s.dx < -60;
   APP.querySelectorAll(".swipe.open").forEach(b => { if (b !== s.box) b.classList.remove("open"); });
-  s.box.classList.toggle("open", open);
-  S.swiped = open ? s.box.dataset.id : null;
+  s.box.classList.toggle("open", open); S.swiped = open ? s.box.dataset.id : null;
   justSwiped = true; setTimeout(() => justSwiped = false, 60);
 }
 APP.addEventListener("pointerup", endSwipe);
@@ -1346,116 +1833,124 @@ APP.addEventListener("pointercancel", endSwipe);
 // ---------- 点击 ----------
 APP.addEventListener("click", e => {
   if (justSwiped) return;
-  const b = e.target.closest("[data-go],[data-act]"); if (!b) return;
-  if (b.dataset.go) return go(b.dataset.go);
-  const a = b.dataset.act, row = S.rows.find(r => r.id === S.cur);
+  const b = e.target.closest("[data-go],[data-act]"); if (!b || b.disabled) return;
+  if (b.dataset.go) { if (b.dataset.go === "plan") S.planBack = S.view === "plans" ? "plans" : S.planBack; return go(b.dataset.go); }
+  const a = b.dataset.act, row = S.rows.find(r => r.id === S.cur), dv = b.dataset.v;
   switch (a) {
-    case "start": S.draft = JSON.parse(JSON.stringify(S.o)); S.back = S.view === "plan" ? "plan" : "home"; return go("setup");
-    case "edit": S.draft = JSON.parse(JSON.stringify(S.o)); S.back = "plan"; return go("setup");
-    case "quick": newPlan(); toast("按上次的条件生成好了"); return go("plan");
-    case "set": S.draft[b.dataset.k] = isNaN(+b.dataset.v) ? b.dataset.v : +b.dataset.v; break;
-    case "stroke": { const v = b.dataset.v, l = S.draft.strokes; S.draft.strokes = l.includes(v) ? l.filter(x => x !== v) : [...l, v]; break; }
+    case "start":
+      if (!(S.rows.length && S.planDate === todayStr())) makeRecommended();
+      S.planBack = "home"; return go("plan");
+    case "newRec": makeRecommended(); S.planBack = "plans"; toast(`按推荐排好了${FOCUS[S.o.focus]}课`); return go("plan");
+    case "custom":
+      S.draft = JSON.parse(JSON.stringify(S.rows.length ? S.o : freshO(recommendFocus().focus)));
+      S.setupBack = S.view; return go("setup");
+    case "set": S.draft[b.dataset.k] = isNaN(+dv) ? dv : +dv; break;
+    case "stroke": { const l = S.draft.strokes; S.draft.strokes = l.includes(dv) ? l.filter(x => x !== dv) : [...l, dv]; break; }
+    case "equip": { const l = S.draft.equip || []; S.draft.equip = l.includes(dv) ? l.filter(x => x !== dv) : [...l, dv]; S.draft.useEquip = S.draft.equip.length > 0; break; }
     case "gen":
       if (!S.draft.strokes.length) S.draft.strokes = ["自由泳"];
-      if (S.draft.useEquip && !S.draft.equip.length) S.draft.useEquip = false;
-      S.o = S.draft; applyPool(); smartPlan(); return go("plan");
-    case "recGo": S.o.focus = b.dataset.v; applyPool(); smartPlan(); toast(`按推荐生成了${FOCUS[b.dataset.v]}课表`); return go("plan");
-    case "equipToggle": S.draft.useEquip = !S.draft.useEquip; if (S.draft.useEquip && !S.draft.equip) S.draft.equip = []; break;
-    case "equipItem": { const v = b.dataset.v, l = S.draft.equip || []; S.draft.equip = l.includes(v) ? l.filter(x => x !== v) : [...l, v]; break; }
-    case "goSettings": S.setBack = S.view; return go("settings");
-    case "setPool": {
-      const u = POOLS[b.dataset.v][1];
-      if (u !== S.prefs.paceUnit) { S.prefs.pace = Math.round(u === "米" ? S.prefs.pace * 1.0936 : S.prefs.pace / 1.0936); S.prefs.paceUnit = u; }
-      S.prefs.pool = b.dataset.v; applyPool(); toast(`泳池改成 ${POOLS[b.dataset.v][0]} ${u}`); break;
+      { const [len, u] = POOLS[P().pool]; S.draft.pool = len; S.draft.unit = u; }
+      S.o = S.draft; delete S.o.cap; smartPlan(); S.planDate = todayStr(); S.planWhy = ""; S.planCustom = true; S.planBack = S.setupBack === "plan" ? (S.planBack || "home") : "plans"; return go("plan");
+    case "seg": S.seg[b.dataset.k] = dv; S.confirm = null; break;
+    case "tpl": {
+      const c = COMPOSITES.find(x => x.key === b.dataset.key);
+      S.o = freshO(c.focus); if (c.stroke && !S.o.strokes.includes(c.stroke)) S.o.strokes.push(c.stroke);
+      smartPlan(); if (c.stroke) S.ms = c.stroke;
+      const mr = S.rows.find(r => r.type === "main"); if (optionsFor("main").some(o => o.key === c.key)) { mr.key = c.key; mr.adj = 0; } else toast("这个模板不适合你现在的泳池或水平，换了一个相近的");
+      S.planDate = todayStr(); S.planWhy = "模板：" + c.title; S.planBack = "plans"; return go("plan");
     }
-    case "paceInc": S.prefs.pace = Math.min(240, S.prefs.pace + 5); break;
-    case "paceDec": S.prefs.pace = Math.max(50, S.prefs.pace - 5); break;
-    case "paceReset": S.prefs.pace = S.prefs.paceUnit === "米" ? Math.round(95 * 1.0936) : 95; break;
-    case "reroll": newPlan(); toast("换了一套新课表"); break;
-    case "open":
-      if (S.swiped && !S.editing) { S.swiped = null; break; }
-      if (S.editing) return;
-      S.cur = b.dataset.id; return go("detail");
-    case "editToggle": S.editing = !S.editing; S.swiped = null; break;
-    case "swRand": { const r = S.rows.find(x => x.id === b.dataset.id); randomKey(r); if (!S.editing) S.swiped = null; break; }
-    case "swDel": {
-      if (S.rows.length <= 1) { toast("至少要留一组"); break; }
-      const i = S.rows.findIndex(x => x.id === b.dataset.id), removed = S.rows[i];
-      S.rows.splice(i, 1); if (!S.editing) S.swiped = null;
-      toast(`已删除 ${ROW[removed.type].name}`, () => S.rows.splice(i, 0, removed));
+    case "reroll": smartPlan(); toast("换了一份新课表"); break;
+    case "open": if (S.swiped) { S.swiped = null; break; } S.cur = b.dataset.id; return go("detail");
+    case "swRand": { const r = S.rows.find(x => x.id === b.dataset.id); randomKey(r); S.swiped = null; break; }
+    case "swDel": case "delRow": {
+      const id = b.dataset.id || S.cur;
+      if (S.rows.length <= 1) { toast("至少要留一项"); break; }
+      const i = S.rows.findIndex(x => x.id === id), removed = S.rows[i];
+      S.rows.splice(i, 1); S.swiped = null; toast(`已删除${ROW[removed.type].name}`, () => S.rows.splice(i, 0, removed));
+      if (a === "delRow") return go("plan");
       break;
     }
+    case "del": if (S.confirm !== S.cur) { S.confirm = S.cur; break; } b.dataset.id = S.cur; S.confirm = null;
+      { const i = S.rows.findIndex(x => x.id === S.cur); if (S.rows.length <= 1) { toast("至少要留一项"); break; } const removed = S.rows.splice(i, 1)[0]; toast(`已删除${ROW[removed.type].name}`, () => S.rows.splice(i, 0, removed)); return go("plan"); }
     case "add": { const r = { id: uid(), type: "extra", key: null, adj: 0 }; randomKey(r); const i = S.rows.findIndex(x => x.type === "cool"); S.rows.splice(i < 0 ? S.rows.length : i, 0, r); S.cur = r.id; return go("detail"); }
     case "pick": if (row.key !== b.dataset.key) { row.key = b.dataset.key; row.adj = 0; } toast("已换上"); return go("plan");
-    case "ms": S.ms = b.dataset.v; for (const r of S.rows) if (r.type === "main" || r.type === "extra") r.adj = 0; break;
+    case "ms": S.ms = dv; S.rows.forEach(r => { if (r.type === "main" || r.type === "extra") r.adj = 0; }); break;
     case "inc": row.adj++; break;
-    case "dec": {
-      const x = compute().rows.find(x => x.r.id === S.cur), s = x.sets[0];
-      const atMin = x.opt.composite ? (x.opt.roundsAdj ? s.outer <= 1 : x.sets.every(e => e.n <= 1))
-        : s.ladder ? s.rounds <= 1 : (s.adjust === "d" || s.n === 1) ? s.d <= S.o.pool : s.n <= 1;
-      if (!atMin) row.adj--; break;
-    }
+    case "dec": row.adj--; break;
     case "fav": {
       if (isSaved()) { toast("这份课表已经收藏过了"); break; }
-      const p = compute(), d = new Date();
+      const p = compute(), d = nowDate();
       S.favs.unshift({ id: uid(), name: `${d.getMonth() + 1}/${d.getDate()} ${FOCUS[S.o.focus]} ${p.dist} 码`, dist: p.dist, mins: p.mins, cfg: JSON.parse(JSON.stringify(cfg())) });
-      toast("已收藏，在「收藏」里可以找到"); break;
+      toast("已收藏，在“计划 › 收藏”里可以找到"); break;
     }
+    case "goFavs": S.seg.plans = "fav"; return go("plans");
+    case "loadFav": { const f = S.favs.find(x => x.id === b.dataset.id); loadCfg(f.cfg); applyPoolToO(); S.planDate = todayStr(); S.planWhy = "收藏：" + f.name; S.planBack = S.view; toast(`已载入：${f.name}`); return go("plan"); }
     case "rename": S.renaming = b.dataset.id; break;
-    case "renameOk": { const f = S.favs.find(x => x.id === b.dataset.id), v = document.getElementById("rn").value.trim(); if (f && v) f.name = v; S.renaming = null; break; }
-    case "loadFav": { const f = S.favs.find(x => x.id === b.dataset.id); loadCfg(f.cfg); toast(`已载入：${f.name}`); return go("plan"); }
+    case "renameOk": { const f = S.favs.find(x => x.id === b.dataset.id), v = (document.getElementById("rn").value || "").trim(); if (f && v) f.name = v; S.renaming = null; break; }
     case "delFav": if (S.confirm !== b.dataset.id) { S.confirm = b.dataset.id; break; } S.favs = S.favs.filter(f => f.id !== b.dataset.id); S.confirm = null; break;
+    case "rpe": S.rpe = +dv; { const dd = document.getElementById("dDate"), dn = document.getElementById("dNote"); if (dd) S.dDate = dd.value; if (dn) S.dNote = dn.value; } break;
+    case "past": S.pastId = b.dataset.id; S.confirm = null; return go("past");
+    case "pastOpen": S.pastIdx = +b.dataset.i; return go("pastDetail");
     case "log": {
-      const p = compute(), date = document.getElementById("dDate").value || ymd(new Date());
-      const dist = Math.max(0, Math.round(+document.getElementById("dDist").value || 0));
-      S.logs.push({ id: uid(), date, dist, planned: p.dist, mins: p.mins, note: document.getElementById("dNote").value.trim(), lines: planLines(p), cfg: cfg() });
-      S.calMonth = date.slice(0, 7); toast("已记到日历"); return go("cal");
+      S.dDate = document.getElementById("dDate").value; S.dNote = document.getElementById("dNote").value;
+      if (S.rpe == null) { toast("先选一个分数：整体有多累"); break; }
+      const p = compute(), date = S.dDate || todayStr(), pct = S.pct == null ? 100 : S.pct;
+      const dist = Math.round(p.dist * pct / 100 / S.o.pool) * S.o.pool;
+      S.pct = null; S.dDate = null; S.dNote = null;
+      S.logs.push({ id: uid(), test: !!S.testMode, pct, date, dist, planned: p.dist, mins: Math.max(1, Math.round(p.mins * Math.max(pct, 30) / 100)), rpe: S.rpe, focus: S.o.focus, note: (document.getElementById("dNote").value || "").trim(), lines: planLines(p), cfg: JSON.parse(JSON.stringify(cfg())) });
+      S.rpe = null; S.calMonth = date.slice(0, 7); S.selDay = date; S.planDate = null; S.seg.hist = "log";
+      toast("记下来了，下次的推荐会参考这次"); return go("home");
     }
     case "mon": { const [y, m] = S.calMonth.split("-").map(Number), d = new Date(y, m - 1 + +b.dataset.d, 1); S.calMonth = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`; break; }
-    case "day": S.day = b.dataset.d; return go("day");
-    case "again": { const l = S.logs.find(x => x.id === b.dataset.id); loadCfg(l.cfg); toast("已载入这份课表"); return go("plan"); }
-    case "delLog": if (S.confirm !== b.dataset.id) { S.confirm = b.dataset.id; break; } S.logs = S.logs.filter(l => l.id !== b.dataset.id); S.confirm = null; break;
+    case "day": S.selDay = b.dataset.d; S.calMonth = b.dataset.d.slice(0, 7); S.seg.hist = "log"; S.confirm = null; if (S.view !== "hist") return go("hist"); break;
+    case "again": { const l = S.logs.find(x => x.id === b.dataset.id); loadCfg(l.cfg); applyPoolToO(); S.planDate = todayStr(); S.planWhy = "再练一次"; S.planBack = "hist"; return go("plan"); }
+    case "delLog": if (S.confirm !== b.dataset.id) { S.confirm = b.dataset.id; break; } S.logs = S.logs.filter(l => l.id !== b.dataset.id); S.confirm = null; toast("已删除"); if (S.view === "past") return go("hist"); break;
+    case "testToggle": S.testMode = !S.testMode; if (!S.testMode) S.dayOffset = 0; toast(S.testMode ? "测试模式已打开，首页可以点“下一天”" : "已回到真实日期"); break;
+    case "nextDay": S.dayOffset = (S.dayOffset || 0) + 1; S.planDate = null; S.selDay = null; { const d = nowDate(); S.calMonth = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`; } toast(`现在是 ${nowDate().getMonth() + 1} 月 ${nowDate().getDate()} 日`); break;
+    case "realDay": S.dayOffset = 0; S.testMode = false; S.planDate = null; S.selDay = null; toast("已回到真实日期"); break;
+    case "clearTest": if (S.confirm !== "clearTest") { S.confirm = "clearTest"; break; } S.logs = S.logs.filter(l => !l.test); S.confirm = null; toast("测试记录已清除"); break;
+    case "editQ": return startQuiz(b.dataset.q);
+    case "prefEquip": { const l = P().equip; P().equip = l.includes(dv) ? l.filter(x => x !== dv) : [...l, dv]; break; }
+    case "redoQuiz": return startQuiz(null);
+    case "wipe":
+      if (S.confirm !== "wipe") { S.confirm = "wipe"; break; }
+      S.logs = []; S.favs = []; S.rows = []; S.profile = { ...DEFAULT_PROFILE, pace: {} }; S.confirm = null; toast("已清除"); return startQuiz(null);
+    // 问卷
+    case "qpick": S.qd[b.dataset.f] = dv; if (S.qEdit) break; return quizNext();
+    case "qstroke": { const l = S.qd.strokes; S.qd.strokes = l.includes(dv) ? l.filter(x => x !== dv) : [...l, dv]; break; }
+    case "qspeed": normPace(S.qd); if (dv) S.qd.pace[b.dataset.s] = +dv; else delete S.qd.pace[b.dataset.s]; break;
+    case "qset": S.qd[b.dataset.f] = +dv; break;
+    case "qnext": return quizNext();
+    case "qskip": return quizNext();
+    case "qback": S.qi = Math.max(0, S.qi - 1); break;
+    case "qcancel": return go(S.qFrom || "me");
+    case "qfinish": saveQuiz(); S.profile.onboarded = true; S.planDate = null; toast("档案已保存，之后的推荐会按这个来"); return go("me");
     case "copy": {
       const p = compute(), text = unitize(`泳池课表：共 ${p.dist} 码，约 ${p.mins} 分钟（${condText(S.o)}）\n` + planLines(p).join("\n"));
-      const fb = () => { const ta = document.createElement("textarea"); ta.value = text; document.body.appendChild(ta); ta.select(); try { document.execCommand("copy"); toast("已复制"); } catch (err) { toast("复制没成功，可以长按文字手动复制"); } ta.remove(); };
+      const fb = () => { const ta = document.createElement("textarea"); ta.value = text; ta.style.fontSize = "16px"; document.body.appendChild(ta); ta.select(); try { document.execCommand("copy"); toast("已复制"); } catch (err) { toast("复制没成功，可以长按文字手动复制"); } ta.remove(); };
       try { navigator.clipboard.writeText(text).then(() => toast("已复制，可以发给朋友"), fb); } catch (err) { fb(); }
       return;
     }
   }
   render();
 });
+function applyPoolToO() { const [len, u] = POOLS[P().pool]; if (S.o.pool !== len || S.o.unit !== u) { S.o.pool = len; S.o.unit = u; } }
+document.getElementById("toast").addEventListener("click", e => {
+  if (e.target.id === "undoBtn" && undoFn) { undoFn(); undoFn = null; document.getElementById("toast").hidden = true; render(); }
+});
+APP.addEventListener("input", e => {
+  if (e.target.id !== "dPct") return;
+  const el = e.target, pct = +el.value, plan = +el.dataset.plan, pool = +el.dataset.pool;
+  S.pct = pct; el.style.setProperty("--v", pct + "%");
+  const lab = document.getElementById("pctLab");
+  if (lab) lab.textContent = unitize(`${pct}% · 约 ${(Math.round(plan * pct / 100 / pool) * pool).toLocaleString()} 码`);
+});
+// 禁止双指缩放（加到主屏幕当 App 用时页面固定）
+["gesturestart", "gesturechange"].forEach(n => document.addEventListener(n, e => e.preventDefault(), { passive: false }));
 
 load();
 render();
 
-/* 首页池底光影 */
-(function () {
-  const W = 96, H = 200, still = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
-  let img = null, last = 0, drawnStill = null;
-  function draw(cv, t) {
-    if (cv.width !== W) { cv.width = W; cv.height = H; }
-    const ctx = cv.getContext("2d"); if (!img) img = ctx.createImageData(W, H);
-    let k = 0;
-    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
-      const u = x / 11, v = y / 11;
-      const a = Math.sin(u + t) + Math.sin(v * 1.3 - t * 0.8) + Math.sin((u + v) * 0.9 + t * 0.6) + Math.sin(Math.hypot(u - 4, v - 3) * 1.4 - t);
-      const lum = Math.pow(1 - Math.min(1, Math.abs(a) / 1.6), 5);
-      img.data[k++] = 150 + 105 * lum; img.data[k++] = 225 + 30 * lum; img.data[k++] = 255; img.data[k++] = 255 * lum;
-    }
-    ctx.putImageData(img, 0, 0);
-  }
-  function loop(ts) {
-    const cv = document.getElementById("water");
-    if (cv && !document.hidden) {
-      if (still) { if (drawnStill !== cv) { draw(cv, 1.3); drawnStill = cv; } }
-      else if (ts - last > 50) { draw(cv, ts / 1600); last = ts; }
-    }
-    requestAnimationFrame(loop);
-  }
-  requestAnimationFrame(loop);
-})();
-
 </script>
-
 </body>
 </html>
