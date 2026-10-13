@@ -1,0 +1,1461 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="泳池课表">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#131f24" media="(prefers-color-scheme: dark)">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" href="icon-512.png">
+<link rel="manifest" href="manifest.json">
+<title>泳池课表</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,200;0,300;0,500;0,700;1,700;1,800&family=Nunito:wght@700;800;900&family=Noto+Sans+SC:wght@400;500;700;900&display=swap">
+<style>
+/* Layout: an app of small pages (home, setup, plan, detail, favourites, calendar); one job per page, big touch targets, a thin lane-rope stripe as the only ornament */
+:root {
+  --bg: #f1f6f8;
+  --surface: #ffffff;
+  --ink: #0c2a36;
+  --muted: #5a7682;
+  --line: #d7e4e8;
+  --navy: #0a4766;
+  --aqua: #0f8fb0;
+  --aqua-soft: #e0f0f4;
+  --rope: #e04a37;
+  --seg-warm: #7fd0e2;
+  --seg-drill: #2aa6c4;
+  --seg-main: #e04a37;
+  --seg-cool: #b5dde6;
+  --font-body: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  --font-num: "Barlow Condensed", "DIN Alternate", "Arial Narrow", sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #08171e; --surface: #102631; --ink: #e2eef2; --muted: #8eabb7; --line: #1f3e4b;
+    --navy: #3aa3c6; --aqua: #4dbcd8; --aqua-soft: #12313d; --rope: #f0705d;
+    --seg-warm: #5fb8cc; --seg-drill: #2b8fab; --seg-main: #f0705d; --seg-cool: #2e5866;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #08171e; --surface: #102631; --ink: #e2eef2; --muted: #8eabb7; --line: #1f3e4b;
+  --navy: #3aa3c6; --aqua: #4dbcd8; --aqua-soft: #12313d; --rope: #f0705d;
+  --seg-warm: #5fb8cc; --seg-drill: #2b8fab; --seg-main: #f0705d; --seg-cool: #2e5866;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 16px; line-height: 1.55; padding-inline: 16px; padding-block: 0 32px; }
+#app { max-width: 560px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
+button { font: inherit; color: inherit; cursor: pointer; border: 0; background: none; }
+button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 2px solid var(--aqua); outline-offset: 2px; }
+.num { font-family: var(--font-num); font-variant-numeric: tabular-nums; }
+
+/* top bar */
+.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); display: grid; grid-template-columns: 72px 1fr 72px; align-items: center; min-height: 54px; }
+.top h1 { margin: 0; font-size: 17px; font-weight: 700; text-align: center; }
+.back { justify-self: start; min-height: 44px; padding: 0 8px 0 0; color: var(--aqua); font-weight: 500; display: inline-flex; align-items: center; gap: 2px; }
+.back::before { content: "‹"; font-size: 28px; line-height: 1; margin-top: -3px; }
+.rope { height: 4px; border-radius: 2px; background: repeating-linear-gradient(90deg, var(--rope) 0 14px, #ffffff 14px 19px, #2a63c9 19px 33px, #ffffff 33px 38px); opacity: .9; }
+
+/* home */
+.hello { display: flex; flex-direction: column; gap: 2px; padding-top: 28px; }
+.hello small { color: var(--muted); font-size: 14px; }
+.hello b { font-size: 28px; font-weight: 900; letter-spacing: .02em; }
+.big { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; width: 100%; text-align: left; padding: 22px 20px; border-radius: 18px; background: var(--navy); color: #ffffff; }
+.big b { font-size: 21px; font-weight: 900; }
+.big span { font-size: 14px; opacity: .8; }
+.list { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; }
+.li { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; padding: 15px 16px; min-height: 60px; border-bottom: 1px solid var(--line); }
+.li:last-child { border-bottom: 0; }
+.li .grow { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.li .grow small { color: var(--muted); font-size: 13px; }
+.li .chev { color: var(--muted); font-size: 22px; }
+.li .side { color: var(--muted); font-size: 14px; white-space: nowrap; }
+
+/* setup */
+.field { display: flex; flex-direction: column; gap: 8px; }
+.label { font-size: 13px; font-weight: 700; color: var(--muted); letter-spacing: .08em; }
+.seg { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 4px; padding: 4px; border-radius: 12px; background: var(--surface); border: 1px solid var(--line); }
+.seg button { min-height: 44px; border-radius: 9px; color: var(--muted); font-size: 15px; }
+.seg button[aria-pressed="true"] { background: var(--navy); color: #ffffff; font-weight: 700; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { min-height: 44px; padding: 0 18px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); font-size: 15px; }
+.chip[aria-pressed="true"] { border-color: var(--aqua); background: var(--aqua-soft); font-weight: 700; }
+
+/* buttons */
+.btn { min-height: 50px; padding: 0 20px; border-radius: 14px; font-weight: 700; font-size: 16px; background: var(--navy); color: #ffffff; display: inline-flex; align-items: center; justify-content: center; }
+.btn.alt { background: var(--surface); color: var(--ink); border: 1px solid var(--line); }
+.btn.warn { background: var(--surface); color: var(--rope); border: 1px solid var(--line); }
+.btn.full { width: 100%; }
+.bar { position: sticky; bottom: 0; z-index: 4; display: grid; grid-template-columns: 1fr 1fr 1.3fr; gap: 8px; padding: 10px 0 calc(10px + env(safe-area-inset-bottom, 0px)); background: var(--bg); }
+
+/* plan */
+.sum { display: flex; flex-direction: column; gap: 8px; }
+.sum-row { display: flex; align-items: baseline; gap: 18px; flex-wrap: wrap; }
+.sum-row b { font-family: var(--font-num); font-style: italic; font-weight: 800; font-size: 40px; line-height: 1; }
+.sum-row b small { font-style: normal; font-weight: 500; font-size: 15px; color: var(--muted); margin-left: 3px; }
+.cond { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 14px; color: var(--muted); }
+.cond button { color: var(--aqua); font-weight: 700; min-height: 40px; }
+.mix { display: flex; height: 6px; gap: 2px; border-radius: 3px; overflow: hidden; }
+.row { display: grid; grid-template-columns: 6px 1fr auto; gap: 12px; align-items: center; width: 100%; text-align: left; padding: 14px 16px 14px 12px; min-height: 68px; border-bottom: 1px solid var(--line); }
+.row:last-child { border-bottom: 0; }
+.row .stripe { align-self: stretch; border-radius: 3px; background: var(--seg); }
+.row .grow { min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.row .ph { font-size: 12px; color: var(--muted); letter-spacing: .06em; }
+.row .nm { font-size: 16px; font-weight: 700; }
+.row .nm em { font-style: normal; font-weight: 400; color: var(--muted); font-size: 14px; }
+.row .q { font-family: var(--font-num); font-style: italic; font-weight: 800; font-size: 24px; white-space: nowrap; text-align: right; }
+.row .q small { font-style: normal; font-weight: 500; font-size: 13px; color: var(--muted); margin-left: 2px; }
+.add { width: 100%; min-height: 54px; color: var(--aqua); font-weight: 700; border-top: 1px dashed var(--line); }
+.linkish { color: var(--muted); font-size: 14px; text-decoration: underline; text-underline-offset: 3px; min-height: 40px; align-self: center; }
+
+/* detail */
+.hero { display: flex; flex-direction: column; gap: 6px; padding: 18px; border-radius: 16px; background: var(--surface); border: 1px solid var(--line); }
+.hero .ph { font-size: 13px; color: var(--muted); }
+.hero h2 { margin: 0; font-size: 24px; font-weight: 900; }
+.hero .q { font-family: var(--font-num); font-style: italic; font-weight: 800; font-size: 46px; line-height: 1; }
+.hero .q small { font-style: normal; font-weight: 500; font-size: 16px; color: var(--muted); margin-left: 4px; }
+.facts { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 14px; color: var(--muted); }
+.dots { display: inline-flex; gap: 3px; margin-right: 6px; vertical-align: middle; }
+.dots i { width: 14px; height: 6px; border-radius: 3px; background: var(--line); }
+.dots i.on { background: var(--seg-main); }
+.how { margin: 0; font-size: 15px; }
+.extra-line { font-size: 14px; color: var(--muted); padding-top: 6px; border-top: 1px dashed var(--line); }
+.stepper { display: grid; grid-template-columns: 64px 1fr 64px; align-items: center; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+.stepper button { min-height: 56px; font-size: 28px; font-weight: 700; color: var(--navy); background: var(--aqua-soft); }
+.stepper span { text-align: center; font-size: 17px; font-weight: 700; }
+.opts { display: flex; flex-direction: column; }
+.opts .li { min-height: 54px; }
+.opts .li[aria-pressed="true"] { background: var(--aqua-soft); }
+.opts .li[aria-pressed="true"] .grow b::after { content: " ✓"; color: var(--aqua); }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+/* forms */
+.input { width: 100%; min-height: 50px; padding: 0 14px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font: inherit; }
+textarea.input { padding: 12px 14px; min-height: 90px; resize: vertical; }
+.panel { display: flex; flex-direction: column; gap: 10px; padding: 16px; border-radius: 16px; background: var(--surface); border: 1px solid var(--line); }
+
+/* calendar */
+.stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.stat { padding: 14px; border-radius: 14px; background: var(--surface); border: 1px solid var(--line); display: flex; flex-direction: column; }
+.stat b { font-family: var(--font-num); font-style: italic; font-weight: 800; font-size: 32px; line-height: 1.05; }
+.stat small { color: var(--muted); font-size: 13px; }
+.mon { display: flex; align-items: center; justify-content: space-between; }
+.mon b { font-size: 17px; }
+.mon button { min-width: 44px; min-height: 44px; font-size: 24px; color: var(--aqua); }
+.cal { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+.cal .wd { text-align: center; font-size: 12px; color: var(--muted); padding-bottom: 2px; }
+.day { position: relative; aspect-ratio: 1; max-width: 100%; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 14px; background: var(--surface); border: 1px solid var(--line); overflow: hidden; }
+.day::before { content: ""; position: absolute; inset: 0; background: var(--aqua); opacity: calc(var(--lv, 0) * 0.22); }
+.day span, .day small { position: relative; }
+.day small { font-family: var(--font-num); font-size: 11px; line-height: 1; }
+.day.has span { font-weight: 700; }
+.day.today { border-color: var(--rope); border-width: 2px; }
+.day.empty { visibility: hidden; }
+.entry { display: flex; flex-direction: column; gap: 6px; }
+.entry ul { margin: 0; padding-left: 18px; font-size: 14px; color: var(--muted); }
+.empty-note { text-align: center; color: var(--muted); font-size: 14px; padding: 24px 0; }
+.toast { position: fixed; left: 50%; bottom: calc(90px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--ink); color: var(--bg); padding: 10px 18px; border-radius: 999px; font-size: 14px; z-index: 9; max-width: calc(100% - 32px); }
+@media (prefers-reduced-motion: no-preference) { #app > * { animation: in .18s ease-out; } @keyframes in { from { opacity: .4; transform: translateY(4px); } } }
+
+/* tab bar */
+.tabs { position: fixed; left: 0; right: 0; bottom: 0; z-index: 6; display: grid; grid-template-columns: repeat(4, 1fr); background: var(--surface); border-top: 1px solid var(--line); padding: 4px max(8px, env(safe-area-inset-right, 0px)) calc(4px + env(safe-area-inset-bottom, 0px)) max(8px, env(safe-area-inset-left, 0px)); }
+.tabs button { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; min-height: 52px; font-size: 11px; color: var(--muted); }
+.tabs svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.tabs button[aria-current="page"] { color: var(--navy); font-weight: 700; }
+body.has-tabs { padding-bottom: calc(84px + env(safe-area-inset-bottom, 0px)); }
+body.has-tabs .bar { bottom: calc(60px + env(safe-area-inset-bottom, 0px)); padding: 10px 0; }
+.top .right { justify-self: end; color: var(--aqua); font-weight: 700; min-height: 44px; padding-left: 8px; }
+/* home week card: one fixed deep-water look in both themes */
+.week { position: relative; overflow: hidden; border-radius: 22px; background: linear-gradient(160deg, #0b5577, #062e45 70%); color: #ffffff; margin-top: 16px; }
+.week canvas { position: absolute; inset: 0; width: 100%; height: 100%; opacity: .5; mix-blend-mode: screen; }
+.week-in { position: relative; padding: 22px 20px 20px; display: flex; flex-direction: column; gap: 14px; }
+.week-in small { opacity: .78; font-size: 13px; letter-spacing: .04em; }
+.big-n { font-family: var(--font-num); font-style: italic; font-weight: 800; font-size: 60px; line-height: .95; }
+.big-n span { font-size: 17px; font-style: normal; font-weight: 500; opacity: .78; margin-left: 6px; font-family: var(--font-body); }
+.wk { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+.wk div { display: flex; flex-direction: column; align-items: center; gap: 5px; font-size: 12px; opacity: .85; }
+.wk i { width: 26px; height: 26px; border-radius: 50%; border: 1.5px solid rgba(255,255,255,.45); display: block; }
+.wk i.on { background: #ffffff; border-color: #ffffff; }
+.wk i.today { box-shadow: 0 0 0 2px #e04a37; }
+.week .rope { border-radius: 0; height: 6px; }
+.quick { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; padding: 14px 16px; min-height: 64px; border-radius: 14px; background: var(--surface); border: 1px solid var(--line); text-align: left; }
+.quick small { display: block; color: var(--muted); font-size: 13px; }
+.quick .go { color: var(--aqua); white-space: nowrap; }
+.sec-title { display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: 700; color: var(--muted); letter-spacing: .08em; margin-bottom: -8px; }
+.sec-title button { color: var(--aqua); letter-spacing: 0; min-height: 36px; }
+/* swipe rows */
+.swipe { position: relative; overflow: hidden; border-bottom: 1px solid var(--line); }
+.swipe .row { position: relative; z-index: 1; border-bottom: 0; background: var(--surface); transition: transform .2s ease; touch-action: pan-y; }
+.swipe .row.drag { transition: none; }
+.swipe .acts { position: absolute; top: 0; right: 0; bottom: 0; display: flex; }
+.swipe .acts button { width: 76px; color: #ffffff; font-weight: 700; font-size: 15px; }
+.swipe .acts .r { background: var(--aqua); }
+.swipe .acts .d { background: var(--rope); }
+.swipe.open .row { transform: translateX(-152px); }
+.hint { margin: -6px 0 0; font-size: 12px; color: var(--muted); text-align: center; }
+.toast { bottom: calc(150px + env(safe-area-inset-bottom, 0px)); display: flex; align-items: center; gap: 12px; }
+.toast button { color: #7fd0e2; font-weight: 700; }
+@media (prefers-reduced-motion: reduce) { .swipe .row { transition: none; } }
+
+/* round 3: numbered, plain-language plan rows */
+.row { grid-template-columns: 30px 1fr 14px; align-items: start; padding: 14px 14px 14px 12px; }
+.row .chev { color: var(--muted); font-size: 22px; align-self: center; }
+.no { width: 28px; height: 28px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-family: var(--font-num); font-weight: 700; font-size: 16px; background: var(--seg); color: #ffffff; margin-top: 2px; }
+.row .grow, .erow .grow { gap: 3px; }
+.ph { font-size: 12px; color: var(--muted); }
+.nm { font-size: 17px; font-weight: 700; }
+.nm em { font-style: normal; font-weight: 400; color: var(--muted); font-size: 14px; }
+.pl { font-size: 14px; color: var(--ink); opacity: .85; line-height: 1.5; }
+.erow { display: grid; grid-template-columns: 30px 1fr auto; gap: 12px; align-items: start; padding: 14px 12px; border-bottom: 1px solid var(--line); }
+.erow .grow { min-width: 0; display: flex; flex-direction: column; }
+.eb { display: flex; gap: 6px; align-self: center; }
+.eb button { min-width: 44px; min-height: 40px; padding: 0 10px; border-radius: 10px; border: 1px solid var(--aqua); color: var(--aqua); font-weight: 700; font-size: 14px; }
+.eb button.d { border-color: var(--rope); color: var(--rope); }
+.guide { margin: 0; padding: 12px 14px; border-radius: 12px; background: var(--aqua-soft); font-size: 14px; line-height: 1.5; }
+.steps { gap: 14px; }
+.steps p { margin: 4px 0 0; font-size: 15px; }
+.today-card { display: flex; flex-direction: column; gap: 8px; padding: 14px 16px; cursor: pointer; text-align: left; }
+.tc-h { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.tc-h b { font-size: 26px; font-style: italic; font-weight: 800; }
+.tc-h span { color: var(--muted); font-size: 14px; }
+.today-card ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; font-size: 14px; }
+.today-card li { display: flex; justify-content: space-between; gap: 12px; color: var(--muted); }
+.today-card li span:first-child { color: var(--ink); }
+.tip-card { display: flex; flex-direction: column; gap: 4px; padding: 16px; border-radius: 16px; background: var(--surface); border: 1px dashed var(--aqua); }
+.tip-card b { font-size: 17px; }
+.tip-card p { margin: 0; font-size: 14px; color: var(--muted); }
+
+/* round 4: swimmer notation on the right */
+.row, .erow { grid-template-columns: 30px 1fr auto; }
+.bq { font-family: var(--font-num); font-style: italic; font-weight: 800; font-size: 28px; line-height: 1.1; white-space: nowrap; font-variant-numeric: tabular-nums; align-self: center; }
+.erow .bq { display: none; }
+@media (max-width: 380px) { .bq { font-size: 23px; } }
+
+/* settings & equipment */
+.week .gear { position: absolute; top: 12px; right: 12px; z-index: 2; min-height: 36px; padding: 0 14px; border-radius: 999px; background: rgba(255,255,255,.16); color: #ffffff; font-size: 13px; font-weight: 700; }
+.seg2 { grid-auto-flow: row; grid-template-columns: 1fr 1fr; }
+.note { margin: 0; font-size: 13px; color: var(--muted); line-height: 1.5; }
+.toggle .sw { width: 48px; height: 28px; border-radius: 14px; background: var(--line); position: relative; flex: none; transition: background .15s; }
+.toggle .sw i { position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%; background: #ffffff; box-shadow: 0 1px 2px rgba(0,0,0,.25); transition: transform .15s; }
+.toggle[aria-pressed="true"] .sw { background: var(--aqua); }
+.toggle[aria-pressed="true"] .sw i { transform: translateX(20px); }
+.eqp { display: flex; flex-wrap: wrap; gap: 8px; padding: 4px 16px 16px; }
+.poolline { width: 100%; min-height: 44px; font-size: 14px; color: var(--muted); text-align: center; }
+.poolline b { color: var(--aqua); }
+.panel .stepper { margin-top: 2px; }
+
+/* composite sets */
+.segs { margin: 6px 0 0; padding-left: 22px; display: flex; flex-direction: column; gap: 8px; }
+.segs li b { font-family: var(--font-num); font-size: 19px; font-style: italic; }
+.segs li span { display: block; font-size: 13px; color: var(--muted); }
+.tag { font-style: normal; font-size: 11px; font-weight: 700; color: var(--aqua); border: 1px solid var(--aqua); border-radius: 6px; padding: 0 5px; margin-left: 4px; vertical-align: 2px; }
+
+/* 带 hidden 的元素一定隐藏（提示条没消息时不显示） */
+[hidden] { display: none !important; }
+
+/* ================= 设计升级「泳道」 ================= */
+:root { --tile: rgba(10,61,87,.05); --lane: #12303d; --ink-strong: #0a3d57; --glass: rgba(241,246,248,.82); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --tile: rgba(255,255,255,.035); --lane: #a9c6d0; --ink-strong: #e2eef2; --glass: rgba(8,23,30,.8); } }
+:root[data-theme="dark"] { --tile: rgba(255,255,255,.035); --lane: #a9c6d0; --ink-strong: #e2eef2; --glass: rgba(8,23,30,.8); }
+
+/* 背景：泳池瓷砖方格 */
+body { background-color: var(--bg); background-image: linear-gradient(var(--tile) 1px, transparent 1px), linear-gradient(90deg, var(--tile) 1px, transparent 1px); background-size: 28px 28px; }
+#app { gap: 20px; }
+
+/* 字号层级 */
+.label { letter-spacing: 0; font-size: 13px; font-weight: 500; }
+.sec-title { letter-spacing: 0; font-weight: 500; font-size: 14px; margin-bottom: -10px; }
+h2, .hero h2 { font-weight: 700; }
+
+/* 顶栏：磨砂玻璃；主页面左对齐大标题 */
+.top { background: var(--glass); -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px); margin-inline: -16px; padding-inline: 16px; }
+.top.large { display: flex; align-items: flex-end; justify-content: space-between; min-height: 68px; padding-bottom: 6px; }
+.top.large h1 { font-size: 30px; font-weight: 700; text-align: left; letter-spacing: .01em; }
+.top.large .right { min-height: 36px; }
+
+/* 卡片减法：去边框，靠底色区分 */
+.list, .panel, .stat, .quick, .stepper, .seg, .chip, .chips .opt span, .input { border-color: transparent; }
+.list { border-radius: 20px; }
+.li, .row, .erow, .swipe { border-bottom-color: var(--line); }
+.quick { border: 0; }
+.tip-card { border: 0; background: var(--aqua-soft); border-radius: 20px; }
+.tip-card .label { color: var(--aqua); }
+.big { border-radius: 20px; }
+.chip { background: var(--surface); }
+.chip[aria-pressed="true"] { border-color: var(--aqua); }
+.input { border: 1px solid var(--line); }
+
+/* 首页本周卡片 */
+.week { border-radius: 24px; }
+.big-n { letter-spacing: -.01em; }
+
+/* 课表总览：数字直立 */
+.sum-row b, .stat b, .hero .q, .tc-h b { font-style: normal; font-weight: 700; }
+.sum-row b { font-size: 38px; }
+.cond { font-size: 13px; }
+.guide { background: transparent; padding: 0 2px; color: var(--muted); font-size: 13px; }
+
+/* 课表：泳道线 */
+.lane .row, .lane .erow { position: relative; background: var(--surface); }
+.lane .row::after, .lane .erow::after { content: ""; position: absolute; left: 25.5px; top: 0; bottom: 0; width: 3px; background: var(--lane); }
+.lane > div:first-child .row::after, .lane > .erow:first-child::after { top: 50%; }
+.no { position: relative; z-index: 1; background: var(--surface); color: var(--lane); border: 2.5px solid var(--lane); width: 30px; height: 30px; margin-top: 0; font-weight: 700; }
+.row, .erow { align-items: center; }
+.is-main .no { background: var(--rope); border-color: var(--rope); color: #ffffff; }
+.nm { font-size: 17px; font-weight: 700; }
+.ph { font-size: 12px; }
+.pl { color: var(--muted); opacity: 1; font-size: 13px; }
+.bq { font-style: normal; font-weight: 700; font-size: 27px; color: var(--ink-strong); }
+.is-main .bq { color: var(--rope); }
+.add { position: relative; border-top: 0; padding-left: 52px; text-align: left; color: var(--aqua); }
+.add::before { content: ""; position: absolute; left: 25.5px; top: 0; height: 18px; width: 3px; background: var(--lane); }
+.add::after { content: ""; position: absolute; left: 15px; top: 18px; width: 24px; height: 3px; border-radius: 2px; background: var(--lane); }
+.swipe .acts button { font-size: 14px; }
+
+/* 底部按钮栏：磨砂，不再挤成两行 */
+.bar { background: var(--glass); -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px); margin-inline: -16px; padding-inline: 16px; grid-template-columns: auto auto 1fr; }
+.bar .btn { white-space: nowrap; font-size: 15px; padding: 0 16px; min-height: 48px; }
+.bar .btn.alt { background: var(--surface); }
+
+/* 底部标签栏：磨砂 */
+.tabs { background: var(--glass); -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px); border-top: 1px solid var(--line); }
+
+/* 练法详情：标题直接放在页面上，不套卡片 */
+.hero { background: transparent; border: 0; padding: 4px 2px 0; }
+.hero h2 { font-size: 26px; }
+.hero .q { font-size: 52px; }
+.steps { gap: 16px; }
+.steps .label { color: var(--aqua); }
+
+/* 日历：去掉方框，游过的天是水蓝圆点 */
+.cal { gap: 6px 4px; }
+.day { border: 0; background: transparent; border-radius: 50%; width: 100%; max-width: 46px; justify-self: center; }
+.day::before { border-radius: 50%; opacity: calc(var(--lv, 0) * 0.25); }
+.day.has { color: var(--ink-strong); }
+.day.today { box-shadow: inset 0 0 0 2px var(--rope); }
+.stat { border-radius: 20px; }
+.stat b { font-size: 34px; }
+
+/* 设置开关等 */
+.seg { background: var(--surface); }
+.seg button[aria-pressed="true"] { background: var(--ink-strong); color: var(--bg); }
+.btn { background: var(--ink-strong); color: var(--bg); }
+.btn.alt, .btn.warn { color: var(--ink); }
+.btn.warn { color: var(--rope); }
+.big { background: var(--ink-strong); color: var(--bg); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .big { background: #0b5577; color: #ffffff; } }
+:root[data-theme="dark"] .big { background: #0b5577; color: #ffffff; }
+
+body.has-tabs .bar { padding: 10px 16px; }
+:root { --tile: rgba(10,61,87,.035); }
+.segs li b { font-style: normal; font-weight: 700; }
+.lane .pl { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+/* ================= 液态玻璃 + 固定泳池背景 ================= */
+:root {
+  --bg: #d6eaef; --surface: rgba(255,255,255,.42); --solid: #f1f8f9;
+  --ink: #0b2e3c; --ink-strong: #0b2e3c; --muted: #4c6a75; --line: rgba(11,46,60,.1); --lane: #133847;
+  --aqua: #0a7ea2; --aqua-soft: rgba(10,126,162,.1); --navy: #0b3a50;
+  --water-a: #ecf6f8; --water-b: #c9e6ec; --water-c: #a3d2de; --grout: rgba(255,255,255,.5); --caustic: .6;
+  --glass: rgba(236,246,248,.55);
+  --glass-bg: linear-gradient(145deg, rgba(255,255,255,.66), rgba(255,255,255,.34));
+  --glass-edge: rgba(255,255,255,.8); --glass-hi: rgba(255,255,255,.95); --glass-lo: rgba(255,255,255,.25);
+  --glass-shadow: 0 12px 32px -16px rgba(5,50,70,.35);
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #051720; --surface: rgba(255,255,255,.06); --solid: #0c2833;
+  --ink: #e4f0f3; --ink-strong: #e4f0f3; --muted: #8eafba; --line: rgba(255,255,255,.09); --lane: #a8c7d1;
+  --aqua: #63c8e1; --aqua-soft: rgba(99,200,225,.12); --navy: #0b5577;
+  --water-a: #031119; --water-b: #062431; --water-c: #0a3a4d; --grout: rgba(255,255,255,.04); --caustic: .32;
+  --glass: rgba(5,23,32,.5);
+  --glass-bg: linear-gradient(145deg, rgba(255,255,255,.11), rgba(255,255,255,.035));
+  --glass-edge: rgba(255,255,255,.14); --glass-hi: rgba(255,255,255,.24); --glass-lo: rgba(255,255,255,.04);
+  --glass-shadow: 0 14px 36px -16px rgba(0,0,0,.7); color-scheme: dark;
+} }
+:root[data-theme="dark"] {
+  --bg: #051720; --surface: rgba(255,255,255,.06); --solid: #0c2833;
+  --ink: #e4f0f3; --ink-strong: #e4f0f3; --muted: #8eafba; --line: rgba(255,255,255,.09); --lane: #a8c7d1;
+  --aqua: #63c8e1; --aqua-soft: rgba(99,200,225,.12); --navy: #0b5577;
+  --water-a: #031119; --water-b: #062431; --water-c: #0a3a4d; --grout: rgba(255,255,255,.04); --caustic: .32;
+  --glass: rgba(5,23,32,.5);
+  --glass-bg: linear-gradient(145deg, rgba(255,255,255,.11), rgba(255,255,255,.035));
+  --glass-edge: rgba(255,255,255,.14); --glass-hi: rgba(255,255,255,.24); --glass-lo: rgba(255,255,255,.04);
+  --glass-shadow: 0 14px 36px -16px rgba(0,0,0,.7); color-scheme: dark;
+}
+
+/* 固定在屏幕后面的泳池：水色 + 池底瓷砖 + 水光，内容从上面滑过 */
+body { background: var(--bg); background-image: none; }
+.pool { position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background:
+    linear-gradient(var(--grout) 1px, transparent 1px) 0 0 / 34px 34px,
+    linear-gradient(90deg, var(--grout) 1px, transparent 1px) 0 0 / 34px 34px,
+    linear-gradient(180deg, var(--water-a), var(--water-b) 45%, var(--water-c)); }
+.pool canvas { position: absolute; inset: -4%; width: 108%; height: 108%; opacity: var(--caustic); mix-blend-mode: screen; filter: blur(1.5px); }
+#app { position: relative; z-index: 1; }
+
+/* 液态玻璃材质 */
+.list, .panel, .stat, .quick, .tip-card, .stepper, .seg, .gear, .chip, .bar .btn.alt, .eqp .chip {
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: blur(22px) saturate(175%); backdrop-filter: blur(22px) saturate(175%);
+  border: 1px solid var(--glass-edge);
+  box-shadow: inset 0 1px 0 var(--glass-hi), inset 0 -1px 0 var(--glass-lo), var(--glass-shadow);
+}
+.chip[aria-pressed="true"] { background: var(--aqua-soft); border-color: var(--aqua); }
+.list, .panel, .stat, .quick, .tip-card { border-radius: 22px; }
+.li, .row, .erow, .swipe { background: transparent; }
+.lane .row, .lane .erow { background: transparent; }
+.no { background: var(--solid); }
+.opts .li[aria-pressed="true"] { background: var(--aqua-soft); }
+
+/* 左滑：没滑开时隐藏操作按钮，滑开时这一行变实心 */
+.swipe .acts { opacity: 0; transition: opacity .15s; }
+.swipe.open .acts, .swipe:has(.row.drag) .acts { opacity: 1; }
+.swipe.open .row, .swipe .row.drag { background: var(--solid); }
+
+/* 顶栏、底部按钮栏、标签栏：玻璃 */
+.top, .bar, .tabs { background: var(--glass); -webkit-backdrop-filter: blur(24px) saturate(180%); backdrop-filter: blur(24px) saturate(180%); }
+.tabs { border-top: 1px solid var(--glass-edge); box-shadow: inset 0 1px 0 var(--glass-hi); }
+
+/* 主按钮：唯一的实心深色元素 */
+.big, .btn:not(.alt):not(.warn) {
+  background: linear-gradient(160deg, #0f5d7e, #0a3349); color: #ffffff;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.28), 0 16px 30px -16px rgba(5,45,65,.7); border: 0; }
+.big { border-radius: 24px; padding: 24px 22px; }
+.seg button[aria-pressed="true"] { background: linear-gradient(160deg, #0f5d7e, #0a3349); color: #ffffff; box-shadow: inset 0 1px 0 rgba(255,255,255,.25); }
+
+/* 首页顶部：直接写在水面上的本周码数 */
+.hero-water { display: flex; flex-direction: column; gap: 20px; padding: 22px 2px 6px; color: var(--ink); }
+.hw-top { display: flex; align-items: center; justify-content: space-between; font-size: 14px; color: var(--muted); }
+.gear { width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center; color: var(--ink); padding: 0; }
+.gear svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; }
+.hw-num { display: flex; align-items: flex-end; gap: 14px; }
+.hw-num b { font-family: var(--font-num); font-weight: 200; font-size: 104px; line-height: .8; letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
+.hw-num span { font-size: 14px; line-height: 1.45; color: var(--muted); padding-bottom: 6px; }
+.hero-water .wk { grid-template-columns: repeat(7, 1fr); gap: 8px; }
+.hero-water .wk div { display: flex; flex-direction: column; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); opacity: 1; }
+.hero-water .wk i { width: 100%; height: 5px; border-radius: 3px; border: 0; background: var(--line); box-shadow: none; }
+.hero-water .wk i.on { background: var(--ink-strong); }
+.hero-water .wk .is-today { color: var(--rope); font-weight: 700; }
+.hero-water .wk .is-today i:not(.on) { background: transparent; box-shadow: inset 0 0 0 1.5px var(--rope); }
+.tip-card .label, .steps .label { color: var(--aqua); }
+.day { background: transparent; }
+
+.tabs button[aria-current="page"] { color: var(--aqua); }
+:root { --glass: rgba(236,246,248,.72); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --glass: rgba(5,23,32,.72); } }
+:root[data-theme="dark"] { --glass: rgba(5,23,32,.72); }
+/* ================= 纯色扁平「Duolingo 式」 ================= */
+:root {
+  --bg: #ffffff; --surface: #ffffff; --solid: #ffffff; --ink: #3c3c3c; --ink-strong: #3c3c3c; --muted: #8a8a8a;
+  --line: #e5e5e5; --lane: #e5e5e5; --aqua: #1899d6; --aqua-soft: #ddf4ff; --rope: #ff4b4b;
+  --c-blue: #1cb0f6; --c-blue-d: #1899d6; --c-green: #58cc02; --c-green-d: #46a302;
+  --c-yellow: #ffc800; --c-yellow-d: #e5a400; --c-pink: #ff86d0; --c-pink-d: #e56cb6;
+  --c-purple: #ce82ff; --c-purple-d: #a568cc; --c-red: #ff4b4b; --c-red-d: #ea2b2b;
+  --sel-bg: #ddf4ff; --sel-edge: #84d8ff; --font-num: "Nunito", "Noto Sans SC", system-ui, sans-serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #131f24; --surface: #131f24; --solid: #131f24; --ink: #f1f7fb; --ink-strong: #f1f7fb; --muted: #8a9ba3;
+  --line: #37464f; --lane: #37464f; --aqua: #49c0f8; --aqua-soft: #1b3a4b; --sel-bg: #1b3a4b; --sel-edge: #3f87b0; color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #131f24; --surface: #131f24; --solid: #131f24; --ink: #f1f7fb; --ink-strong: #f1f7fb; --muted: #8a9ba3;
+  --line: #37464f; --lane: #37464f; --aqua: #49c0f8; --aqua-soft: #1b3a4b; --sel-bg: #1b3a4b; --sel-edge: #3f87b0; color-scheme: dark; }
+
+/* 纯色背景，去掉水光、格子、玻璃 */
+.pool { display: none; }
+body { background: var(--bg); background-image: none; font-weight: 500; }
+.top, .bar, .tabs, .list, .panel, .stat, .quick, .tip-card, .stepper, .seg, .gear, .chip, .eqp .chip { -webkit-backdrop-filter: none; backdrop-filter: none; }
+.top { background: var(--bg); border-bottom: 2px solid var(--line); }
+.top.large { border-bottom: 0; }
+
+/* 卡片：白底 + 2px 浅灰边框，不加阴影 */
+.list, .panel, .stat, .quick, .tip-card { background: var(--surface); border: 2px solid var(--line); border-radius: 16px; box-shadow: none; }
+.li, .row, .erow, .swipe { border-bottom: 2px solid var(--line); }
+.tip-card { border-color: var(--c-purple); }
+.tip-card .label { color: var(--c-purple-d); font-weight: 700; }
+.steps .label, .label { color: var(--muted); font-weight: 700; }
+.sec-title { font-weight: 700; }
+h1, .nm, .hero h2, .li b, .quick b, .tip-card b { font-weight: 900; }
+
+/* 立体按钮：实心色 + 底下一条厚边，按下去会沉 */
+.pb { display: inline-flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+  min-height: 50px; padding: 0 18px; border-radius: 16px; border: 0; color: #ffffff; font-weight: 900; font-size: 16px;
+  letter-spacing: .02em; white-space: nowrap; background: var(--c); box-shadow: 0 4px 0 var(--cd); transition: transform .06s, box-shadow .06s; }
+.pb:active { transform: translateY(4px); box-shadow: 0 0 0 var(--cd); }
+.pb.blue { --c: var(--c-blue); --cd: var(--c-blue-d); }
+.pb.green { --c: var(--c-green); --cd: var(--c-green-d); }
+.pb.yellow { --c: var(--c-yellow); --cd: var(--c-yellow-d); color: #4b3a00; }
+.pb.pink { --c: var(--c-pink); --cd: var(--c-pink-d); }
+.pb.full { width: 100%; }
+.pb.big { align-items: flex-start; padding: 22px 22px 20px; border-radius: 20px; min-height: 0; box-shadow: 0 5px 0 var(--cd); }
+.pb.big:active { box-shadow: 0 0 0 var(--cd); transform: translateY(5px); }
+.pb.big b { font-size: 21px; }
+.pb.big span { font-size: 14px; font-weight: 700; opacity: .92; }
+.btn.alt, .btn.warn { background: var(--surface); border: 2px solid var(--line); box-shadow: 0 3px 0 var(--line); color: var(--ink); font-weight: 900; }
+.btn.warn { color: var(--c-red); }
+.bar { background: var(--bg); border-top: 2px solid var(--line); grid-template-columns: 1fr 1fr 1.4fr; gap: 10px; }
+body.has-tabs .bar { padding: 12px 16px 14px; }
+
+/* 选项：选中时浅蓝底 + 蓝边 */
+.seg { background: transparent; border: 0; padding: 0; gap: 8px; box-shadow: none; }
+.seg button { background: var(--surface); border: 2px solid var(--line); border-bottom-width: 4px; border-radius: 14px; color: var(--ink); font-weight: 700; min-height: 48px; box-shadow: none; }
+.seg button[aria-pressed="true"] { background: var(--sel-bg); border-color: var(--sel-edge); color: var(--aqua); box-shadow: none; }
+.chip, .eqp .chip { background: var(--surface); border: 2px solid var(--line); border-bottom-width: 4px; border-radius: 14px; box-shadow: none; font-weight: 700; color: var(--ink); }
+.chip[aria-pressed="true"] { background: var(--sel-bg); border-color: var(--sel-edge); color: var(--aqua); }
+.stepper { background: var(--surface); border: 2px solid var(--line); border-radius: 16px; box-shadow: none; }
+.stepper button { background: transparent; color: var(--aqua); }
+.toggle[aria-pressed="true"] .sw { background: var(--c-green); }
+.input { border: 2px solid var(--line); border-radius: 14px; background: var(--surface); }
+.gear { background: var(--surface); border: 2px solid var(--line); box-shadow: 0 3px 0 var(--line); color: var(--muted); }
+
+/* 首页顶部：纯色上的大数字 */
+.hw-num b { font-family: var(--font-num); font-weight: 900; font-size: 84px; line-height: .85; letter-spacing: -.02em; color: var(--c-blue); }
+.hw-num span { font-weight: 700; }
+.hero-water .wk i { height: 30px; width: 30px; max-width: 100%; border-radius: 50%; background: var(--line); }
+.hero-water .wk i.on { background: var(--c-blue); }
+.hero-water .wk .is-today { color: var(--c-red); }
+.hero-water .wk .is-today i:not(.on) { background: transparent; box-shadow: inset 0 0 0 3px var(--c-red); }
+.quick .go { color: var(--c-green-d); font-weight: 900; }
+
+/* 课表：浅灰泳道线 + 每个阶段一个颜色 */
+.sum-row b, .stat b, .hero .q, .tc-h b, .bq, .segs li b { font-family: var(--font-num); font-weight: 900; font-style: normal; }
+.lane .row::after, .lane .erow::after, .add::before { background: var(--lane); width: 4px; left: 25px; }
+.add::after { background: var(--lane); width: 24px; height: 4px; left: 15px; }
+.no { border: 0; color: #ffffff; background: var(--c-blue); width: 32px; height: 32px; font-family: var(--font-num); font-weight: 900; }
+.ph-warm .no { background: var(--c-blue); }
+.ph-drill .no { background: var(--c-purple); }
+.ph-main .no { background: var(--c-red); }
+.ph-cool .no { background: var(--c-green); }
+.bq { color: var(--ink); }
+.is-main .bq { color: var(--c-red); }
+.add { color: var(--c-blue-d); font-weight: 900; }
+.swipe.open .row, .swipe .row.drag { background: var(--bg); }
+.swipe .acts .r { background: var(--c-blue); }
+.swipe .acts .d { background: var(--c-red); }
+.eb button { border-width: 2px; border-bottom-width: 4px; border-radius: 12px; font-weight: 900; }
+
+/* 详情 */
+.hero .q { color: var(--c-blue); }
+.dots i.on { background: var(--c-red); }
+
+/* 日历 */
+.day::before { display: none; }
+.day.has { background: var(--c-blue); color: #ffffff; }
+.day.has small { color: #ffffff; }
+.day.today { box-shadow: inset 0 0 0 3px var(--c-red); }
+.stat b { color: var(--c-blue); }
+
+/* 底部标签栏 */
+.tabs { background: var(--bg); border-top: 2px solid var(--line); box-shadow: none; }
+.tabs button { font-weight: 700; }
+.tabs button[aria-current="page"] { color: var(--c-blue); }
+.tabs button[aria-current="page"] svg { stroke-width: 2.4; }
+.toast { background: #3c3c3c; color: #ffffff; font-weight: 700; border-radius: 14px; }
+
+/* 独立网页版：自己处理 iPhone 顶部和底部的安全区域 */
+html { padding-top: env(safe-area-inset-top, 0px); background: var(--bg); }
+body { margin: 0; -webkit-text-size-adjust: 100%; -webkit-tap-highlight-color: transparent; }
+</style>
+</head>
+<body>
+
+
+<div id="app"></div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+const PACE = 95;   // 熟练泳者每 100 码大约用时（秒），自由泳中等强度
+const STROKE_ADJ = { "自由泳": 0, "仰泳": 9, "蛙泳": 16, "蝶泳": 6 };
+const INT = {
+  easy:   { label: "轻松", f: 1.12, lv: 1 },
+  mod:    { label: "中等", f: 1.0,  lv: 2 },
+  fast:   { label: "快",   f: 0.92, lv: 3 },
+  sprint: { label: "冲刺", f: 0.86, lv: 4 }
+};
+const REST = { easy: 10, mod: 15, fast: 30, sprint: 45, drill: 15 };
+const KICK = 1.4, DRILL = 1.25;
+const FOCUS = { endurance: "耐力", speed: "速度", technique: "技术" };
+const DRILLS = {
+  "自由泳": [
+    ["单臂划水", "一只手放前面不动，另一只手划，专心感受推水到大腿"],
+    ["六次打腿换边", "侧身打腿六次，划一下手翻到另一侧，练身体转动和平衡"],
+    ["追逐式划臂", "一只手划回来碰到另一只手，才开始下一次划水"],
+    ["握拳游", "双手握拳游，逼前臂去抓水，最后几趟再张开手"],
+    ["指尖拖水", "移臂时指尖轻轻划过水面，练高肘移臂"],
+    ["海豚腿配自由泳手", "手划自由泳、腿打海豚腿，找划水的节奏"]
+  ],
+  "蛙泳": [
+    ["两次蹬腿一次划手", "多一次蹬腿让身体滑得更远，体会蹬腿和划手的时机"],
+    ["扶板蛙泳腿", "双手扶浮板只用腿，脚掌外翻、向后蹬水"],
+    ["仰卧蛙泳腿", "躺在水面做蛙泳腿，膝盖保持在两脚之间"],
+    ["握拳蛙泳", "握拳游蛙泳，用前臂压水，肘部保持在高位"],
+    ["雨刷划手", "只练手往外分水的动作，肘部靠近水面，手腕低于手肘"],
+    ["划手加夹腿", "腿夹住不动，只练划手和抬头换气的节奏"]
+  ],
+  "仰泳": [
+    ["仰卧打腿", "双手贴身体两侧，脸朝上，膝盖不要露出水面"],
+    ["单臂仰泳", "一只手划三下再换手，转动从髋部开始"],
+    ["十二次打腿换边", "侧身打腿 12 次，划一下翻到另一侧，脊柱保持笔直"],
+    ["头部不动打腿", "想象额头上放了一杯水，打腿时头完全不动"],
+    ["两段式移臂", "手臂在头顶和大腿旁各停一下，找干净的移臂路线"]
+  ],
+  "蝶泳": [
+    ["海豚腿打腿", "双腿并拢，从胸口发力像波浪一样往下传"],
+    ["单臂蝶泳", "一只手放前面，另一只手划，每划一次打两次腿"],
+    ["右臂左臂双臂", "右手划一次、左手划一次、双手划一次，循环"],
+    ["胸部波浪", "双手伸直不划水，只用胸部和髋部做波浪，感受身体起伏"],
+    ["三次打腿一次划手", "放慢节奏，把每一次划手都落在第二次打腿上"]
+  ]
+};
+
+const pick = a => a[Math.floor(Math.random() * a.length)];
+const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+
+function tools(o) {
+  const pool = o.pool;
+  const fixD = d => Math.max(pool, Math.round(d / pool) * pool);
+  const T = (d, stroke, inten, extra = 1) => d / 100 * (paceOf(o) + (STROKE_ADJ[stroke] || 0)) * INT[inten].f * extra;
+  const reps = (budget, d, stroke, inten, r, max, extra) => clamp(Math.round(budget / (T(d, stroke, inten, extra) + r)), 1, max);
+  // 组数太多时把每组距离加倍，避免出现 30×50 这种课表
+  const fit = (budget, d0, stroke, inten, r, max = 10, extra = 1, maxD = 400) => {
+    let d = fixD(d0);
+    while (Math.round(budget / (T(d, stroke, inten, extra) + r)) > max && d < maxD) d = fixD(d * 2);
+    return { n: reps(budget, d, stroke, inten, r, max, extra), d };
+  };
+  return { pool, fixD, T, fit };
+}
+
+// ---------- 每一行的可选练法 ----------
+function warmOptions(o, t, S, m, B) {
+  const out = [];
+  for (const s of S) out.push({ key: "cont-" + s, title: "连续游", sets: [
+    { n: 1, d: t.fixD(Math.round(Math.min(800, B / t.T(100, s, "easy") * 100) / 50) * 50), stroke: s, inten: "easy", rest: 0, tip: "慢慢游，把身体和呼吸调顺" }] });
+  const part = t.fixD(Math.max(50, Math.round(B / t.T(100, m, "easy", 1.15) * 100 / 4 / 50) * 50));
+  out.push({ key: "skps", title: "游·打腿·划手·游", sets: [
+    { n: 4, d: part, stroke: m, label: "游·打腿·划手·游", inten: "easy", rest: 10, extra: 1.15, adjust: "d",
+      tip: "分四段：完整游、扶板打腿、夹浮漂只划手、再完整游" }] });
+  if (S.length > 1) { const f = t.fit(B, 100, m, "easy", REST.easy, 8);
+    out.push({ key: "mixw", title: "混合泳姿", sets: [{ ...f, stroke: S.join(" / "), strokeKey: m, label: "混合泳姿", inten: "easy", rest: REST.easy, tip: "每组换一种泳姿，轮流来" }] }); }
+  { const f = t.fit(B, 100, m, "easy", REST.easy, 8);
+    out.push({ key: "build", title: "渐快游", sets: [{ ...f, stroke: m, label: "渐快游", inten: "easy", rest: REST.easy, tip: "每组比上一组快一点，最后一组到中等强度" }] }); }
+  { const f = t.fit(B, 100, m, "easy", REST.easy, 8, 1.15);
+    out.push({ key: "kickswim", title: "打腿+游", sets: [{ ...f, stroke: m, label: "打腿+游", inten: "easy", rest: REST.easy, extra: 1.15, tip: "每组前半段扶板打腿，后半段完整游" }] }); }
+  if (S.includes("自由泳")) { const f = t.fit(B, 100, "自由泳", "easy", REST.easy, 8);
+    out.push({ key: "hypo", title: "呼吸递进", sets: [{ ...f, stroke: "自由泳", label: "呼吸递进", inten: "easy", rest: REST.easy, tip: "第 1 组每 3 次划水换气，第 2 组每 5 次，第 3 组每 7 次，然后循环" }] }); }
+  return out;
+}
+
+function drillOptions(o, t, S, m, B) {
+  const out = [];
+  for (const s of S) for (const [name, tip] of DRILLS[s]) {
+    const f = t.fit(B, 50, s, "easy", REST.drill, 6, DRILL); f.n = Math.max(3, f.n);
+    out.push({ key: "d-" + s + "-" + name, title: name, sub: s, sets: [{ ...f, stroke: s, label: name, inten: "easy", rest: REST.drill, extra: DRILL, tip, half: true }] });
+  }
+  const f = t.fit(B, 50, m, "easy", REST.drill, 8, DRILL);
+  out.push({ key: "d-stream", title: "流线型滑行", sub: "不限", sets: [{ ...f, stroke: "不限泳姿", strokeKey: m, label: "流线型滑行", inten: "easy", rest: REST.drill, extra: DRILL, tip: "每次蹬壁后夹紧头部保持流线型，水下海豚腿 3 到 5 次再出水" }] });
+  return out;
+}
+
+function mainOptions(o, t, S, m, B) {
+  const P = t.pool, out = [];
+  const one = (key, title, d0, inten, rest, tip, extra = 1, max = 10, stroke = m) => {
+    const f = t.fit(B, d0, stroke, inten, rest, max, extra, o.focus === "endurance" ? 400 : Math.max(d0 * 2, 100));
+    const block = f.n * (t.T(f.d, stroke, inten, extra) + rest);
+    const k = Math.round(B / (block + 20));
+    if (o.focus !== "endurance" && k >= 2) {   // 短距离组排不满时间，就整组重复几轮
+      const outer = Math.min(k, 3);
+      out.push({ key, title, sub: stroke, composite: true, roundsAdj: true, outer, sets: [{ ...f, stroke, label: "", inten, rest, extra, tip }] });
+      return;
+    }
+    out.push({ key, title, sets: [{ ...f, stroke, label: title, inten, rest, extra, tip }] });
+  };
+  const ladderOpt = (key, title, sizes, tip) => {
+    const time = arr => arr.reduce((s, d) => s + t.T(d, m, "mod") + REST.mod, 0);
+    let ladder = sizes[0].map(t.fixD);
+    for (const s of sizes) { const l = s.map(t.fixD); if (time(l) <= B * 1.1) ladder = l; }
+    const rounds = clamp(Math.round(B / time(ladder)), 1, 4);
+    out.push({ key, title, sets: [{ ladder, rounds, stroke: m, label: title, inten: "mod", rest: REST.mod, tip }] });
+  };
+  const withRecover = (key, title, d0, inten, tip, extra = 1, stroke = m) => {
+    const f = t.fit(B * 0.75, d0, m, inten, REST[inten], 16, extra, d0);   // 速度组保持短距离
+    const r = t.fit(B * 0.25, 100, m, "easy", REST.easy, 4);
+    const block = f.n * (t.T(f.d, m, inten, extra) + REST[inten]) + r.n * (t.T(r.d, m, "easy") + REST.easy);
+    const fast = { ...f, stroke, strokeKey: m, label: title, inten, rest: REST[inten], extra, tip };
+    const easy = { ...r, stroke: m, label: "放松游", inten: "easy", rest: REST.easy, tip: "快游之后慢下来，让心跳回落" };
+    if (B / (block + 20) >= 1.5) {   // 排不满时间：快游 + 4×50 放松作为一轮，重复几轮
+      const e = { ...easy, n: 4, d: t.fixD(50), label: "放松" };
+      const block2 = f.n * (t.T(f.d, m, inten, extra) + REST[inten]) + 4 * (t.T(e.d, m, "easy") + REST.easy) + 20;
+      out.push({ key, title, sub: stroke, composite: true, roundsAdj: true, outer: clamp(Math.round(B / block2), 2, 3), sets: [{ ...fast, label: "" }, e] });
+      return;
+    }
+    out.push({ key, title, sets: [fast, easy] });
+  };
+
+  if (o.focus === "endurance") {
+    one("mid", "中距离分组", 100, "mod", REST.mod, "每组用时尽量一样，后半程不掉速");
+    one("long", "长距离分组", 200, "mod", REST.mod, "找到能一直保持的节奏，每组都游得一样");
+    one("xlong", "超长分组", 400, "mod", 20, "当成一段长距离来游，中间不要停", 1, 8);
+    ladderOpt("pyr", "金字塔", [[50, 100, 150, 100, 50], [50, 100, 150, 200, 150, 100, 50], [100, 200, 300, 200, 100]], "距离先变长再变短，每一段都保持同样的节奏");
+    ladderOpt("ladder", "阶梯递增", [[100, 200, 300], [100, 200, 300, 400], [100, 200, 300, 400, 500]], "距离一段比一段长，速度保持不变");
+    one("desc", "递减游", 100, "mod", REST.mod, "每 4 组一轮，一组比一组快，第 4 组最快");
+    one("neg", "后程加速", 200, "mod", REST.mod, "每组后半程要比前半程快");
+    { // 逐组减一趟
+      const lenT = k => k * t.T(P, m, "mod") + 20;
+      let L = 3; while (L < 14) { let s = 0; for (let k = 1; k <= L + 1; k++) s += lenT(k); if (s > B * 1.05) break; L++; }
+      const ladder = []; for (let k = L; k >= 1; k--) ladder.push(k * P);
+      out.push({ key: "minus1", title: "逐组减一趟", sets: [{ ladder, rounds: 1, stroke: m, label: "逐组减一趟", inten: "mod", rest: 20, tip: `先连续游 ${L} 趟，歇 20 秒，再游 ${L - 1} 趟，一直减到 1 趟` }] });
+    }
+    if (m === "自由泳") one("hypo", "控制呼吸", 100, "mod", REST.mod, "每 5 次划水换一次气，憋不住就改回 3 次");
+    one("pull", "划手组", 200, "mod", REST.mod, "两腿夹浮漂，只用手划，专心抱水和推水", 1.05);
+    one("kick", "打腿组", 100, "mod", REST.mod, "扶板打腿，每组用时尽量一样", KICK);
+  } else if (o.focus === "speed") {
+    withRecover("f50", "50 码快游", 50, "fast", "每组都全力游，休息要歇够，保证下一组还能快");
+    withRecover("f100", "100 码快游", 100, "fast", "前 50 码稳住，后 50 码顶住不掉速");
+    if (P === 25) withRecover("s25", "25 码冲刺", 25, "sprint", "从蹬壁开始全力，一口气冲到对面");
+    if (P === 25) withRecover("broken", "分段 100", 100, "fast", "每组拆成 50 + 25 + 25，中间各歇 10 秒和 5 秒，一段比一段快");
+    else withRecover("broken", "分段 200", 200, "fast", "每组拆成 100 + 50 + 50，中间各歇 10 秒和 5 秒，一段比一段快");
+    withRecover("descf", "递减快游", 50, "fast", "每 4 组一轮，第 1 组中等，第 4 组全力");
+    withRecover("build50", "渐快 50", 50, "fast", "每组从慢到快，最后几下全力");
+    withRecover("negf", "后程冲刺", 100, "fast", "前半程中等，后半程全力冲");
+    if (S.length > 1) withRecover("rot", "各泳姿冲刺", P === 25 ? 25 : 50, "sprint", "每组换一种泳姿，全力游", 1, S.join(" / "));
+    withRecover("kickf", "打腿冲刺", 50, "fast", "扶板全力打腿", KICK);
+  } else {
+    one("count", "数划水", 100, "mod", REST.mod, "数每趟划水次数，下一组试着少划一下");
+    one("half", "半程动作", 50, "mod", REST.mod, "前半趟想着刚才练的动作，后半趟正常游，对比感觉");
+    one("focus200", "分段关注点", 200, "mod", REST.mod, "每 50 码换一个关注点：入水、抱水、推水、打腿");
+    one("drillswim", "练习加游", 100, "mod", REST.mod, "每组前半段做刚才的技术练习，后半段完整游", 1.1);
+    one("rate", "高频划水", 50, "mod", REST.mod, "划水频率加快，但不用蛮力，保持动作完整");
+    one("uw", "水下腿", 50, "mod", 20, "每次蹬壁后水下海豚腿 3 到 5 次再出水，动作做完整");
+    if (m === "自由泳") one("bilat", "两侧换气", 100, "mod", REST.mod, "每 3 次划水换一次气，左右两边轮流");
+    one("kickt", "打腿组", 100, "mod", REST.mod, "扶板打腿，注意从髋部发力而不是膝盖", KICK);
+  }
+  return out;
+}
+
+function coolOptions(o, t, S, m, B) {
+  const d = t.fixD(Math.round(clamp(B / t.T(100, m, "easy") * 100, 100, 400) / 50) * 50), out = [];
+  for (const s of S) out.push({ key: "c-" + s, title: "放松游", sets: [{ n: 1, d, stroke: s, inten: "easy", rest: 0, tip: "游得越慢越好，深呼吸" }] });
+  out.push({ key: "c-slow", title: "越游越慢", sets: [{ n: 4, d: t.fixD(50), stroke: m, label: "越游越慢", inten: "easy", rest: 10, tip: "一组比一组慢，让心跳慢慢降下来" }] });
+  out.push({ key: "c-stretch", title: "放松游+拉伸", sets: [{ n: 1, d, stroke: m, label: "放松游+拉伸", inten: "easy", rest: 0, tip: "游完在池边拉伸肩膀、背部和大腿，各 30 秒" }] });
+  out.push({ key: "c-any", title: "随意游", sets: [{ n: 1, d, stroke: "任意泳姿", strokeKey: m, label: "随意游", inten: "easy", rest: 0, tip: "游自己最舒服的泳姿，怎么放松怎么来" }] });
+  return out;
+}
+
+
+
+// ---------- 行类型 ----------
+const ROW = {
+  warm:  { name: "热身",     color: "--seg-warm",  share: 0.17 },
+  drill: { name: "技术练习", color: "--seg-drill", share: 0.09 },
+  main:  { name: "主项",     color: "--seg-main",  share: 0.53 },
+  extra: { name: "加练",     color: "--seg-main",  share: 0.15 },
+  cool:  { name: "放松",     color: "--seg-cool",  share: 0.12 }
+};
+// 按训练目标分配时间（暂定，等资料回来再调）
+// 依据：USMS 与 Swim England 公开课表，热身 14–21%、技术 0–15%、主项 60–71%、放松 6–14%（按距离）
+const SHARE = {
+  endurance: { warm: 0.18, drill: 0.12, main: 0.60, cool: 0.10 },
+  speed:     { warm: 0.18, drill: 0.07, main: 0.62, cool: 0.13 },
+  technique: { warm: 0.18, drill: 0.17, main: 0.55, cool: 0.10 }   // 技术日：主项本身也围绕技术
+};
+function drillCount(o = S.o) { return o.focus === "technique" && o.time > 30 ? 2 : 1; }
+function shareOf(type) {
+  if (type === "extra") return 0.15;
+  const sh = SHARE[S.o.focus][type];
+  return type === "drill" ? sh / drillCount() : sh;
+}
+const DEFAULT_O = { time: 45, focus: "endurance", pool: 25, unit: "码", strokes: ["自由泳", "蛙泳"], useEquip: false, equip: [] };
+const DEFAULT_PREFS = { pool: "25y", pace: 95, paceUnit: "码" };
+const POOLS = { "25y": [25, "码"], "50y": [50, "码"], "25m": [25, "米"], "50m": [50, "米"] };
+const EQUIP = ["浮板", "浮漂", "脚蹼"];
+// 需要器材的练法
+const NEED = { "c-desc": ["浮板", "浮漂"], skps: ["浮板", "浮漂"], kickswim: ["浮板"], pull: ["浮漂"], kick: ["浮板"], kickf: ["浮板"], kickt: ["浮板"], "d-蛙泳-扶板蛙泳腿": ["浮板"], pullw: ["浮漂"] };
+function paceOf(o) {
+  const pr = S.prefs || DEFAULT_PREFS, unit = (o && o.unit) || "码";
+  let p = pr.pace;
+  if (pr.paceUnit !== unit) p = unit === "米" ? p * 1.0936 : p / 1.0936;
+  return p;
+}
+function eqOf(o) { return o.useEquip ? (o.equip || []) : []; }
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+const ymd = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+
+const S = { view: "home", prefs: null, o: null, draft: null, ms: null, rows: [], cur: null, favs: [], logs: [], calMonth: null, day: null, confirm: null, saving: false };
+
+function strokesOf(o) { return o.strokes.length ? o.strokes : ["自由泳"]; }
+function optionsFor(type) {
+  const o = S.o, t = tools(o), st = strokesOf(o);
+  if (!st.includes(S.ms)) S.ms = pick(st);
+  const B = o.time * 60 * shareOf(type), m = S.ms, eq = eqOf(o);
+  let list = type === "warm" ? warmOptions(o, t, st, m, B) : type === "drill" ? drillOptions(o, t, st, m, B)
+    : type === "cool" ? coolOptions(o, t, st, m, B) : [...compositeOptions(o, t, st, m, B), ...mainOptions(o, t, st, m, B)];
+  if (type === "warm" && eq.includes("浮漂")) {
+    const f = t.fit(B, 100, m, "easy", REST.easy, 8, 1.05);
+    list.push({ key: "pullw", title: "夹浮漂划手", sets: [{ ...f, stroke: m, label: "夹浮漂划手", inten: "easy", rest: REST.easy, extra: 1.05, tip: "两腿夹浮漂只用手划，热身时专心找抱水的感觉" }] });
+  }
+  list = list.filter(op => (NEED[op.key] || []).every(e => eq.includes(e)));
+  if ((type === "main" || type === "extra") && eq.includes("脚蹼")) {
+    const fin = { endurance: ["finE", "脚蹼长游", 200, "mod", "穿脚蹼游，保持身体平直，打腿从髋部发力"],
+                  speed: ["finS", "脚蹼冲刺", 50, "fast", "穿脚蹼全力游，体会更快的速度和划水节奏"],
+                  technique: ["finT", "脚蹼技术游", 100, "mod", "穿脚蹼放慢节奏，把注意力放在划手动作上"] }[o.focus];
+    const f = t.fit(B, fin[2], m, fin[3], REST[fin[3]], 10, 0.9);
+    list.push({ key: fin[0], title: fin[1], sets: [{ ...f, stroke: m, label: fin[1], inten: fin[3], rest: REST[fin[3]], extra: 0.9, tip: fin[4] }] });
+  }
+  return list;
+}
+function randomKey(row, avoid = []) {
+  const list = optionsFor(row.type);
+  let c = list.filter(x => x.key !== row.key && !avoid.includes(x.key));
+  if (!c.length) c = list;
+  row.key = pick(c).key; row.adj = 0;
+}
+function newPlan() {
+  S.ms = pick(strokesOf(S.o));
+  S.rows = ["warm", ...Array(drillCount()).fill("drill"), "main", "cool"].map(type => ({ id: uid(), type, key: null, adj: 0 }));
+  const used = [];
+  for (const r of S.rows) { randomKey(r, r.type === "drill" ? used : []); if (r.type === "drill") used.push(r.key); }
+}
+function applyAdj(set, delta, pool) {
+  const s = { ...set };
+  if (!delta) return s;
+  if (s.ladder) s.rounds = Math.max(1, s.rounds + delta);
+  else if (s.adjust === "d" || s.n === 1) s.d = Math.max(pool, s.d + delta * (s.n === 1 ? 100 : pool));
+  else s.n = Math.max(1, s.n + delta);
+  return s;
+}
+function finishSet(s, t) {
+  const key = s.strokeKey || s.stroke;
+  if (s.ladder) {
+    s.total = s.ladder.reduce((a, d) => a + d, 0) * s.rounds;
+    s.secs = s.rounds * s.ladder.reduce((a, d) => a + t.T(d, key, s.inten, s.extra || 1) + s.rest, 0);
+  } else {
+    s.total = s.n * s.d;
+    s.secs = s.n * t.T(s.d, key, s.inten, s.extra || 1) + Math.max(0, s.n - 1) * s.rest;
+  }
+  if (s.outer > 1) { s.total *= s.outer; s.secs = s.secs * s.outer + (s.outer - 1) * 20; }
+  return s;
+}
+function compute() {
+  const t = tools(S.o);
+  const rows = S.rows.map(r => {
+    const opts = optionsFor(r.type);
+    let opt = opts.find(x => x.key === r.key);
+    if (!opt) { randomKey(r); opt = opts.find(x => x.key === r.key); }
+    const sets = opt.composite
+      ? opt.sets.map(s => finishSet({ ...s, n: opt.roundsAdj ? s.n : Math.max(1, s.n + r.adj), outer: opt.roundsAdj ? Math.max(1, opt.outer + r.adj) : opt.outer }, t))
+      : opt.sets.map((s, i) => finishSet(applyAdj(s, i === 0 ? r.adj : 0, t.pool), t));
+    const dist = sets.reduce((a, s) => a + s.total, 0), secs = sets.reduce((a, s) => a + s.secs, 0) + 30;
+    return { r, def: ROW[r.type], opts, opt, sets, dist, secs };
+  });
+  return { rows, dist: rows.reduce((a, x) => a + x.dist, 0), mins: Math.round(rows.reduce((a, x) => a + x.secs, 0) / 60) };
+}
+
+// ---------- 文字 ----------
+function qty(s) {
+  if (s.ladder) return `${s.rounds} 轮<small>${s.total} 码</small>`;
+  return `${s.n > 1 ? s.n + "×" : ""}${s.d}<small>码</small>`;
+}
+function qtyPlain(s) { return s.ladder ? `${s.rounds} 轮 共 ${s.total} 码` : `${s.n > 1 ? s.n + " × " : ""}${s.d} 码`; }
+function nameOf(s) {
+  const base = s.label || s.stroke;
+  const extra = s.ladder && s.ladder.length > 1 && s.label !== "逐组减一趟" ? " " + s.ladder.join("-") : "";
+  return base + extra + (s.label ? ` · ${s.stroke}` : "");
+}
+function restText(s) { return s.rest && (s.n > 1 || s.ladder) ? `${s.ladder ? "每段" : "每组"}后歇 ${s.rest} 秒` : "不用休息"; }
+function stepText(s) { return s.ladder ? `${s.rounds} 轮` : (s.adjust === "d" ? `每段 ${s.d} 码` : s.n === 1 ? `${s.d} 码` : `${s.n} 组`); }
+function condText(o) { return `${o.time} 分钟 · ${FOCUS[o.focus]} · ${o.pool} 码池 · ${strokesOf(o).join(" ")}`; }
+function planLines(p) { return p.rows.map(x => `${x.def.name}：` + (x.opt.composite ? `${x.opt.title}（${x.sets[0].outer > 1 ? x.sets[0].outer + " 轮，" : ""}${x.sets.map(s => `${s.n > 1 ? s.n + "×" : ""}${s.d}${s.label ? " " + s.label : ""}`).join(" → ")}）` : x.sets.map(s => `${qtyPlain(s)} ${nameOf(s)}`).join("，"))); }
+function dots(lv) { return `<span class="dots" aria-hidden="true">${[1, 2, 3, 4].map(k => `<i class="${k <= lv ? "on" : ""}"></i>`).join("")}</span>`; }
+function cfg() { return { o: S.o, ms: S.ms, rows: S.rows.map(r => ({ type: r.type, key: r.key, adj: r.adj })) }; }
+function loadCfg(c) { S.o = { ...c.o }; S.ms = c.ms; S.rows = c.rows.map(r => ({ ...r, id: uid() })); }
+
+// ---------- 页面 ----------
+const ROOTS = ["home", "plan", "cal", "favs"];
+// 用力程度 1–10 分（RPE）；“能不能说话”是陆上的说法，水里不适用
+const INT_DESC = { easy: "用力 2–3 分：很轻松，动作舒展，呼吸平稳", mod: "用力 4–6 分：呼吸加快，但能一直稳定保持", fast: "用力 7–8 分：很吃力，只能坚持几组", sprint: "用力 9–10 分：全力以赴，组间要歇够" };
+// ---------- 组合式主项（来自 USMS / Swim England 公开课表，成人） ----------
+// 每段：[组数, 距离, 组间歇秒, 强度, 名称, 泳姿]
+const COMPOSITES = [
+  { key: "c-neg", focus: "endurance", title: "后程加速组合", tip: "三段越来越短；每一组都要后半程比前半程快", segs: [[2, 200, 30, "mod"], [4, 100, 20, "mod"], [4, 50, 15, "fast"]] },
+  { key: "c-pyr", focus: "endurance", title: "耐力金字塔", tip: "先变长再变短，后两段加快，最后 100 慢慢游恢复", segs: [[1, 100, 15, "mod"], [1, 200, 20, "mod"], [1, 300, 25, "mod"], [1, 200, 20, "fast"], [1, 100, 15, "fast"], [1, 100, 30, "easy", "放松"]] },
+  { key: "c-tempo", focus: "endurance", title: "节奏组合", tip: "100 稳住节奏，75 加快，最后 100 放松", segs: [[6, 100, 15, "mod"], [4, 75, 10, "fast"], [1, 100, 30, "easy", "放松"]] },
+  { key: "c-step", focus: "endurance", title: "递减阶梯", tip: "距离越来越短、组数越来越多，全程保持同样的节奏", segs: [[1, 300, 20, "mod"], [2, 150, 15, "mod"], [3, 100, 15, "mod"], [4, 75, 10, "mod"], [5, 50, 10, "mod"], [6, 25, 10, "mod"]] },
+  { key: "c-stroke", focus: "technique", title: "划水效率组合", tip: "每趟数划水次数，试着在不减速的同时少划一下", segs: [[4, 100, 20, "mod"], [4, 75, 15, "fast"], [4, 50, 15, "mod"], [1, 100, 30, "easy", "放松"]] },
+  { key: "c-breast", focus: "technique", stroke: "蛙泳", title: "蛙泳时机", rounds: 2, tip: "练划手和蹬腿的先后时机，一轮比一轮缩短停顿", segs: [[4, 50, 20, "mod", "三蹬一划 / 三划一蹬"], [4, 50, 20, "mod", "延迟蛙泳"]] },
+  { key: "c-fly", focus: "technique", stroke: "蝶泳", title: "蝶泳身体位置", rounds: 3, tip: "单臂找低位换气和水平身体，再用完整蝶泳把感觉接上", segs: [[2, 50, 30, "mod", "单臂蝶泳"], [4, 25, 30, "mod", "完整蝶泳"]] },
+  { key: "c-repeat", focus: "speed", title: "重复冲刺", rounds: 10, tip: "每轮 50 快 + 2×25 快 + 50 仰泳放松，轮与轮之间多歇一会儿", segs: [[1, 50, 12, "fast"], [2, 25, 12, "fast"], [1, 50, 25, "easy", "仰泳放松", "仰泳"]] },
+  { key: "c-kickswim", focus: "speed", title: "快游加打腿", rounds: 3, tip: "6×50 快游后接 200 打腿和 100 放松，每轮之间歇 1 到 2 分钟", segs: [[6, 50, 15, "fast"], [1, 200, 60, "mod", "打腿"], [1, 100, 20, "easy", "放松"]] },
+  { key: "c-desc", focus: "speed", title: "递减三段", rounds: 2, tip: "游、划手、打腿各 3×100，每段从易到快", segs: [[3, 100, 30, "fast", "游"], [3, 100, 30, "fast", "夹浮漂划手"], [3, 100, 30, "fast", "扶板打腿"], [1, 50, 20, "easy", "放松"]] }
+];
+function compositeOptions(o, t, st, m, B) {
+  const out = [];
+  for (const c of COMPOSITES) {
+    if (c.focus !== o.focus || (c.stroke && !st.includes(c.stroke))) continue;
+    if (c.segs.some(sg => sg[1] % t.pool)) continue;           // 每段距离必须是泳池长度的整数倍
+    const main = c.stroke || m;
+    const mk = (sg, k) => ({ n: Math.max(1, Math.round(sg[0] * k)), d: sg[1], rest: sg[2], inten: sg[3], label: sg[4] || "", stroke: sg[5] || main,
+      extra: /打腿/.test(sg[4] || "") ? KICK : 1, tip: c.tip });
+    const time = sets => sets.reduce((a, s) => a + s.n * (t.T(s.d, s.stroke, s.inten, s.extra) + s.rest), 0);
+    let sets = c.segs.map(sg => mk(sg, 1)), outer = 1;
+    const one = time(sets) + 20;
+    if (c.rounds) outer = clamp(Math.round(B / one), 1, c.rounds + 2);
+    else { const k = B / one; if (k < 0.85 || k > 1.2) sets = c.segs.map(sg => mk(sg, clamp(k, 0.4, 2))); }
+    out.push({ key: c.key, title: c.title, sub: main, composite: true, src: true, outer, roundsAdj: !!c.rounds, sets });
+  }
+  return out;
+}
+function chainText(x) {
+  const segs = x.sets.map(s => `${s.n > 1 ? s.n + "×" : ""}${s.d}${s.label ? " " + s.label : ""}`).join(" → ");
+  return (x.sets[0].outer > 1 ? "每轮 " : "") + segs;
+}
+function sendoff(s) {   // 出发间隔：游一组的时间 + 组间歇，取整到 5 秒
+  const t = tools(S.o);
+  return Math.ceil((t.T(s.d, s.strokeKey || s.stroke, s.inten, s.extra || 1) + s.rest) / 5) * 5;
+}
+
+// ---------- 休闲模式：按规则挑最合适的练法 ----------
+const FOCI = ["endurance", "speed", "technique"];
+function logsDesc() { return [...S.logs].sort((a, b) => b.date.localeCompare(a.date)); }
+function recentKeys(n = 2) { return new Set(logsDesc().slice(0, n).flatMap(x => x.cfg.rows.map(r => r.key))); }
+function strokeRecency() {   // 每种泳姿最近一次练是第几次之前（0 = 上一次），没练过就没有
+  const rec = {};
+  logsDesc().forEach((x, i) => {
+    const st = new Set([x.cfg.ms, ...x.cfg.rows.filter(r => r.key && r.key.startsWith("d-")).map(r => r.key.split("-")[1])]);
+    st.forEach(s => { if (!(s in rec)) rec[s] = i; });
+  });
+  return rec;
+}
+function weightedPick(list, score) {
+  const w = list.map((x, i) => Math.max(0.0001, score(x, i)));
+  let r = Math.random() * w.reduce((a, b) => a + b, 0);
+  for (let i = 0; i < list.length; i++) { r -= w[i]; if (r <= 0) return list[i]; }
+  return list[list.length - 1];
+}
+function smartPlan() {
+  const st = strokesOf(S.o), rec = strokeRecency(), recent = recentKeys(2);
+  const age = s => (s in rec ? rec[s] : 4);
+  S.ms = weightedPick(st, s => 1 + age(s));                       // 主项优先排久没练的泳姿
+  S.rows = ["warm", ...Array(drillCount()).fill("drill"), "main", "cool"].map(type => ({ id: uid(), type, key: null, adj: 0 }));
+  const used = [];
+  for (const r of S.rows) {
+    let opts = optionsFor(r.type).filter(o => !used.includes(o.key));
+    if (!opts.length) opts = optionsFor(r.type);
+    const firstDrill = r.type === "drill" && !used.length;
+    const pick = weightedPick(opts, (o, i) => {
+      let w = 1 / (1 + i * 0.12);                                   // 经典练法排在前面，权重高一点
+      if (recent.has(o.key)) w *= 0.15;                             // 最近两次练过的往后放
+      if (r.type === "drill") {
+        const s = o.key.split("-")[1];
+        w *= firstDrill ? (s === S.ms ? 4 : 0.5) : 1 + age(s) * 0.5; // 第一项跟主项泳姿，其余优先久没练的泳姿
+      }
+      return w;
+    });
+    r.key = pick.key;
+    if (r.type === "drill") used.push(pick.key);
+  }
+  ensureEquip(); ensureEquip();   // 跑两遍：第一遍换掉的项如果带走了另一种器材，第二遍补回来
+  S.rows.find(r => r.type === "main").adj = progressionAdj();
+}
+function ensureEquip() {   // 开了器材，就保证用上
+  const eq = eqOf(S.o); if (!eq.length) return;
+  const warm = S.rows.find(r => r.type === "warm"), main = S.rows.find(r => r.type === "main");
+  const has = e => S.rows.some(r => (NEED[r.key] || []).includes(e));
+  const can = (type, key) => optionsFor(type).some(o => o.key === key);
+  if (eq.includes("浮板") && eq.includes("浮漂") && !has("浮板") && !has("浮漂") && can("warm", "skps")) warm.key = "skps";
+  if (eq.includes("浮板") && !has("浮板")) warm.key = "kickswim";
+  if (eq.includes("浮漂") && !has("浮漂")) {
+    if (can("main", "pull")) main.key = "pull";
+    else if (warm.key === "kickswim" && can("warm", "skps")) warm.key = "skps";
+    else warm.key = "pullw";
+  }
+  if (eq.includes("脚蹼") && !S.rows.some(r => (r.key || "").startsWith("fin"))) main.key = { endurance: "finE", speed: "finS", technique: "finT" }[S.o.focus];
+}
+function progressionAdj() {   // 同一个目标：上次游完了就加一组，明显没游完就减一组
+  const last = logsDesc().find(l => l.cfg.o.focus === S.o.focus && l.planned);
+  if (!last) return 0;
+  const prev = (last.cfg.rows.find(r => r.type === "main") || {}).adj || 0, ratio = last.dist / last.planned;
+  return ratio >= 0.95 ? Math.min(3, prev + 1) : ratio < 0.85 ? Math.max(-2, prev - 1) : prev;
+}
+function recommend() {   // 首页推荐今天练什么
+  const l = logsDesc();
+  if (!l.length) return { focus: "endurance", why: "还没有训练记录，先从耐力开始打基础" };
+  const idx = f => { const i = l.findIndex(x => x.cfg.o.focus === f); return i < 0 ? 99 : i; };
+  const focus = [...FOCI].sort((a, b) => idx(b) - idx(a))[0];
+  const lastTwo = l.slice(0, 2).map(x => FOCUS[x.cfg.o.focus]).join("、");
+  return { focus, why: idx(focus) === 99 ? `最近还没练过${FOCUS[focus]}` : `最近练的是${lastTwo}，换个目标更全面` };
+}
+
+// 游泳习惯写法：大字 4×200，小字 每组 8 趟 · 组间歇 15 秒
+function bigQty(s) {
+  if (s.ladder) return s.label === "逐组减一趟" ? `${s.total}` : `${s.rounds}轮`;
+  return s.n > 1 ? `${s.n}×${s.d}` : `${s.d}`;
+}
+function subText(s) {
+  const P = S.o.pool;
+  if (s.ladder) {
+    if (s.label === "逐组减一趟") return `从 ${s.ladder[0] / P} 趟减到 1 趟 · 每次歇 ${s.rest} 秒`;
+    return `每轮 ${s.ladder.join("-")} · 每段歇 ${s.rest} 秒`;
+  }
+  if (s.adjust === "d") return `${s.n} 段，每段 ${s.d / P} 趟，歇 ${s.rest} 秒`;
+  if (s.n === 1) return `${s.d / P} 趟，中间不停`;
+  return `${s.half ? "前半练习后半正常游，" : ""}@${fmtPace(sendoff(s))} 出发，每组歇约 ${s.rest} 秒`;
+}
+function plainText(s) { return `${bigQty(s)}${s.ladder && s.label !== "逐组减一趟" ? "" : " 码"}，${subText(s)}`; }
+function dailyTip() {
+  const all = Object.entries(DRILLS).flatMap(([st, l]) => l.map(([n, t]) => ({ st, n, t })));
+  const d = new Date(), k = d.getFullYear() * 400 + d.getMonth() * 31 + d.getDate();
+  return all[k % all.length];
+}
+function topBar(title, backTo, right = "") {
+  if (!backTo) return `<header class="top large"><h1>${title}</h1>${right}</header>`;   // 主页面：左对齐大标题
+  return `<header class="top"><button class="back" data-go="${backTo}">返回</button><h1>${title}</h1>${right || "<span></span>"}</header>`;
+}
+function weekDays() {
+  const now = new Date(), day = (now.getDay() + 6) % 7, out = [];
+  for (let i = 0; i < 7; i++) out.push(ymd(new Date(now.getFullYear(), now.getMonth(), now.getDate() - day + i)));
+  return out;
+}
+function weekStats() {
+  const days = weekDays(), today = ymd(new Date());
+  const list = S.logs.filter(l => l.date >= days[0] && l.date <= today);
+  return { dist: list.reduce((a, l) => a + l.dist, 0), n: list.length };
+}
+const ICON = {
+  home: '<path d="M4 11l8-7 8 7v9h-5v-6h-6v6H4z"/>',
+  plan: '<path d="M8 6h12M8 12h12M8 18h12"/><circle cx="4" cy="6" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="18" r="1"/>',
+  cal: '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
+  favs: '<path d="M12 4l2.5 5.2 5.5.8-4 3.9 1 5.6-5-2.7-5 2.7 1-5.6-4-3.9 5.5-.8z"/>'
+};
+function tabs() {
+  const t = [["home", "首页"], ["plan", "课表"], ["cal", "日历"], ["favs", "收藏"]];
+  return `<nav class="tabs">${t.map(([v, l]) => `<button data-go="${v}" aria-current="${S.view === v ? "page" : "false"}"><svg viewBox="0 0 24 24" aria-hidden="true">${ICON[v]}</svg>${l}</button>`).join("")}</nav>`;
+}
+
+const VIEWS = {
+  home() {
+    const w = weekStats(), days = weekDays(), today = ymd(new Date());
+    const logged = new Set(S.logs.map(l => l.date));
+    const d = new Date();
+    const favs = S.favs.slice(0, 3).map(f => `<button class="li" data-act="loadFav" data-id="${f.id}"><span class="grow"><b>${esc(f.name)}</b><small>${f.dist} 码 · 约 ${f.mins} 分钟</small></span><span class="chev">›</span></button>`).join("");
+    return `<section class="hero-water">
+        <div class="hw-top"><span>${d.getMonth() + 1} 月 ${d.getDate()} 日，星期${"日一二三四五六"[d.getDay()]}</span>
+          <button class="gear" data-act="goSettings" aria-label="设置"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></svg></button></div>
+        <div class="hw-num"><b>${w.dist.toLocaleString()}</b><span>码<br>本周游了 ${w.n} 次</span></div>
+        <div class="wk">${days.map((k, i) => `<div class="${k === today ? "is-today" : ""}"><i class="${logged.has(k) ? "on" : ""}"></i>${"一二三四五六日"[i]}</div>`).join("")}</div>
+      </section>
+      <button class="pb blue big" data-act="start"><b>开始今天的训练</b><span>选好时长和目标，生成一份课表</span></button>
+      ${recCard()}
+      ${tipCard()}
+      ${todayCard()}
+      ${favs ? `<div class="sec-title"><span>最近收藏</span><button data-go="favs">全部 ›</button></div><div class="list">${favs}</div>` : ""}
+      ${recentLogs()}`;
+  },
+
+  setup() {
+    const d = S.draft;
+    const seg = (key, items) => `<div class="seg">${items.map(([v, l]) => `<button data-act="set" data-k="${key}" data-v="${v}" aria-pressed="${d[key] == v}">${l}</button>`).join("")}</div>`;
+    return topBar("安排训练", S.back || "home") + `
+      <div class="field"><span class="label">今天游多久</span>${seg("time", [[30, "30 分"], [45, "45 分"], [60, "60 分"], [90, "90 分"]])}</div>
+      <div class="field"><span class="label">今天练什么</span>${seg("focus", [["endurance", "耐力"], ["speed", "速度"], ["technique", "技术"]])}</div>
+      <div class="field"><span class="label">今天游哪些泳姿</span><div class="chips">${["自由泳", "仰泳", "蛙泳", "蝶泳"].map(s =>
+        `<button class="chip" data-act="stroke" data-v="${s}" aria-pressed="${d.strokes.includes(s)}">${s}</button>`).join("")}</div></div>
+      <div class="list">
+        <button class="li toggle" data-act="equipToggle" aria-pressed="${!!d.useEquip}"><span class="grow"><b>用器材</b><small>${d.useEquip ? (d.equip.length ? "已选：" + d.equip.join("、") : "勾选今天带了什么") : "关闭时，不安排需要器材的练法"}</small></span><span class="sw"><i></i></span></button>
+        ${d.useEquip ? `<div class="eqp">${EQUIP.map(e => `<button class="chip" data-act="equipItem" data-v="${e}" aria-pressed="${d.equip.includes(e)}">${e}</button>`).join("")}</div>` : ""}
+      </div>
+      <button class="pb blue full" data-act="gen">生成课表</button>
+      <button class="poolline" data-act="goSettings">泳池：${S.prefs.pool.slice(0, 2)} ${POOLS[S.prefs.pool][1]} · 我的速度 ${fmtPace(S.prefs.pace)}/100${S.prefs.paceUnit} <b>修改 ›</b></button>`;
+  },
+
+  settings() {
+    const pr = S.prefs;
+    return topBar("设置", S.setBack || "home") + `
+      <div class="field"><span class="label">训练模式</span>
+        <div class="seg"><button aria-pressed="true">休闲</button><button disabled style="opacity:.45">系统训练</button></div>
+        <p class="note">休闲模式适合一周游一到三次：按规则挑合适的练法，不重复最近练过的，泳姿和目标轮着来，游完了下次稍微加一点量。系统训练模式（游泳队、备赛用）正在整理资料，之后开放。</p></div>
+      <div class="field"><span class="label">常用泳池</span>
+        <div class="seg seg2">${Object.entries(POOLS).map(([k, [len, u]]) => `<button data-act="setPool" data-v="${k}" aria-pressed="${pr.pool === k}">${len} ${u}</button>`).join("")}</div>
+        <p class="note">平时在哪个泳池游就选哪个。去别的泳池时回这里改一下，所有距离和单位都会跟着变。</p></div>
+      <div class="field"><span class="label">我的速度</span>
+        <div class="panel"><span>中等强度游 100 ${pr.paceUnit}，大概用时</span>
+          <div class="stepper"><button data-act="paceDec" aria-label="快 5 秒">−</button><span class="num" style="font-size:26px">${fmtPace(pr.pace)}</span><button data-act="paceInc" aria-label="慢 5 秒">＋</button></div>
+          <button class="linkish" data-act="paceReset">恢复默认（${fmtPace(pr.paceUnit === "米" ? Math.round(95 * 1.0936) : 95)}）</button></div>
+        <p class="note">每按一下改 5 秒。课表的组数和预计时间会按这个速度来算：游得快的人同样时间会排更多组。</p></div>`;
+  },
+
+  plan() {
+    if (!S.rows.length) return topBar("今日课表") + `<p class="empty-note">还没有课表。</p><button class="pb blue full" data-act="start">开始今天的训练</button>`;
+    const p = compute();
+    const rows = p.rows.map((x, i) => {
+      const s = x.sets[0], mins = Math.max(1, Math.round(x.secs / 60)), comp = x.opt.composite;
+      const name = comp ? `${esc(x.opt.title)} <em>${esc(x.opt.sub)}</em>` : `${esc(s.label || s.stroke)}${s.label ? ` <em>${esc(s.stroke)}</em>` : ""}`;
+      const after = !comp && x.sets.length > 1 ? `<span class="pl">接着 ${bigQty(x.sets[1])} ${esc(x.sets[1].label || x.sets[1].stroke)} · ${INT[x.sets[1].inten].label}</span>` : "";
+      const big = comp ? (s.outer > 1 ? `${s.outer}轮` : `${x.dist}`) : bigQty(s);
+      const body = `<span class="no">${i + 1}</span>
+          <span class="grow"><span class="ph">${x.def.name} · ${comp ? "组合主项" : INT[s.inten].label} · 约 ${mins} 分钟</span><span class="nm">${name}</span>
+            <span class="pl">${esc(comp ? chainText(x) : subText(s))}</span>${after}</span>
+          <span class="bq">${big}</span>`;
+      const mainCls = x.r.type === "main" || x.r.type === "extra" ? " is-main" : "";
+      const phaseCls = " ph-" + (x.r.type === "extra" ? "main" : x.r.type);
+      if (S.editing) return `<div class="erow${mainCls}${phaseCls}" style="--seg:var(${x.def.color})">${body}
+          <span class="eb"><button data-act="swRand" data-id="${x.r.id}">换</button><button class="d" data-act="swDel" data-id="${x.r.id}">删</button></span></div>`;
+      return `<div class="swipe${S.swiped === x.r.id ? " open" : ""}" data-id="${x.r.id}">
+        <div class="acts"><button class="r" data-act="swRand" data-id="${x.r.id}">随机</button><button class="d" data-act="swDel" data-id="${x.r.id}">删除</button></div>
+        <button class="row${mainCls}${phaseCls}" style="--seg:var(${x.def.color})" data-act="open" data-id="${x.r.id}">${body}</button></div>`;
+    }).join("");
+    const saved = isSaved();
+    return topBar("今日课表", null, `<button class="right" data-act="editToggle">${S.editing ? "完成" : "编辑"}</button>`) + `
+      <div class="sum">
+        <div class="sum-row"><b>${p.dist.toLocaleString()}<small>码</small></b><b>${p.mins}<small>分钟</small></b><b>${p.dist / S.o.pool}<small>趟</small></b></div>
+        <div class="cond"><span>${condText(S.o)}</span><button data-act="edit">修改条件</button></div>
+      </div>
+      <p class="guide">${S.editing ? "点「换」随机换一个练法，点「删」去掉这一项。改完点右上角「完成」。" : `按顺序从 1 游到 ${p.rows.length}。点任意一项看动作怎么做；往左滑可以换掉或删除。`}</p>
+      <div class="list lane">${rows}<button class="add" data-act="add">＋ 加一组</button></div>
+      <button class="linkish" data-act="copy">复制课表文字</button>
+      <div class="bar"><button class="pb yellow" data-act="reroll">全部随机</button><button class="pb pink" data-act="fav">${saved ? "已收藏 ✓" : "收藏"}</button><button class="pb green" data-go="done">完成训练</button></div>`;
+  },
+
+  detail() {
+    const p = compute(), x = p.rows.find(r => r.r.id === S.cur);
+    if (!x) { S.view = "plan"; return VIEWS.plan(); }
+    const s = x.sets[0];
+    if (x.opt.composite) return compositeDetail(x);
+    const more = x.sets.slice(1).map(e => `<div class="extra-line">接着：${qtyPlain(e)} ${esc(nameOf(e))}，${INT[e.inten].label}，${restText(e)}</div>`).join("");
+    const isMain = x.r.type === "main" || x.r.type === "extra";
+    const st = strokesOf(S.o);
+    const strokeChips = isMain && st.length > 1 ? `<div class="field"><span class="label">主项泳姿</span><div class="chips">${st.map(v =>
+      `<button class="chip" data-act="ms" data-v="${v}" aria-pressed="${v === S.ms}">${v}</button>`).join("")}</div></div>` : "";
+    const t = tools(S.o);
+    const opts = x.opts.map(op => {
+      const f = finishSet({ ...op.sets[0] }, t);
+      return `<button class="li" data-act="pick" data-key="${esc(op.key)}" aria-pressed="${op.key === x.r.key}"><span class="grow"><b>${esc(op.title)}</b><small>${esc(op.sub || op.sets[0].stroke)}</small></span><span class="side num">${qtyPlain(f)}</span></button>`;
+    }).join("");
+    return topBar(x.def.name, "plan") + `
+      <div class="hero">
+        <span class="ph">${x.def.name}</span>
+        <h2>${esc(nameOf(s))}</h2>
+        <span class="q">${qty(s)}</span>
+        <div class="facts"><span>${dots(INT[s.inten].lv)}${INT[s.inten].label}</span><span>${restText(s)}</span><span>约 ${Math.max(1, Math.round(x.secs / 60))} 分钟</span></div>
+      </div>
+      <div class="panel steps">
+        <div><span class="label">怎么游</span><p>${esc(plainText(s))}。</p></div>
+        <div><span class="label">用多大力</span><p>${INT[s.inten].label}：${INT_DESC[s.inten]}。</p></div>
+        <div><span class="label">动作要点</span><p>${esc(s.tip)}。</p></div>${more}
+      </div>
+      <div class="field"><span class="label">调整</span>
+        <div class="stepper"><button data-act="dec" aria-label="减少">−</button><span>${stepText(s)}</span><button data-act="inc" aria-label="增加">＋</button></div></div>
+      ${optListHtml(x)}`;
+  },
+
+  done() {
+    const p = compute();
+    return topBar("完成训练", "plan") + `
+      <div class="panel"><span class="label">日期</span><input class="input" type="date" id="dDate" value="${ymd(new Date())}">
+        <span class="label">实际游了多少码</span><input class="input num" type="number" inputmode="numeric" id="dDist" value="${p.dist}" min="0" step="25">
+        <span class="label">备注（可不填）</span><textarea class="input" id="dNote" maxlength="200" placeholder="比如：最后两组没游完，肩膀有点酸"></textarea></div>
+      <button class="pb green full" data-act="log">记到日历里</button>`;
+  },
+
+  favs() {
+    const items = S.favs.map(f => S.renaming === f.id
+      ? `<div class="li"><input class="input" id="rn" maxlength="30" value="${esc(f.name)}"><button class="side" data-act="renameOk" data-id="${f.id}" style="min-height:44px;color:var(--aqua);font-weight:700">保存</button></div>`
+      : `<div class="li"><button class="grow" style="text-align:left" data-act="loadFav" data-id="${f.id}"><b>${esc(f.name)}</b><small>${f.dist} 码 · 约 ${f.mins} 分钟 · ${condText(f.cfg.o)}</small></button>
+      <button class="side" data-act="rename" data-id="${f.id}" style="min-height:44px;color:var(--aqua)">改名</button>
+      <button class="side" data-act="delFav" data-id="${f.id}" style="min-height:44px;color:var(--rope)">${S.confirm === f.id ? "确认删除" : "删除"}</button></div>`).join("");
+    return topBar("我的收藏") + (items ? `<div class="list">${items}</div>` : `<p class="empty-note">还没有收藏。在课表页点「收藏」，喜欢的课表就会存在这里。</p>`);
+  },
+
+  cal() {
+    const [y, m] = S.calMonth.split("-").map(Number);
+    const first = new Date(y, m - 1, 1), days = new Date(y, m, 0).getDate(), lead = (first.getDay() + 6) % 7;
+    const byDay = {}; for (const l of S.logs) (byDay[l.date] = byDay[l.date] || []).push(l);
+    const mk = `${y}-${String(m).padStart(2, "0")}`;
+    const monthLogs = S.logs.filter(l => l.date.startsWith(mk));
+    const w = weekStats(), today = ymd(new Date());
+    let cells = "一二三四五六日".split("").map(d => `<span class="wd">${d}</span>`).join("");
+    for (let i = 0; i < lead; i++) cells += `<span class="day empty"></span>`;
+    for (let d = 1; d <= days; d++) {
+      const key = `${mk}-${String(d).padStart(2, "0")}`, list = byDay[key] || [];
+      const dist = list.reduce((a, l) => a + l.dist, 0);
+      const lv = dist ? Math.min(4, 1 + Math.floor(dist / 1000)) : 0;
+      cells += `<button class="day${list.length ? " has" : ""}${key === today ? " today" : ""}" style="--lv:${lv}" data-act="day" data-d="${key}"><span>${d}</span>${dist ? `<small>${dist}</small>` : ""}</button>`;
+    }
+    return topBar("训练日历") + `
+      <div class="stats"><div class="stat"><b>${w.dist}</b><small>本周 · ${w.n} 次</small></div><div class="stat"><b>${monthLogs.reduce((a, l) => a + l.dist, 0)}</b><small>${m} 月 · ${monthLogs.length} 次</small></div></div>
+      <div class="mon"><button data-act="mon" data-d="-1" aria-label="上个月">‹</button><b>${y} 年 ${m} 月</b><button data-act="mon" data-d="1" aria-label="下个月">›</button></div>
+      <div class="cal">${cells}</div>
+      ${S.logs.length ? "" : `<p class="empty-note">游完之后在课表页点「完成训练」，这里就会记下来。</p>`}`;
+  },
+
+  day() {
+    const list = S.logs.filter(l => l.date === S.day);
+    const [y, m, d] = S.day.split("-").map(Number);
+    const items = list.map(l => `<div class="panel entry">
+        <b>${l.dist} 码 · ${FOCUS[l.cfg.o.focus]} · 计划约 ${l.mins} 分钟</b>
+        ${l.note ? `<span>${esc(l.note)}</span>` : ""}
+        <ul>${l.lines.map(x => `<li>${esc(x)}</li>`).join("")}</ul>
+        <div class="two"><button class="btn alt" data-act="again" data-id="${l.id}">再练一次</button><button class="btn warn" data-act="delLog" data-id="${l.id}">${S.confirm === l.id ? "确认删除" : "删除记录"}</button></div>
+      </div>`).join("");
+    return topBar(`${m} 月 ${d} 日`, "cal") + (items || `<p class="empty-note">这一天没有训练记录。</p>`);
+  }
+};
+
+function todayCard() {
+  if (!S.rows.length) return "";
+  const p = compute();
+  const items = p.rows.map((x, i) => `<li><span>${i + 1}. ${x.def.name}</span><span class="num">${qtyPlain(x.sets[0])}</span></li>`).join("");
+  return `<div class="sec-title"><span>当前课表</span><button data-go="plan">去看 ›</button></div>
+    <div class="list today-card" data-go="plan" role="button" tabindex="0"><span class="tc-h"><b class="num">${p.dist} 码</b><span>约 ${p.mins} 分钟 · ${FOCUS[S.o.focus]}</span></span><ul>${items}</ul></div>`;
+}
+function recentLogs() {
+  const l = [...S.logs].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 3);
+  if (!l.length) return "";
+  return `<div class="sec-title"><span>最近训练</span><button data-go="cal">日历 ›</button></div><div class="list">${l.map(x => {
+    const [, m, d] = x.date.split("-").map(Number);
+    return `<button class="li" data-act="day" data-d="${x.date}"><span class="grow"><b>${m} 月 ${d} 日 · ${FOCUS[x.cfg.o.focus]}</b><small>${x.note ? esc(x.note) : `计划约 ${x.mins} 分钟`}</small></span><span class="side num">${x.dist} 码</span><span class="chev">›</span></button>`;
+  }).join("")}</div>`;
+}
+function compositeDetail(x) {
+  const s0 = x.sets[0], P = S.o.pool;
+  const segs = x.sets.map((s, i) => `<li><b>${s.n > 1 ? s.n + "×" : ""}${s.d}${s.label ? " " + esc(s.label) : ""}</b>
+      <span>${s.d / P} 趟${s.n > 1 ? ` · @${fmtPace(sendoff(s))} 出发` : ""} · 歇 ${s.rest} 秒 · ${INT[s.inten].label}${s.stroke !== x.opt.sub ? " · " + esc(s.stroke) : ""}</span></li>`).join("");
+  const opts = optListHtml(x);
+  return topBar(x.def.name, "plan") + `
+    <div class="hero">
+      <span class="ph">${x.def.name}${x.opt.src ? " · 组合主项 · 来自 USMS / Swim England 公开课表" : ` · 分 ${s0.outer} 轮`}</span>
+      <h2>${esc(x.opt.title)} · ${esc(x.opt.sub)}</h2>
+      <span class="q">${s0.outer > 1 ? `${s0.outer} 轮<small>共 ${x.dist} 码</small>` : `${x.dist}<small>码</small>`}</span>
+      <div class="facts"><span>约 ${Math.max(1, Math.round(x.secs / 60))} 分钟</span>${s0.outer > 1 ? "<span>每轮之间多歇 20 秒左右</span>" : ""}</div>
+    </div>
+    <div class="panel steps">
+      <div><span class="label">${s0.outer > 1 ? "每一轮按顺序游" : "按顺序游"}</span><ol class="segs">${segs}</ol></div>
+      <div><span class="label">要点</span><p>${esc(s0.tip)}。</p></div>
+      <div><span class="label">强度说明</span><p>${[...new Set(x.sets.map(s => s.inten))].map(k => `${INT[k].label}：${INT_DESC[k]}`).join("<br>")}。</p></div>
+    </div>
+    <div class="field"><span class="label">调整</span>
+      <div class="stepper"><button data-act="dec" aria-label="减少">−</button><span>${x.opt.roundsAdj ? `${s0.outer} 轮` : `每段组数 ${x.r.adj > 0 ? "+" : ""}${x.r.adj}`}</span><button data-act="inc" aria-label="增加">＋</button></div></div>
+    ${opts}`;
+}
+function optListHtml(x) {
+  const t = tools(S.o);
+  const st = strokesOf(S.o), isMain = x.r.type === "main" || x.r.type === "extra";
+  const chips = isMain && st.length > 1 ? `<div class="field"><span class="label">主项泳姿</span><div class="chips">${st.map(v =>
+    `<button class="chip" data-act="ms" data-v="${v}" aria-pressed="${v === S.ms}">${v}</button>`).join("")}</div></div>` : "";
+  const items = x.opts.map(op => {
+    const total = op.sets.reduce((a, s) => a + finishSet({ ...s }, t).total, 0);
+    const q = op.composite ? (op.outer > 1 ? `${op.outer} 轮 · ${total} 码` : `${total} 码`) : qtyPlain(finishSet({ ...op.sets[0] }, t));
+    return `<button class="li" data-act="pick" data-key="${esc(op.key)}" aria-pressed="${op.key === x.r.key}"><span class="grow"><b>${esc(op.title)}${op.composite ? ' <em class="tag">组合</em>' : ""}</b><small>${esc(op.sub || op.sets[0].stroke)}</small></span><span class="side num">${q}</span></button>`;
+  }).join("");
+  return `${chips}<div class="field"><span class="label">换一个练法 · ${x.opts.length} 种</span><div class="list opts">${items}</div></div>`;
+}
+function recCard() {
+  const r = recommend();
+  return `<button class="quick" data-act="recGo" data-v="${r.focus}"><span><b>今日推荐：${FOCUS[r.focus]}</b><small>${r.why}</small></span><b class="go">按推荐生成 ›</b></button>`;
+}
+function tipCard() {
+  const t = dailyTip();
+  return `<div class="tip-card"><span class="label">今日小贴士 · ${t.st}</span><b>${esc(t.n)}</b><p>${esc(t.t)}。</p></div>`;
+}
+function cfgKey(c) { return JSON.stringify([c.o, c.ms, c.rows.map(r => [r.type, r.key, r.adj])]); }
+function isSaved() { const k = cfgKey(cfg()); return S.favs.some(f => cfgKey(f.cfg) === k); }
+
+function fmtPace(sec) { sec = Math.round(sec); return `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, "0")}`; }
+function unitize(str) { return S.o && S.o.unit === "米" ? str.replace(/码/g, "米") : str; }
+function applyPool() {
+  const [len, u] = POOLS[S.prefs.pool];
+  for (const o of [S.o, S.draft]) if (o) { o.pool = len; o.unit = u; }
+}
+
+function render() {
+  const root = ROOTS.includes(S.view);
+  document.getElementById("app").innerHTML = unitize(VIEWS[S.view]() + (root ? tabs() : ""));
+  document.body.classList.toggle("has-tabs", root);
+  save();
+}
+function go(v) {
+  const from = S.view;
+  if (from === "plan") S.planScroll = window.scrollY || 0;   // 记住课表看到哪里
+  S.view = v; S.confirm = null; S.renaming = null; S.swiped = null; S.editing = false; render();
+  window.scrollTo(0, v === "plan" && (from === "detail" || from === "done") ? (S.planScroll || 0) : 0);
+}
+let undoFn = null;
+function toast(msg, undo) {
+  const t = document.getElementById("toast");
+  t.innerHTML = esc(unitize(msg)) + (undo ? `<button id="undoBtn">撤销</button>` : "");
+  undoFn = undo || null; t.hidden = false;
+  clearTimeout(toast.t); toast.t = setTimeout(() => { t.hidden = true; undoFn = null; }, undo ? 4000 : 2200);
+}
+document.getElementById("toast").addEventListener("click", e => {
+  if (e.target.id === "undoBtn" && undoFn) { undoFn(); undoFn = null; document.getElementById("toast").hidden = true; render(); }
+});
+
+function save() { try { localStorage.setItem("swim2", JSON.stringify({ prefs: S.prefs, o: S.o, ms: S.ms, rows: S.rows, favs: S.favs, logs: S.logs })); } catch (e) {} }
+function load() {
+  try {
+    const d = JSON.parse(localStorage.getItem("swim2") || "null");
+    if (d) { S.prefs = d.prefs; S.o = d.o; S.ms = d.ms; S.rows = d.rows || []; S.favs = d.favs || []; S.logs = d.logs || []; }
+  } catch (e) {}
+  if (!S.prefs) S.prefs = { ...DEFAULT_PREFS };
+  S.o = { ...DEFAULT_O, ...(S.o || {}) };
+  applyPool();
+  const n = new Date(); S.calMonth = `${n.getFullYear()}-${String(n.getMonth() + 1).padStart(2, "0")}`;
+}
+
+// ---------- 左滑 ----------
+const APP = document.getElementById("app");
+let sw = null, justSwiped = false;
+APP.addEventListener("pointerdown", e => {
+  const row = e.target.closest(".swipe .row");
+  if (!row || S.editing) return;
+  const box = row.parentElement;
+  sw = { el: row, box, x: e.clientX, y: e.clientY, dx: 0, moved: false, base: box.classList.contains("open") ? -152 : 0 };
+});
+APP.addEventListener("pointermove", e => {
+  if (!sw) return;
+  const dx = e.clientX - sw.x, dy = e.clientY - sw.y;
+  if (!sw.moved) {
+    if (Math.abs(dx) < 8) return;
+    if (Math.abs(dy) > Math.abs(dx)) { sw = null; return; }
+    sw.moved = true; sw.el.classList.add("drag");
+  }
+  sw.dx = dx;
+  sw.el.style.transform = `translateX(${Math.max(-170, Math.min(0, sw.base + dx))}px)`;
+});
+function endSwipe() {
+  if (!sw) return;
+  const s = sw; sw = null;
+  if (!s.moved) return;
+  s.el.classList.remove("drag"); s.el.style.transform = "";
+  const open = s.base + s.dx < -60;
+  APP.querySelectorAll(".swipe.open").forEach(b => { if (b !== s.box) b.classList.remove("open"); });
+  s.box.classList.toggle("open", open);
+  S.swiped = open ? s.box.dataset.id : null;
+  justSwiped = true; setTimeout(() => justSwiped = false, 60);
+}
+APP.addEventListener("pointerup", endSwipe);
+APP.addEventListener("pointercancel", endSwipe);
+
+// ---------- 点击 ----------
+APP.addEventListener("click", e => {
+  if (justSwiped) return;
+  const b = e.target.closest("[data-go],[data-act]"); if (!b) return;
+  if (b.dataset.go) return go(b.dataset.go);
+  const a = b.dataset.act, row = S.rows.find(r => r.id === S.cur);
+  switch (a) {
+    case "start": S.draft = JSON.parse(JSON.stringify(S.o)); S.back = S.view === "plan" ? "plan" : "home"; return go("setup");
+    case "edit": S.draft = JSON.parse(JSON.stringify(S.o)); S.back = "plan"; return go("setup");
+    case "quick": newPlan(); toast("按上次的条件生成好了"); return go("plan");
+    case "set": S.draft[b.dataset.k] = isNaN(+b.dataset.v) ? b.dataset.v : +b.dataset.v; break;
+    case "stroke": { const v = b.dataset.v, l = S.draft.strokes; S.draft.strokes = l.includes(v) ? l.filter(x => x !== v) : [...l, v]; break; }
+    case "gen":
+      if (!S.draft.strokes.length) S.draft.strokes = ["自由泳"];
+      if (S.draft.useEquip && !S.draft.equip.length) S.draft.useEquip = false;
+      S.o = S.draft; applyPool(); smartPlan(); return go("plan");
+    case "recGo": S.o.focus = b.dataset.v; applyPool(); smartPlan(); toast(`按推荐生成了${FOCUS[b.dataset.v]}课表`); return go("plan");
+    case "equipToggle": S.draft.useEquip = !S.draft.useEquip; if (S.draft.useEquip && !S.draft.equip) S.draft.equip = []; break;
+    case "equipItem": { const v = b.dataset.v, l = S.draft.equip || []; S.draft.equip = l.includes(v) ? l.filter(x => x !== v) : [...l, v]; break; }
+    case "goSettings": S.setBack = S.view; return go("settings");
+    case "setPool": {
+      const u = POOLS[b.dataset.v][1];
+      if (u !== S.prefs.paceUnit) { S.prefs.pace = Math.round(u === "米" ? S.prefs.pace * 1.0936 : S.prefs.pace / 1.0936); S.prefs.paceUnit = u; }
+      S.prefs.pool = b.dataset.v; applyPool(); toast(`泳池改成 ${POOLS[b.dataset.v][0]} ${u}`); break;
+    }
+    case "paceInc": S.prefs.pace = Math.min(240, S.prefs.pace + 5); break;
+    case "paceDec": S.prefs.pace = Math.max(50, S.prefs.pace - 5); break;
+    case "paceReset": S.prefs.pace = S.prefs.paceUnit === "米" ? Math.round(95 * 1.0936) : 95; break;
+    case "reroll": newPlan(); toast("换了一套新课表"); break;
+    case "open":
+      if (S.swiped && !S.editing) { S.swiped = null; break; }
+      if (S.editing) return;
+      S.cur = b.dataset.id; return go("detail");
+    case "editToggle": S.editing = !S.editing; S.swiped = null; break;
+    case "swRand": { const r = S.rows.find(x => x.id === b.dataset.id); randomKey(r); if (!S.editing) S.swiped = null; break; }
+    case "swDel": {
+      if (S.rows.length <= 1) { toast("至少要留一组"); break; }
+      const i = S.rows.findIndex(x => x.id === b.dataset.id), removed = S.rows[i];
+      S.rows.splice(i, 1); if (!S.editing) S.swiped = null;
+      toast(`已删除 ${ROW[removed.type].name}`, () => S.rows.splice(i, 0, removed));
+      break;
+    }
+    case "add": { const r = { id: uid(), type: "extra", key: null, adj: 0 }; randomKey(r); const i = S.rows.findIndex(x => x.type === "cool"); S.rows.splice(i < 0 ? S.rows.length : i, 0, r); S.cur = r.id; return go("detail"); }
+    case "pick": if (row.key !== b.dataset.key) { row.key = b.dataset.key; row.adj = 0; } toast("已换上"); return go("plan");
+    case "ms": S.ms = b.dataset.v; for (const r of S.rows) if (r.type === "main" || r.type === "extra") r.adj = 0; break;
+    case "inc": row.adj++; break;
+    case "dec": {
+      const x = compute().rows.find(x => x.r.id === S.cur), s = x.sets[0];
+      const atMin = x.opt.composite ? (x.opt.roundsAdj ? s.outer <= 1 : x.sets.every(e => e.n <= 1))
+        : s.ladder ? s.rounds <= 1 : (s.adjust === "d" || s.n === 1) ? s.d <= S.o.pool : s.n <= 1;
+      if (!atMin) row.adj--; break;
+    }
+    case "fav": {
+      if (isSaved()) { toast("这份课表已经收藏过了"); break; }
+      const p = compute(), d = new Date();
+      S.favs.unshift({ id: uid(), name: `${d.getMonth() + 1}/${d.getDate()} ${FOCUS[S.o.focus]} ${p.dist} 码`, dist: p.dist, mins: p.mins, cfg: JSON.parse(JSON.stringify(cfg())) });
+      toast("已收藏，在「收藏」里可以找到"); break;
+    }
+    case "rename": S.renaming = b.dataset.id; break;
+    case "renameOk": { const f = S.favs.find(x => x.id === b.dataset.id), v = document.getElementById("rn").value.trim(); if (f && v) f.name = v; S.renaming = null; break; }
+    case "loadFav": { const f = S.favs.find(x => x.id === b.dataset.id); loadCfg(f.cfg); toast(`已载入：${f.name}`); return go("plan"); }
+    case "delFav": if (S.confirm !== b.dataset.id) { S.confirm = b.dataset.id; break; } S.favs = S.favs.filter(f => f.id !== b.dataset.id); S.confirm = null; break;
+    case "log": {
+      const p = compute(), date = document.getElementById("dDate").value || ymd(new Date());
+      const dist = Math.max(0, Math.round(+document.getElementById("dDist").value || 0));
+      S.logs.push({ id: uid(), date, dist, planned: p.dist, mins: p.mins, note: document.getElementById("dNote").value.trim(), lines: planLines(p), cfg: cfg() });
+      S.calMonth = date.slice(0, 7); toast("已记到日历"); return go("cal");
+    }
+    case "mon": { const [y, m] = S.calMonth.split("-").map(Number), d = new Date(y, m - 1 + +b.dataset.d, 1); S.calMonth = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`; break; }
+    case "day": S.day = b.dataset.d; return go("day");
+    case "again": { const l = S.logs.find(x => x.id === b.dataset.id); loadCfg(l.cfg); toast("已载入这份课表"); return go("plan"); }
+    case "delLog": if (S.confirm !== b.dataset.id) { S.confirm = b.dataset.id; break; } S.logs = S.logs.filter(l => l.id !== b.dataset.id); S.confirm = null; break;
+    case "copy": {
+      const p = compute(), text = unitize(`泳池课表：共 ${p.dist} 码，约 ${p.mins} 分钟（${condText(S.o)}）\n` + planLines(p).join("\n"));
+      const fb = () => { const ta = document.createElement("textarea"); ta.value = text; document.body.appendChild(ta); ta.select(); try { document.execCommand("copy"); toast("已复制"); } catch (err) { toast("复制没成功，可以长按文字手动复制"); } ta.remove(); };
+      try { navigator.clipboard.writeText(text).then(() => toast("已复制，可以发给朋友"), fb); } catch (err) { fb(); }
+      return;
+    }
+  }
+  render();
+});
+
+load();
+render();
+
+/* 首页池底光影 */
+(function () {
+  const W = 96, H = 200, still = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let img = null, last = 0, drawnStill = null;
+  function draw(cv, t) {
+    if (cv.width !== W) { cv.width = W; cv.height = H; }
+    const ctx = cv.getContext("2d"); if (!img) img = ctx.createImageData(W, H);
+    let k = 0;
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+      const u = x / 11, v = y / 11;
+      const a = Math.sin(u + t) + Math.sin(v * 1.3 - t * 0.8) + Math.sin((u + v) * 0.9 + t * 0.6) + Math.sin(Math.hypot(u - 4, v - 3) * 1.4 - t);
+      const lum = Math.pow(1 - Math.min(1, Math.abs(a) / 1.6), 5);
+      img.data[k++] = 150 + 105 * lum; img.data[k++] = 225 + 30 * lum; img.data[k++] = 255; img.data[k++] = 255 * lum;
+    }
+    ctx.putImageData(img, 0, 0);
+  }
+  function loop(ts) {
+    const cv = document.getElementById("water");
+    if (cv && !document.hidden) {
+      if (still) { if (drawnStill !== cv) { draw(cv, 1.3); drawnStill = cv; } }
+      else if (ts - last > 50) { draw(cv, ts / 1600); last = ts; }
+    }
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+})();
+
+</script>
+
+</body>
+</html>
