@@ -1,0 +1,497 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="泳池课表">
+<meta name="theme-color" content="#062e45">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" href="icon-512.png">
+<link rel="manifest" href="manifest.json">
+<title>今日泳池课表</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,500;0,700;1,700;1,800&family=Noto+Sans+SC:wght@400;500;700;900&family=ZCOOL+QingKe+HuangYou&display=swap">
+<style>
+/* Layout: a deep-water hero with moving caustic light carries the day's totals; settings sit in a light deck card; the workout runs down a lane line like a coach's set on the board */
+:root {
+  --bg: #eef5f7;
+  --surface: #ffffff;
+  --ink: #0c2a36;
+  --muted: #557381;
+  --line: #d2e2e7;
+  --aqua: #0f8fb0;
+  --aqua-soft: #e0f0f4;
+  --rope: #e04a37;
+  --rope-soft: #fdeceb;
+  --deep: #062e45;
+  --deep-2: #0b5577;
+  --on-deep: #ffffff;
+  --on-deep-muted: rgba(255,255,255,0.72);
+  --seg-warm: #7fd0e2;
+  --seg-drill: #2aa6c4;
+  --seg-main: #e04a37;
+  --seg-cool: #bfe4ec;
+  --font-body: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  --font-display: "ZCOOL QingKe HuangYou", "Noto Sans SC", "PingFang SC", sans-serif;
+  --font-num: "Barlow Condensed", "DIN Alternate", "Arial Narrow", sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #07161d; --surface: #0f2530; --ink: #e2eef2; --muted: #8eabb7; --line: #1f3e4b;
+    --aqua: #4dbcd8; --aqua-soft: #12313d; --rope: #f0705d; --rope-soft: #3a1d1a;
+    --deep: #041e2d; --deep-2: #0a4865;
+    --seg-warm: #5fb8cc; --seg-drill: #2b8fab; --seg-main: #f0705d; --seg-cool: #2e5866;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #07161d; --surface: #0f2530; --ink: #e2eef2; --muted: #8eabb7; --line: #1f3e4b;
+  --aqua: #4dbcd8; --aqua-soft: #12313d; --rope: #f0705d; --rope-soft: #3a1d1a;
+  --deep: #041e2d; --deep-2: #0a4865;
+  --seg-warm: #5fb8cc; --seg-drill: #2b8fab; --seg-main: #f0705d; --seg-cool: #2e5866;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink); font-family: var(--font-body);
+  font-size: 15px; line-height: 1.6; padding-inline: max(16px, env(safe-area-inset-left)) max(16px, env(safe-area-inset-right));
+  padding-block: calc(20px + env(safe-area-inset-top)) calc(48px + env(safe-area-inset-bottom));
+  margin: 0; -webkit-text-size-adjust: 100%;
+}
+.wrap { max-width: 680px; margin: 0 auto; display: flex; flex-direction: column; gap: 18px; }
+
+/* ---------- Hero ---------- */
+.hero {
+  position: relative; overflow: hidden; border-radius: 22px;
+  background: linear-gradient(160deg, var(--deep-2), var(--deep) 70%);
+  color: var(--on-deep);
+}
+.hero canvas { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0.55; mix-blend-mode: screen; }
+.hero-in { position: relative; padding: 26px 22px 22px; display: flex; flex-direction: column; gap: 14px; }
+.eyebrow { margin: 0; font-size: 13px; letter-spacing: 0.08em; color: var(--on-deep-muted); }
+h1 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: clamp(38px, 10vw, 56px); line-height: 1; letter-spacing: 0.04em; }
+.totals { display: flex; flex-wrap: wrap; gap: 8px 28px; align-items: flex-end; }
+.total { display: flex; flex-direction: column; }
+.total b {
+  font-family: var(--font-num); font-style: italic; font-weight: 800; font-size: clamp(44px, 12vw, 64px);
+  line-height: 0.95; font-variant-numeric: tabular-nums; letter-spacing: -0.01em;
+}
+.total b small { font-size: 0.4em; font-weight: 700; margin-left: 4px; color: var(--on-deep-muted); }
+.total span { font-size: 12px; color: var(--on-deep-muted); letter-spacing: 0.06em; }
+.mix { display: flex; height: 10px; border-radius: 5px; overflow: hidden; gap: 2px; }
+.mix i { display: block; height: 100%; }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 12px; color: var(--on-deep-muted); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend i { width: 8px; height: 8px; border-radius: 2px; display: inline-block; }
+.rope {
+  position: relative; height: 10px;
+  background: repeating-linear-gradient(90deg, var(--rope) 0 16px, #ffffff 16px 22px, #2a63c9 22px 38px, #ffffff 38px 44px);
+}
+
+/* ---------- Controls ---------- */
+.controls { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 18px; display: flex; flex-direction: column; gap: 16px; }
+.field { border: 0; margin: 0; padding: 0; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+.field legend { font-size: 12px; font-weight: 700; color: var(--muted); letter-spacing: 0.1em; padding: 0; margin-bottom: 8px; }
+.seg { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; background: var(--bg); border: 1px solid var(--line); border-radius: 12px; padding: 4px; gap: 4px; }
+.opt { position: relative; }
+.opt input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; }
+.opt span {
+  display: flex; align-items: center; justify-content: center; gap: 6px; min-height: 40px; padding: 0 10px;
+  border-radius: 9px; font-size: 14px; color: var(--muted); cursor: pointer; user-select: none; text-align: center;
+  transition: background .15s, color .15s;
+}
+.seg .opt input:checked + span { background: var(--surface); color: var(--ink); font-weight: 700; box-shadow: 0 1px 3px rgba(6,46,69,0.18); }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chips .opt span { border: 1px solid var(--line); background: var(--bg); padding: 0 14px; }
+.chips .opt span::before { content: ""; width: 14px; height: 14px; border-radius: 4px; border: 1.5px solid var(--muted); box-sizing: border-box; }
+.chips .opt input:checked + span { background: var(--aqua-soft); border-color: var(--aqua); color: var(--ink); font-weight: 700; }
+.chips .opt input:checked + span::before { background: var(--aqua); border-color: var(--aqua); box-shadow: inset 0 0 0 2px var(--aqua-soft); }
+.opt input:focus-visible + span { outline: 2px solid var(--aqua); outline-offset: 2px; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 520px) { .grid2 { grid-template-columns: 1fr; } }
+
+.actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+button {
+  font: inherit; font-weight: 700; font-size: 16px; border-radius: 12px; padding: 12px 22px; cursor: pointer;
+  border: 0; background: var(--rope); color: #ffffff; display: inline-flex; align-items: center; gap: 8px;
+}
+button.ghost { background: transparent; color: var(--ink); border: 1px solid var(--line); font-size: 15px; padding: 11px 18px; }
+button:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+button:active { transform: translateY(1px); }
+.toast { font-size: 13px; color: var(--aqua); font-weight: 700; }
+
+/* ---------- Plan ---------- */
+.plan { display: flex; flex-direction: column; gap: 0; position: relative; padding-left: 26px; }
+.plan::before { content: ""; position: absolute; left: 8px; top: 10px; bottom: 10px; width: 4px; border-radius: 2px; background: var(--ink); opacity: 0.85; }
+.plan::after { content: ""; position: absolute; left: 0; bottom: 8px; width: 20px; height: 4px; border-radius: 2px; background: var(--ink); opacity: 0.85; }
+.sec { position: relative; padding: 14px 0 18px; display: flex; flex-direction: column; gap: 8px; }
+.sec::before {
+  content: ""; position: absolute; left: -24px; top: 21px; width: 12px; height: 12px; border-radius: 50%;
+  background: var(--seg); border: 3px solid var(--bg);
+}
+.sec-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.sec-head h2 { margin: 0; font-size: 20px; font-weight: 900; letter-spacing: 0.02em; }
+.sec-head h2 small { font-family: var(--font-num); font-weight: 500; font-size: 15px; color: var(--muted); margin-right: 8px; letter-spacing: 0.04em; }
+.sec-meta { font-family: var(--font-num); font-size: 17px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.sets { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+.sec.main .sets { border-color: var(--rope); box-shadow: 0 0 0 3px var(--rope-soft); }
+.set { display: grid; grid-template-columns: 112px 1fr; gap: 14px; padding: 14px 16px; }
+.set + .set { border-top: 1px dashed var(--line); }
+.qty { font-family: var(--font-num); font-style: italic; font-weight: 800; font-size: 30px; line-height: 1; font-variant-numeric: tabular-nums; color: var(--ink); white-space: nowrap; }
+.qty small { font-style: normal; font-weight: 500; font-size: 14px; color: var(--muted); margin-left: 3px; }
+.qty.ladder { font-size: 22px; }
+.what { min-width: 0; display: flex; flex-direction: column; gap: 5px; }
+.what strong { font-weight: 700; font-size: 16px; }
+.meta { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; font-size: 13px; color: var(--muted); }
+.effort { display: inline-flex; align-items: center; gap: 6px; }
+.dots { display: inline-flex; gap: 3px; }
+.dots i { width: 14px; height: 6px; border-radius: 3px; background: var(--line); }
+.dots i.on { background: var(--seg-main); }
+.tip { font-size: 13px; color: var(--muted); }
+@media (max-width: 440px) { .set { grid-template-columns: 1fr; gap: 6px; } .qty { font-size: 28px; } }
+
+.note { font-size: 13px; color: var(--muted); margin: 0; padding-left: 26px; }
+@media (prefers-reduced-motion: reduce) { button:active { transform: none; } .opt span { transition: none; } }
+</style>
+</head>
+<body>
+
+
+<div class="wrap">
+  <header class="hero">
+    <canvas id="water" aria-hidden="true"></canvas>
+    <div class="hero-in">
+      <p class="eyebrow" id="eyebrow">25 码泳池 · 45 分钟 · 耐力</p>
+      <h1>今日泳池课表</h1>
+      <div class="totals" id="totals"></div>
+      <div class="mix" id="mix" aria-hidden="true"></div>
+      <div class="legend" id="legend"></div>
+    </div>
+    <div class="rope" aria-hidden="true"></div>
+  </header>
+
+  <form class="controls" id="opts">
+    <fieldset class="field"><legend>今天游多久</legend>
+      <div class="seg">
+        <label class="opt"><input type="radio" name="time" id="t30" value="30"><span>30 分钟</span></label>
+        <label class="opt"><input type="radio" name="time" id="t45" value="45" checked><span>45 分钟</span></label>
+        <label class="opt"><input type="radio" name="time" id="t60" value="60"><span>60 分钟</span></label>
+        <label class="opt"><input type="radio" name="time" id="t90" value="90"><span>90 分钟</span></label>
+      </div>
+    </fieldset>
+    <div class="grid2">
+      <fieldset class="field"><legend>今天练什么</legend>
+        <div class="seg">
+          <label class="opt"><input type="radio" name="focus" id="fe" value="endurance" checked><span>耐力</span></label>
+          <label class="opt"><input type="radio" name="focus" id="fs" value="speed"><span>速度</span></label>
+          <label class="opt"><input type="radio" name="focus" id="ft" value="technique"><span>技术</span></label>
+        </div>
+      </fieldset>
+      <fieldset class="field"><legend>泳池长度</legend>
+        <div class="seg">
+          <label class="opt"><input type="radio" name="pool" id="p25" value="25" checked><span>25 码</span></label>
+          <label class="opt"><input type="radio" name="pool" id="p50" value="50"><span>50 码</span></label>
+        </div>
+      </fieldset>
+    </div>
+    <fieldset class="field"><legend>今天游哪些泳姿</legend>
+      <div class="chips">
+        <label class="opt"><input type="checkbox" name="stroke" id="s1" value="自由泳" checked><span>自由泳</span></label>
+        <label class="opt"><input type="checkbox" name="stroke" id="s2" value="仰泳"><span>仰泳</span></label>
+        <label class="opt"><input type="checkbox" name="stroke" id="s3" value="蛙泳" checked><span>蛙泳</span></label>
+        <label class="opt"><input type="checkbox" name="stroke" id="s4" value="蝶泳"><span>蝶泳</span></label>
+      </div>
+    </fieldset>
+    <div class="actions">
+      <button type="submit" id="gen">换一套</button>
+      <button type="button" class="ghost" id="copy">复制课表</button>
+      <span class="toast" id="toast" role="status"></span>
+    </div>
+  </form>
+
+  <section class="plan" id="out" aria-live="polite"></section>
+  <p class="note">距离和时间按熟练泳者的速度估算，实际以自己的感觉为准。</p>
+</div>
+
+<script>
+const PACE = 95;   // 熟练泳者每100码大约用时（秒），自由泳中等强度
+const STROKE_ADJ = { "自由泳": 0, "仰泳": 9, "蛙泳": 16, "蝶泳": 6 };
+const INT = {
+  easy:   { label: "轻松", f: 1.12, lv: 1 },
+  mod:    { label: "中等", f: 1.0,  lv: 2 },
+  fast:   { label: "快",   f: 0.92, lv: 3 },
+  sprint: { label: "冲刺", f: 0.86, lv: 4 }
+};
+const REST = { easy: 10, mod: 15, fast: 30, sprint: 45, drill: 15 };
+const FOCUS = { endurance: "耐力", speed: "速度", technique: "技术" };
+const SEC_COLOR = { "热身": "--seg-warm", "技术练习": "--seg-drill", "主项": "--seg-main", "放松": "--seg-cool" };
+const DRILLS = {
+  "自由泳": [
+    { name: "单臂划水", tip: "一只手放前面不动，另一只手划，专心感受推水到大腿" },
+    { name: "侧身打腿", tip: "身体侧过来，下面的手伸直，固定侧身换气的姿势" },
+    { name: "追逐式划臂", tip: "一只手划回来碰到另一只手，才开始下一次划水" },
+    { name: "握拳划水", tip: "双手握拳游，逼前臂去抓水，最后几趟再张开手" }
+  ],
+  "蛙泳": [
+    { name: "两次蹬腿一次划手", tip: "让身体在水里多滑一会儿，体会蹬腿后的滑行" },
+    { name: "扶板蛙泳腿", tip: "双手扶浮板，只用腿，注意脚掌外翻、向后蹬水" },
+    { name: "蛙泳划手加夹腿", tip: "腿夹住不动，只练手的划水和抬头换气节奏" }
+  ],
+  "仰泳": [
+    { name: "仰卧打腿", tip: "双手贴身体两侧，脸朝上，膝盖尽量别露出水面" },
+    { name: "单臂仰泳", tip: "一只手贴身体，另一只手划，注意肩膀跟着转动" },
+    { name: "六次打腿一次划手", tip: "侧着身体打六次腿再划一下，练身体的转动" }
+  ],
+  "蝶泳": [
+    { name: "海豚腿打腿", tip: "双腿并拢，从胸口发力像波浪一样往下传" },
+    { name: "单臂蝶泳", tip: "一只手放前面，另一只手划，练打腿和划手的配合" },
+    { name: "三次打腿一次划手", tip: "放慢节奏，把每一次划手都落在第二次打腿上" }
+  ]
+};
+
+const pick = a => a[Math.floor(Math.random() * a.length)];
+const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+function shuffle(a) { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+
+function makePlan(o) {
+  const pool = o.pool;
+  const fixD = d => Math.max(pool, Math.round(d / pool) * pool);
+  const swimT = (d, stroke, inten, extra = 1) => d / 100 * (PACE + STROKE_ADJ[stroke]) * INT[inten].f * extra;
+  const reps = (budget, d, stroke, inten, r, max = 16, extra = 1) =>
+    clamp(Math.round(budget / (swimT(d, stroke, inten, extra) + r)), 1, max);
+
+  // 组数太多时自动把每组距离加倍，避免出现 30×50 这种课表
+  const fit = (budget, d0, stroke, inten, r, max = 16, extra = 1) => {
+    let d = fixD(d0);
+    while (Math.round(budget / (swimT(d, stroke, inten, extra) + r)) > max && d < 400) d = fixD(d * 2);
+    return { d, n: reps(budget, d, stroke, inten, r, max, extra) };
+  };
+  const strokes = o.strokes.length ? o.strokes : ["自由泳"];
+  const main = pick(strokes);
+  const total = o.time * 60;
+  const sections = [];
+
+  { // 热身
+    const budget = total * 0.17, sets = [];
+    if (Math.random() < 0.5 || strokes.length === 1) {
+      const d = fixD(Math.min(800, budget / swimT(100, main, "easy") * 100));
+      sets.push({ n: 1, d, stroke: main, inten: "easy", rest: 0, tip: "慢慢游，把身体和呼吸调顺" });
+    } else {
+      const d = fixD(100);
+      const n = reps(budget, d, main, "easy", REST.easy, 8);
+      sets.push({ n, d, stroke: strokes.join(" / "), strokeKey: main, inten: "easy", rest: REST.easy, tip: "每组换一种泳姿，轮流来" });
+    }
+    sections.push({ name: "热身", sets });
+  }
+
+  { // 技术练习
+    const budget = total * 0.18, sets = [];
+    const all = shuffle(strokes.flatMap(s => DRILLS[s].map(x => ({ ...x, stroke: s }))));
+    const chosen = [];
+    for (const dr of all) {
+      if (!chosen.some(c => c.stroke === dr.stroke) || chosen.length >= strokes.length) chosen.push(dr);
+      if (chosen.length === 2) break;
+    }
+    for (const dr of chosen) {
+      const { d, n } = fit(budget / chosen.length, 50, dr.stroke, "easy", REST.drill, 8, 1.25);
+      sets.push({ n, d, stroke: dr.stroke, label: dr.name, inten: "easy", rest: REST.drill, tip: dr.tip, extra: 1.25 });
+    }
+    sections.push({ name: "技术练习", sets });
+  }
+
+  { // 主项
+    const budget = total * 0.53, sets = [];
+    if (o.focus === "endurance") {
+      const tpl = pick(["long", "mid", "pyramid"]);
+      if (tpl === "pyramid") {
+        const sizes = [[50, 100, 150, 100, 50], [50, 100, 150, 200, 150, 100, 50], [100, 200, 300, 200, 100]];
+        const t = arr => arr.reduce((s, d) => s + swimT(d, main, "mod") + REST.mod, 0);
+        let ladder = sizes[0];
+        for (const s of sizes) if (t(s.map(fixD)) <= budget * 1.1) ladder = s;
+        ladder = ladder.map(fixD);
+        const rounds = clamp(Math.round(budget / t(ladder)), 1, 3);
+        sets.push({ ladder, rounds, stroke: main, inten: "mod", rest: REST.mod, tip: "距离先变长再变短，每一段都保持同样的节奏" });
+      } else {
+        const { d, n } = fit(budget, tpl === "long" ? 200 : 100, main, "mod", REST.mod);
+        sets.push({ n, d, stroke: main, inten: "mod", rest: REST.mod, tip: "每组用时尽量一样，后半程不掉速" });
+      }
+    } else if (o.focus === "speed") {
+      const opts = [{ d: 50, i: "fast" }, { d: 100, i: "fast" }];
+      if (pool === 25) opts.push({ d: 25, i: "sprint" });
+      const c = pick(opts);
+      const { d, n } = fit(budget * 0.75, c.d, main, c.i, REST[c.i]);
+      sets.push({ n, d, stroke: main, inten: c.i, rest: REST[c.i], tip: "每组都全力游，休息要歇够，保证下一组还能快" });
+      const e2 = fit(budget * 0.25, 100, main, "easy", REST.easy, 4);
+      sets.push({ n: e2.n, d: e2.d, stroke: main, inten: "easy", rest: REST.easy, tip: "快游之后慢下来，让心跳回落" });
+    } else {
+      const c = pick([
+        { d: 100, tip: "数每趟划水次数，下一组试着少划一下" },
+        { d: 50, tip: "前半趟想着刚才练的动作，后半趟正常游，对比感觉" },
+        { d: 200, tip: "每 50 码换一个关注点：入水、抱水、推水、打腿" }
+      ]);
+      const { d, n } = fit(budget, c.d, main, "mod", REST.mod);
+      sets.push({ n, d, stroke: main, inten: "mod", rest: REST.mod, tip: c.tip });
+    }
+    sections.push({ name: "主项", sets });
+  }
+
+  { // 放松
+    const cool = strokes.includes("仰泳") ? "仰泳" : strokes.includes("蛙泳") ? "蛙泳" : main;
+    const d = fixD(o.time >= 60 ? 300 : 200);
+    sections.push({ name: "放松", sets: [{ n: 1, d, stroke: cool, inten: "easy", rest: 0, tip: "游得越慢越好，深呼吸，上岸后拉伸" }] });
+  }
+
+  let dist = 0, secs = 0;
+  for (const sec of sections) {
+    sec.dist = 0; sec.secs = 0;
+    for (const s of sec.sets) {
+      const key = s.strokeKey || s.stroke;
+      if (s.ladder) {
+        s.total = s.ladder.reduce((a, d) => a + d, 0) * s.rounds;
+        s.secs = s.rounds * s.ladder.reduce((a, d) => a + swimT(d, key, s.inten) + s.rest, 0);
+      } else {
+        s.total = s.n * s.d;
+        s.secs = s.n * swimT(s.d, key, s.inten, s.extra || 1) + Math.max(0, s.n - 1) * s.rest;
+      }
+      sec.dist += s.total; sec.secs += s.secs;
+    }
+    sec.secs += 30;
+    dist += sec.dist; secs += sec.secs;
+  }
+  return { sections, dist, mins: Math.round(secs / 60), opts: o };
+}
+
+function nameOf(s) {
+  const n = s.label ? `${s.label} · ${s.stroke}` : s.stroke;
+  return s.ladder ? `金字塔 ${s.ladder.join("-")} · ${n}` : n;
+}
+function restText(s) {
+  if (!s.rest || !(s.n > 1 || s.ladder)) return "";
+  return `${s.ladder ? "每段" : "每组"}后歇 ${s.rest} 秒`;
+}
+
+let current = null;
+function render(plan) {
+  current = plan;
+  const o = plan.opts;
+  document.getElementById("eyebrow").textContent = `${o.pool} 码泳池 · ${o.time} 分钟 · ${FOCUS[o.focus]}`;
+  document.getElementById("totals").innerHTML = `
+    <div class="total"><b>${plan.dist.toLocaleString()}<small>码</small></b><span>总距离</span></div>
+    <div class="total"><b>${plan.mins}<small>分</small></b><span>预计用时</span></div>
+    <div class="total"><b>${plan.dist / o.pool}<small>趟</small></b><span>单程趟数</span></div>`;
+  document.getElementById("mix").innerHTML = plan.sections.map(s =>
+    `<i style="flex:${s.dist};background:var(${SEC_COLOR[s.name]})"></i>`).join("");
+  document.getElementById("legend").innerHTML = plan.sections.map(s =>
+    `<span><i style="background:var(${SEC_COLOR[s.name]})"></i>${s.name} ${s.dist}</span>`).join("");
+
+  const h = [];
+  plan.sections.forEach((sec, idx) => {
+    h.push(`<article class="sec${sec.name === "主项" ? " main" : ""}" style="--seg:var(${SEC_COLOR[sec.name]})">
+      <div class="sec-head"><h2><small>0${idx + 1}</small>${sec.name}</h2><span class="sec-meta">${sec.dist} 码 · 约 ${Math.max(1, Math.round(sec.secs / 60))} 分钟</span></div>
+      <div class="sets">`);
+    for (const s of sec.sets) {
+      const lv = INT[s.inten].lv;
+      const dots = [1, 2, 3, 4].map(i => `<i class="${i <= lv ? "on" : ""}"></i>`).join("");
+      const qty = s.ladder
+        ? `<div class="qty ladder">${s.rounds} 轮<small>共 ${s.total} 码</small></div>`
+        : `<div class="qty">${s.n > 1 ? s.n + "×" : ""}${s.d}<small>码</small></div>`;
+      const rt = restText(s);
+      h.push(`<div class="set">${qty}
+        <div class="what"><strong>${nameOf(s)}</strong>
+          <div class="meta"><span class="effort"><span class="dots" aria-hidden="true">${dots}</span>${INT[s.inten].label}</span>${rt ? `<span>${rt}</span>` : ""}</div>
+          <span class="tip">${s.tip}</span></div></div>`);
+    }
+    h.push(`</div></article>`);
+  });
+  document.getElementById("out").innerHTML = h.join("");
+}
+
+function planText(plan) {
+  const o = plan.opts;
+  const L = [`今日泳池课表：共 ${plan.dist} 码，约 ${plan.mins} 分钟（${o.pool} 码泳池 · ${FOCUS[o.focus]}）`];
+  for (const sec of plan.sections) {
+    L.push("", `【${sec.name}】${sec.dist} 码`);
+    for (const s of sec.sets) {
+      const q = s.ladder ? `${s.rounds} 轮 ${nameOf(s)}` : `${s.n > 1 ? s.n + " × " : ""}${s.d} 码 ${nameOf(s)}`;
+      const rt = restText(s);
+      L.push(`· ${q}，${INT[s.inten].label}${rt ? "，" + rt : ""}`);
+    }
+  }
+  return L.join("\n");
+}
+
+function readOpts() {
+  const f = document.getElementById("opts");
+  const v = n => f.querySelector(`input[name="${n}"]:checked`).value;
+  return { time: +v("time"), focus: v("focus"), pool: +v("pool"),
+    strokes: [...f.querySelectorAll('input[name="stroke"]:checked')].map(i => i.value) };
+}
+function saveOpts(o) { try { localStorage.setItem("swimOpts2", JSON.stringify(o)); } catch (e) {} }
+function loadOpts() {
+  try {
+    const o = JSON.parse(localStorage.getItem("swimOpts2") || "null");
+    if (!o) return;
+    const f = document.getElementById("opts");
+    for (const k of ["time", "focus", "pool"]) {
+      const el = f.querySelector(`input[name="${k}"][value="${o[k]}"]`); if (el) el.checked = true;
+    }
+    if (Array.isArray(o.strokes)) f.querySelectorAll('input[name="stroke"]').forEach(i => i.checked = o.strokes.includes(i.value));
+  } catch (e) {}
+}
+function toast(msg) { const t = document.getElementById("toast"); t.textContent = msg; clearTimeout(toast.t); toast.t = setTimeout(() => t.textContent = "", 2500); }
+function regen() {
+  const o = readOpts();
+  if (!o.strokes.length) toast("没选泳姿，先按自由泳来排");
+  saveOpts(o);
+  render(makePlan(o));
+}
+
+document.getElementById("opts").addEventListener("submit", e => { e.preventDefault(); regen(); });
+document.getElementById("opts").addEventListener("change", regen);
+document.getElementById("copy").addEventListener("click", () => {
+  if (!current) return;
+  const text = planText(current);
+  const fallback = () => {
+    const ta = document.createElement("textarea"); ta.value = text; document.body.appendChild(ta); ta.select();
+    try { document.execCommand("copy"); toast("已复制"); } catch (e) { toast("复制没成功，可以长按文字手动复制"); }
+    ta.remove();
+  };
+  try { navigator.clipboard.writeText(text).then(() => toast("已复制，可以发给朋友"), fallback); } catch (e) { fallback(); }
+});
+
+loadOpts();
+render(makePlan(readOpts()));
+
+/* 池底光影 */
+(function () {
+  const cv = document.getElementById("water"), ctx = cv.getContext("2d");
+  const W = 140, H = 70; cv.width = W; cv.height = H;
+  const img = ctx.createImageData(W, H);
+  const still = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+  function draw(t) {
+    let k = 0;
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+      const u = x / 14, v = y / 9;
+      const a = Math.sin(u + t) + Math.sin(v * 1.3 - t * 0.8) + Math.sin((u + v) * 0.9 + t * 0.6) + Math.sin(Math.hypot(u - 4, v - 3) * 1.4 - t);
+      const c = 1 - Math.min(1, Math.abs(a) / 1.6);
+      const lum = Math.pow(c, 5);
+      img.data[k++] = 150 + 105 * lum; img.data[k++] = 225 + 30 * lum; img.data[k++] = 255; img.data[k++] = 255 * lum;
+    }
+    ctx.putImageData(img, 0, 0);
+  }
+  if (still) { draw(1.3); return; }
+  let last = 0;
+  function loop(ts) {
+    if (!document.hidden && ts - last > 50) { draw(ts / 1600); last = ts; }
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+})();
+</script>
+
+</body>
+</html>
