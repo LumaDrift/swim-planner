@@ -260,6 +260,9 @@ body.has-tabs .bar { bottom: calc(60px + env(safe-area-inset-bottom, 0px)); padd
 /* 独立网页版：自己处理 iPhone 顶部和底部的安全区域 */
 html { padding-top: env(safe-area-inset-top, 0px); background: var(--bg); }
 body { margin: 0; -webkit-text-size-adjust: 100%; -webkit-tap-highlight-color: transparent; }
+
+/* 带 hidden 的元素一定隐藏（提示条没消息时不显示） */
+[hidden] { display: none !important; }
 </style>
 </head>
 <body>
