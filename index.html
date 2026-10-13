@@ -16,7 +16,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,500;0,700;1,700;1,800&family=Noto+Sans+SC:wght@400;500;700;900&family=ZCOOL+QingKe+HuangYou&display=swap">
 <style>
-/* Layout: a deep-water hero with moving caustic light carries the day's totals; settings sit in a light deck card; the workout runs down a lane line like a coach's set on the board */
+/* Layout: deep-water hero carries the day's totals; settings in a deck card; the workout is a table, one row per phase, each row opens a list of drills and sets to pick from */
 :root {
   --bg: #eef5f7;
   --surface: #ffffff;
@@ -62,24 +62,17 @@ body {
   padding-block: calc(20px + env(safe-area-inset-top)) calc(48px + env(safe-area-inset-bottom));
   margin: 0; -webkit-text-size-adjust: 100%;
 }
-.wrap { max-width: 680px; margin: 0 auto; display: flex; flex-direction: column; gap: 18px; }
+.wrap { max-width: 720px; margin: 0 auto; display: flex; flex-direction: column; gap: 18px; }
 
 /* ---------- Hero ---------- */
-.hero {
-  position: relative; overflow: hidden; border-radius: 22px;
-  background: linear-gradient(160deg, var(--deep-2), var(--deep) 70%);
-  color: var(--on-deep);
-}
+.hero { position: relative; overflow: hidden; border-radius: 22px; background: linear-gradient(160deg, var(--deep-2), var(--deep) 70%); color: var(--on-deep); }
 .hero canvas { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0.55; mix-blend-mode: screen; }
 .hero-in { position: relative; padding: 26px 22px 22px; display: flex; flex-direction: column; gap: 14px; }
 .eyebrow { margin: 0; font-size: 13px; letter-spacing: 0.08em; color: var(--on-deep-muted); }
 h1 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: clamp(38px, 10vw, 56px); line-height: 1; letter-spacing: 0.04em; }
 .totals { display: flex; flex-wrap: wrap; gap: 8px 28px; align-items: flex-end; }
 .total { display: flex; flex-direction: column; }
-.total b {
-  font-family: var(--font-num); font-style: italic; font-weight: 800; font-size: clamp(44px, 12vw, 64px);
-  line-height: 0.95; font-variant-numeric: tabular-nums; letter-spacing: -0.01em;
-}
+.total b { font-family: var(--font-num); font-style: italic; font-weight: 800; font-size: clamp(44px, 12vw, 64px); line-height: 0.95; font-variant-numeric: tabular-nums; }
 .total b small { font-size: 0.4em; font-weight: 700; margin-left: 4px; color: var(--on-deep-muted); }
 .total span { font-size: 12px; color: var(--on-deep-muted); letter-spacing: 0.06em; }
 .mix { display: flex; height: 10px; border-radius: 5px; overflow: hidden; gap: 2px; }
@@ -87,10 +80,7 @@ h1 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: c
 .legend { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 12px; color: var(--on-deep-muted); }
 .legend span { display: inline-flex; align-items: center; gap: 6px; }
 .legend i { width: 8px; height: 8px; border-radius: 2px; display: inline-block; }
-.rope {
-  position: relative; height: 10px;
-  background: repeating-linear-gradient(90deg, var(--rope) 0 16px, #ffffff 16px 22px, #2a63c9 22px 38px, #ffffff 38px 44px);
-}
+.rope { height: 10px; background: repeating-linear-gradient(90deg, var(--rope) 0 16px, #ffffff 16px 22px, #2a63c9 22px 38px, #ffffff 38px 44px); }
 
 /* ---------- Controls ---------- */
 .controls { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 18px; display: flex; flex-direction: column; gap: 16px; }
@@ -99,62 +89,78 @@ h1 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: c
 .seg { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; background: var(--bg); border: 1px solid var(--line); border-radius: 12px; padding: 4px; gap: 4px; }
 .opt { position: relative; }
 .opt input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; }
-.opt span {
-  display: flex; align-items: center; justify-content: center; gap: 6px; min-height: 40px; padding: 0 10px;
-  border-radius: 9px; font-size: 14px; color: var(--muted); cursor: pointer; user-select: none; text-align: center;
-  transition: background .15s, color .15s;
-}
+.opt span { display: flex; align-items: center; justify-content: center; gap: 6px; min-height: 40px; padding: 0 10px; border-radius: 9px; font-size: 14px; color: var(--muted); cursor: pointer; user-select: none; text-align: center; transition: background .15s, color .15s; }
 .seg .opt input:checked + span { background: var(--surface); color: var(--ink); font-weight: 700; box-shadow: 0 1px 3px rgba(6,46,69,0.18); }
 .chips { display: flex; flex-wrap: wrap; gap: 8px; }
 .chips .opt span { border: 1px solid var(--line); background: var(--bg); padding: 0 14px; }
-.chips .opt span::before { content: ""; width: 14px; height: 14px; border-radius: 4px; border: 1.5px solid var(--muted); box-sizing: border-box; }
+.chips .opt span::before { content: ""; width: 14px; height: 14px; border-radius: 4px; border: 1.5px solid var(--muted); }
 .chips .opt input:checked + span { background: var(--aqua-soft); border-color: var(--aqua); color: var(--ink); font-weight: 700; }
 .chips .opt input:checked + span::before { background: var(--aqua); border-color: var(--aqua); box-shadow: inset 0 0 0 2px var(--aqua-soft); }
 .opt input:focus-visible + span { outline: 2px solid var(--aqua); outline-offset: 2px; }
 .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 @media (max-width: 520px) { .grid2 { grid-template-columns: 1fr; } }
 
-.actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
-button {
-  font: inherit; font-weight: 700; font-size: 16px; border-radius: 12px; padding: 12px 22px; cursor: pointer;
-  border: 0; background: var(--rope); color: #ffffff; display: inline-flex; align-items: center; gap: 8px;
-}
-button.ghost { background: transparent; color: var(--ink); border: 1px solid var(--line); font-size: 15px; padding: 11px 18px; }
-button:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+button { font: inherit; cursor: pointer; border: 0; display: inline-flex; align-items: center; gap: 6px; }
+button:focus-visible { outline: 2px solid var(--aqua); outline-offset: 2px; }
 button:active { transform: translateY(1px); }
+.btn { font-weight: 700; font-size: 16px; border-radius: 12px; padding: 12px 22px; background: var(--rope); color: #ffffff; }
+.btn.ghost { background: transparent; color: var(--ink); border: 1px solid var(--line); font-size: 15px; padding: 11px 18px; }
+.actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
 .toast { font-size: 13px; color: var(--aqua); font-weight: 700; }
 
-/* ---------- Plan ---------- */
-.plan { display: flex; flex-direction: column; gap: 0; position: relative; padding-left: 26px; }
-.plan::before { content: ""; position: absolute; left: 8px; top: 10px; bottom: 10px; width: 4px; border-radius: 2px; background: var(--ink); opacity: 0.85; }
-.plan::after { content: ""; position: absolute; left: 0; bottom: 8px; width: 20px; height: 4px; border-radius: 2px; background: var(--ink); opacity: 0.85; }
-.sec { position: relative; padding: 14px 0 18px; display: flex; flex-direction: column; gap: 8px; }
-.sec::before {
-  content: ""; position: absolute; left: -24px; top: 21px; width: 12px; height: 12px; border-radius: 50%;
-  background: var(--seg); border: 3px solid var(--bg);
-}
-.sec-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
-.sec-head h2 { margin: 0; font-size: 20px; font-weight: 900; letter-spacing: 0.02em; }
-.sec-head h2 small { font-family: var(--font-num); font-weight: 500; font-size: 15px; color: var(--muted); margin-right: 8px; letter-spacing: 0.04em; }
-.sec-meta { font-family: var(--font-num); font-size: 17px; color: var(--muted); font-variant-numeric: tabular-nums; }
-.sets { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
-.sec.main .sets { border-color: var(--rope); box-shadow: 0 0 0 3px var(--rope-soft); }
-.set { display: grid; grid-template-columns: 112px 1fr; gap: 14px; padding: 14px 16px; }
-.set + .set { border-top: 1px dashed var(--line); }
-.qty { font-family: var(--font-num); font-style: italic; font-weight: 800; font-size: 30px; line-height: 1; font-variant-numeric: tabular-nums; color: var(--ink); white-space: nowrap; }
-.qty small { font-style: normal; font-weight: 500; font-size: 14px; color: var(--muted); margin-left: 3px; }
-.qty.ladder { font-size: 22px; }
-.what { min-width: 0; display: flex; flex-direction: column; gap: 5px; }
-.what strong { font-weight: 700; font-size: 16px; }
-.meta { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; font-size: 13px; color: var(--muted); }
+/* ---------- Workout table ---------- */
+.table { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; overflow: hidden; }
+.thead { display: grid; grid-template-columns: 76px 1fr; gap: 12px; padding: 10px 16px; background: var(--bg); border-bottom: 1px solid var(--line); font-size: 12px; font-weight: 700; color: var(--muted); letter-spacing: 0.08em; }
+.row { border-bottom: 1px solid var(--line); }
+.row:last-child { border-bottom: 0; }
+.row.main { background: linear-gradient(90deg, var(--rope-soft), transparent 60%); }
+.row-in { display: grid; grid-template-columns: 76px 1fr; gap: 12px; padding: 14px 16px; }
+.phase { display: flex; flex-direction: column; gap: 4px; padding-top: 4px; }
+.phase b { display: inline-flex; align-items: center; gap: 6px; font-size: 15px; font-weight: 900; }
+.phase b i { width: 10px; height: 10px; border-radius: 50%; background: var(--seg); flex: none; }
+.phase span { font-family: var(--font-num); font-size: 14px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.body { min-width: 0; display: flex; flex-direction: column; gap: 10px; }
+.line { display: grid; grid-template-columns: 104px 1fr; gap: 12px; }
+.qty { font-family: var(--font-num); font-style: italic; font-weight: 800; font-size: 28px; line-height: 1.05; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.qty small { font-style: normal; font-weight: 500; font-size: 13px; color: var(--muted); margin-left: 3px; }
+.qty.sm { font-size: 21px; }
+.what { min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.what strong { font-size: 16px; font-weight: 700; }
+.what strong em { font-style: normal; font-weight: 500; color: var(--muted); font-size: 14px; }
+.meta { display: flex; flex-wrap: wrap; gap: 4px 14px; align-items: center; font-size: 13px; color: var(--muted); }
 .effort { display: inline-flex; align-items: center; gap: 6px; }
 .dots { display: inline-flex; gap: 3px; }
 .dots i { width: 14px; height: 6px; border-radius: 3px; background: var(--line); }
 .dots i.on { background: var(--seg-main); }
 .tip { font-size: 13px; color: var(--muted); }
-@media (max-width: 440px) { .set { grid-template-columns: 1fr; gap: 6px; } .qty { font-size: 28px; } }
+.ctrl { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.choose { font-size: 14px; font-weight: 700; padding: 7px 14px; border-radius: 9px; background: var(--aqua); color: #ffffff; }
+.choose[aria-expanded="true"] { background: var(--ink); color: var(--surface); }
+.mini { font-size: 13px; padding: 6px 12px; border-radius: 9px; background: transparent; color: var(--ink); border: 1px solid var(--line); }
+.stepper { display: inline-flex; align-items: center; border: 1px solid var(--line); border-radius: 9px; overflow: hidden; }
+.stepper button { background: var(--bg); color: var(--ink); padding: 4px 13px; font-size: 17px; font-weight: 700; line-height: 1.3; }
+.stepper span { padding: 0 8px; font-size: 13px; color: var(--muted); min-width: 56px; text-align: center; font-variant-numeric: tabular-nums; }
 
-.note { font-size: 13px; color: var(--muted); margin: 0; padding-left: 26px; }
+.picker { padding: 0 16px 16px; display: flex; flex-direction: column; gap: 8px; }
+.picker-h { font-size: 12px; font-weight: 700; color: var(--muted); letter-spacing: 0.08em; margin: 0; }
+.picks { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 6px; }
+.pick { justify-content: space-between; gap: 10px; text-align: left; width: 100%; min-width: 0; background: var(--bg); color: var(--ink); border: 1px solid var(--line); border-radius: 10px; padding: 9px 12px; font-size: 14px; }
+.pick span { min-width: 0; }
+.pick em { font-style: normal; color: var(--muted); font-size: 13px; }
+.pick small { font-family: var(--font-num); font-size: 15px; color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.pick[aria-pressed="true"] { border-color: var(--aqua); background: var(--aqua-soft); font-weight: 700; }
+.stroke-row { display: flex; flex-wrap: wrap; gap: 6px; }
+.schip { font-size: 13px; padding: 5px 14px; border-radius: 999px; background: var(--bg); color: var(--ink); border: 1px solid var(--line); }
+.schip[aria-pressed="true"] { background: var(--rope); border-color: var(--rope); color: #ffffff; font-weight: 700; }
+
+@media (max-width: 480px) {
+  .thead { display: none; }
+  .row-in { grid-template-columns: 1fr; gap: 8px; }
+  .phase { flex-direction: row; align-items: baseline; gap: 10px; padding-top: 0; }
+  .line { grid-template-columns: 1fr; gap: 2px; }
+  .picks { grid-template-columns: 1fr; }
+}
+.note { font-size: 13px; color: var(--muted); margin: 0; }
 @media (prefers-reduced-motion: reduce) { button:active { transform: none; } .opt span { transition: none; } }
 </style>
 </head>
@@ -207,18 +213,18 @@ button:active { transform: translateY(1px); }
       </div>
     </fieldset>
     <div class="actions">
-      <button type="submit" id="gen">换一套</button>
-      <button type="button" class="ghost" id="copy">复制课表</button>
+      <button type="submit" class="btn" id="gen">全部随机</button>
+      <button type="button" class="btn ghost" id="copy">复制课表</button>
       <span class="toast" id="toast" role="status"></span>
     </div>
   </form>
 
-  <section class="plan" id="out" aria-live="polite"></section>
-  <p class="note">距离和时间按熟练泳者的速度估算，实际以自己的感觉为准。</p>
+  <section class="table" id="out" aria-live="polite"></section>
+  <p class="note">每一行点「选择」可以自己挑练法，用 − 和 + 调组数，点「随机」只换这一行。距离和时间按熟练泳者的速度估算，实际以自己的感觉为准。</p>
 </div>
 
 <script>
-const PACE = 95;   // 熟练泳者每100码大约用时（秒），自由泳中等强度
+const PACE = 95;   // 熟练泳者每 100 码大约用时（秒），自由泳中等强度
 const STROKE_ADJ = { "自由泳": 0, "仰泳": 9, "蛙泳": 16, "蝶泳": 6 };
 const INT = {
   easy:   { label: "轻松", f: 1.12, lv: 1 },
@@ -227,196 +233,303 @@ const INT = {
   sprint: { label: "冲刺", f: 0.86, lv: 4 }
 };
 const REST = { easy: 10, mod: 15, fast: 30, sprint: 45, drill: 15 };
+const KICK = 1.4, DRILL = 1.25;
 const FOCUS = { endurance: "耐力", speed: "速度", technique: "技术" };
-const SEC_COLOR = { "热身": "--seg-warm", "技术练习": "--seg-drill", "主项": "--seg-main", "放松": "--seg-cool" };
+const SLOTS = ["warm", "drill1", "drill2", "main", "cool"];
+const PHASE = {
+  warm:   { name: "热身",     color: "--seg-warm",  share: 0.17 },
+  drill1: { name: "技术练习", color: "--seg-drill", share: 0.09 },
+  drill2: { name: "技术练习", color: "--seg-drill", share: 0.09 },
+  main:   { name: "主项",     color: "--seg-main",  share: 0.53 },
+  cool:   { name: "放松",     color: "--seg-cool",  share: 0.12 }
+};
 const DRILLS = {
   "自由泳": [
-    { name: "单臂划水", tip: "一只手放前面不动，另一只手划，专心感受推水到大腿" },
-    { name: "侧身打腿", tip: "身体侧过来，下面的手伸直，固定侧身换气的姿势" },
-    { name: "追逐式划臂", tip: "一只手划回来碰到另一只手，才开始下一次划水" },
-    { name: "握拳划水", tip: "双手握拳游，逼前臂去抓水，最后几趟再张开手" }
+    ["单臂划水", "一只手放前面不动，另一只手划，专心感受推水到大腿"],
+    ["六次打腿换边", "侧身打腿六次，划一下手翻到另一侧，练身体转动和平衡"],
+    ["追逐式划臂", "一只手划回来碰到另一只手，才开始下一次划水"],
+    ["握拳游", "双手握拳游，逼前臂去抓水，最后几趟再张开手"],
+    ["指尖拖水", "移臂时指尖轻轻划过水面，练高肘移臂"],
+    ["海豚腿配自由泳手", "手划自由泳、腿打海豚腿，找划水的节奏"]
   ],
   "蛙泳": [
-    { name: "两次蹬腿一次划手", tip: "让身体在水里多滑一会儿，体会蹬腿后的滑行" },
-    { name: "扶板蛙泳腿", tip: "双手扶浮板，只用腿，注意脚掌外翻、向后蹬水" },
-    { name: "蛙泳划手加夹腿", tip: "腿夹住不动，只练手的划水和抬头换气节奏" }
+    ["两次蹬腿一次划手", "多一次蹬腿让身体滑得更远，体会蹬腿和划手的时机"],
+    ["扶板蛙泳腿", "双手扶浮板只用腿，脚掌外翻、向后蹬水"],
+    ["仰卧蛙泳腿", "躺在水面做蛙泳腿，膝盖保持在两脚之间"],
+    ["握拳蛙泳", "握拳游蛙泳，用前臂压水，肘部保持在高位"],
+    ["雨刷划手", "只练手往外分水的动作，肘部靠近水面，手腕低于手肘"],
+    ["划手加夹腿", "腿夹住不动，只练划手和抬头换气的节奏"]
   ],
   "仰泳": [
-    { name: "仰卧打腿", tip: "双手贴身体两侧，脸朝上，膝盖尽量别露出水面" },
-    { name: "单臂仰泳", tip: "一只手贴身体，另一只手划，注意肩膀跟着转动" },
-    { name: "六次打腿一次划手", tip: "侧着身体打六次腿再划一下，练身体的转动" }
+    ["仰卧打腿", "双手贴身体两侧，脸朝上，膝盖不要露出水面"],
+    ["单臂仰泳", "一只手划三下再换手，转动从髋部开始"],
+    ["十二次打腿换边", "侧身打腿 12 次，划一下翻到另一侧，脊柱保持笔直"],
+    ["头部不动打腿", "想象额头上放了一杯水，打腿时头完全不动"],
+    ["两段式移臂", "手臂在头顶和大腿旁各停一下，找干净的移臂路线"]
   ],
   "蝶泳": [
-    { name: "海豚腿打腿", tip: "双腿并拢，从胸口发力像波浪一样往下传" },
-    { name: "单臂蝶泳", tip: "一只手放前面，另一只手划，练打腿和划手的配合" },
-    { name: "三次打腿一次划手", tip: "放慢节奏，把每一次划手都落在第二次打腿上" }
+    ["海豚腿打腿", "双腿并拢，从胸口发力像波浪一样往下传"],
+    ["单臂蝶泳", "一只手放前面，另一只手划，每划一次打两次腿"],
+    ["右臂左臂双臂", "右手划一次、左手划一次、双手划一次，循环"],
+    ["胸部波浪", "双手伸直不划水，只用胸部和髋部做波浪，感受身体起伏"],
+    ["三次打腿一次划手", "放慢节奏，把每一次划手都落在第二次打腿上"]
   ]
 };
 
 const pick = a => a[Math.floor(Math.random() * a.length)];
 const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
-function shuffle(a) { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
 
-function makePlan(o) {
+function tools(o) {
   const pool = o.pool;
   const fixD = d => Math.max(pool, Math.round(d / pool) * pool);
-  const swimT = (d, stroke, inten, extra = 1) => d / 100 * (PACE + STROKE_ADJ[stroke]) * INT[inten].f * extra;
-  const reps = (budget, d, stroke, inten, r, max = 16, extra = 1) =>
-    clamp(Math.round(budget / (swimT(d, stroke, inten, extra) + r)), 1, max);
-
-  // 组数太多时自动把每组距离加倍，避免出现 30×50 这种课表
+  const T = (d, stroke, inten, extra = 1) => d / 100 * (PACE + (STROKE_ADJ[stroke] || 0)) * INT[inten].f * extra;
+  const reps = (budget, d, stroke, inten, r, max, extra) => clamp(Math.round(budget / (T(d, stroke, inten, extra) + r)), 1, max);
+  // 组数太多时把每组距离加倍，避免出现 30×50 这种课表
   const fit = (budget, d0, stroke, inten, r, max = 16, extra = 1) => {
     let d = fixD(d0);
-    while (Math.round(budget / (swimT(d, stroke, inten, extra) + r)) > max && d < 400) d = fixD(d * 2);
-    return { d, n: reps(budget, d, stroke, inten, r, max, extra) };
+    while (Math.round(budget / (T(d, stroke, inten, extra) + r)) > max && d < 400) d = fixD(d * 2);
+    return { n: reps(budget, d, stroke, inten, r, max, extra), d };
   };
-  const strokes = o.strokes.length ? o.strokes : ["自由泳"];
-  const main = pick(strokes);
-  const total = o.time * 60;
-  const sections = [];
-
-  { // 热身
-    const budget = total * 0.17, sets = [];
-    if (Math.random() < 0.5 || strokes.length === 1) {
-      const d = fixD(Math.min(800, budget / swimT(100, main, "easy") * 100));
-      sets.push({ n: 1, d, stroke: main, inten: "easy", rest: 0, tip: "慢慢游，把身体和呼吸调顺" });
-    } else {
-      const d = fixD(100);
-      const n = reps(budget, d, main, "easy", REST.easy, 8);
-      sets.push({ n, d, stroke: strokes.join(" / "), strokeKey: main, inten: "easy", rest: REST.easy, tip: "每组换一种泳姿，轮流来" });
-    }
-    sections.push({ name: "热身", sets });
-  }
-
-  { // 技术练习
-    const budget = total * 0.18, sets = [];
-    const all = shuffle(strokes.flatMap(s => DRILLS[s].map(x => ({ ...x, stroke: s }))));
-    const chosen = [];
-    for (const dr of all) {
-      if (!chosen.some(c => c.stroke === dr.stroke) || chosen.length >= strokes.length) chosen.push(dr);
-      if (chosen.length === 2) break;
-    }
-    for (const dr of chosen) {
-      const { d, n } = fit(budget / chosen.length, 50, dr.stroke, "easy", REST.drill, 8, 1.25);
-      sets.push({ n, d, stroke: dr.stroke, label: dr.name, inten: "easy", rest: REST.drill, tip: dr.tip, extra: 1.25 });
-    }
-    sections.push({ name: "技术练习", sets });
-  }
-
-  { // 主项
-    const budget = total * 0.53, sets = [];
-    if (o.focus === "endurance") {
-      const tpl = pick(["long", "mid", "pyramid"]);
-      if (tpl === "pyramid") {
-        const sizes = [[50, 100, 150, 100, 50], [50, 100, 150, 200, 150, 100, 50], [100, 200, 300, 200, 100]];
-        const t = arr => arr.reduce((s, d) => s + swimT(d, main, "mod") + REST.mod, 0);
-        let ladder = sizes[0];
-        for (const s of sizes) if (t(s.map(fixD)) <= budget * 1.1) ladder = s;
-        ladder = ladder.map(fixD);
-        const rounds = clamp(Math.round(budget / t(ladder)), 1, 3);
-        sets.push({ ladder, rounds, stroke: main, inten: "mod", rest: REST.mod, tip: "距离先变长再变短，每一段都保持同样的节奏" });
-      } else {
-        const { d, n } = fit(budget, tpl === "long" ? 200 : 100, main, "mod", REST.mod);
-        sets.push({ n, d, stroke: main, inten: "mod", rest: REST.mod, tip: "每组用时尽量一样，后半程不掉速" });
-      }
-    } else if (o.focus === "speed") {
-      const opts = [{ d: 50, i: "fast" }, { d: 100, i: "fast" }];
-      if (pool === 25) opts.push({ d: 25, i: "sprint" });
-      const c = pick(opts);
-      const { d, n } = fit(budget * 0.75, c.d, main, c.i, REST[c.i]);
-      sets.push({ n, d, stroke: main, inten: c.i, rest: REST[c.i], tip: "每组都全力游，休息要歇够，保证下一组还能快" });
-      const e2 = fit(budget * 0.25, 100, main, "easy", REST.easy, 4);
-      sets.push({ n: e2.n, d: e2.d, stroke: main, inten: "easy", rest: REST.easy, tip: "快游之后慢下来，让心跳回落" });
-    } else {
-      const c = pick([
-        { d: 100, tip: "数每趟划水次数，下一组试着少划一下" },
-        { d: 50, tip: "前半趟想着刚才练的动作，后半趟正常游，对比感觉" },
-        { d: 200, tip: "每 50 码换一个关注点：入水、抱水、推水、打腿" }
-      ]);
-      const { d, n } = fit(budget, c.d, main, "mod", REST.mod);
-      sets.push({ n, d, stroke: main, inten: "mod", rest: REST.mod, tip: c.tip });
-    }
-    sections.push({ name: "主项", sets });
-  }
-
-  { // 放松
-    const cool = strokes.includes("仰泳") ? "仰泳" : strokes.includes("蛙泳") ? "蛙泳" : main;
-    const d = fixD(o.time >= 60 ? 300 : 200);
-    sections.push({ name: "放松", sets: [{ n: 1, d, stroke: cool, inten: "easy", rest: 0, tip: "游得越慢越好，深呼吸，上岸后拉伸" }] });
-  }
-
-  let dist = 0, secs = 0;
-  for (const sec of sections) {
-    sec.dist = 0; sec.secs = 0;
-    for (const s of sec.sets) {
-      const key = s.strokeKey || s.stroke;
-      if (s.ladder) {
-        s.total = s.ladder.reduce((a, d) => a + d, 0) * s.rounds;
-        s.secs = s.rounds * s.ladder.reduce((a, d) => a + swimT(d, key, s.inten) + s.rest, 0);
-      } else {
-        s.total = s.n * s.d;
-        s.secs = s.n * swimT(s.d, key, s.inten, s.extra || 1) + Math.max(0, s.n - 1) * s.rest;
-      }
-      sec.dist += s.total; sec.secs += s.secs;
-    }
-    sec.secs += 30;
-    dist += sec.dist; secs += sec.secs;
-  }
-  return { sections, dist, mins: Math.round(secs / 60), opts: o };
+  return { pool, fixD, T, fit };
 }
 
+// ---------- 每一行的可选练法 ----------
+function warmOptions(o, t, S, m) {
+  const B = o.time * 60 * PHASE.warm.share, out = [];
+  for (const s of S) out.push({ key: "cont-" + s, title: "连续游", sets: [
+    { n: 1, d: t.fixD(Math.min(800, B / t.T(100, s, "easy") * 100)), stroke: s, inten: "easy", rest: 0, tip: "慢慢游，把身体和呼吸调顺" }] });
+  const part = t.fixD(B / t.T(100, m, "easy", 1.15) * 100 / 4);
+  out.push({ key: "skps", title: "游·打腿·划手·游", sets: [
+    { n: 4, d: part, stroke: m, label: "游·打腿·划手·游", inten: "easy", rest: 10, extra: 1.15, adjust: "d",
+      tip: "分四段：完整游、扶板打腿、夹浮漂只划手、再完整游" }] });
+  if (S.length > 1) { const f = t.fit(B, 100, m, "easy", REST.easy, 8);
+    out.push({ key: "mixw", title: "混合泳姿", sets: [{ ...f, stroke: S.join(" / "), strokeKey: m, label: "混合泳姿", inten: "easy", rest: REST.easy, tip: "每组换一种泳姿，轮流来" }] }); }
+  { const f = t.fit(B, 100, m, "easy", REST.easy, 8);
+    out.push({ key: "build", title: "渐快游", sets: [{ ...f, stroke: m, label: "渐快游", inten: "easy", rest: REST.easy, tip: "每组比上一组快一点，最后一组到中等强度" }] }); }
+  { const f = t.fit(B, 100, m, "easy", REST.easy, 8, 1.15);
+    out.push({ key: "kickswim", title: "打腿+游", sets: [{ ...f, stroke: m, label: "打腿+游", inten: "easy", rest: REST.easy, extra: 1.15, tip: "每组前半段扶板打腿，后半段完整游" }] }); }
+  if (S.includes("自由泳")) { const f = t.fit(B, 100, "自由泳", "easy", REST.easy, 8);
+    out.push({ key: "hypo", title: "呼吸递进", sets: [{ ...f, stroke: "自由泳", label: "呼吸递进", inten: "easy", rest: REST.easy, tip: "第 1 组每 3 次划水换气，第 2 组每 5 次，第 3 组每 7 次，然后循环" }] }); }
+  return out;
+}
+
+function drillOptions(o, t, S, m) {
+  const B = o.time * 60 * PHASE.drill1.share, out = [];
+  for (const s of S) for (const [name, tip] of DRILLS[s]) {
+    const f = t.fit(B, 50, s, "easy", REST.drill, 8, DRILL);
+    out.push({ key: "d-" + s + "-" + name, title: name, sub: s, sets: [{ ...f, stroke: s, label: name, inten: "easy", rest: REST.drill, extra: DRILL, tip }] });
+  }
+  const f = t.fit(B, 50, m, "easy", REST.drill, 8, DRILL);
+  out.push({ key: "d-stream", title: "流线型滑行", sub: "不限", sets: [{ ...f, stroke: "不限泳姿", strokeKey: m, label: "流线型滑行", inten: "easy", rest: REST.drill, extra: DRILL, tip: "每次蹬壁后夹紧头部保持流线型，水下海豚腿 3 到 5 次再出水" }] });
+  return out;
+}
+
+function mainOptions(o, t, S, m) {
+  const B = o.time * 60 * PHASE.main.share, P = t.pool, out = [];
+  const one = (key, title, d0, inten, rest, tip, extra = 1, max = 16, stroke = m) => {
+    const f = t.fit(B, d0, stroke, inten, rest, max, extra);
+    out.push({ key, title, sets: [{ ...f, stroke, label: title, inten, rest, extra, tip }] });
+  };
+  const ladderOpt = (key, title, sizes, tip) => {
+    const time = arr => arr.reduce((s, d) => s + t.T(d, m, "mod") + REST.mod, 0);
+    let ladder = sizes[0].map(t.fixD);
+    for (const s of sizes) { const l = s.map(t.fixD); if (time(l) <= B * 1.1) ladder = l; }
+    const rounds = clamp(Math.round(B / time(ladder)), 1, 4);
+    out.push({ key, title, sets: [{ ladder, rounds, stroke: m, label: title, inten: "mod", rest: REST.mod, tip }] });
+  };
+  const withRecover = (key, title, d0, inten, tip, extra = 1, stroke = m) => {
+    const f = t.fit(B * 0.75, d0, stroke === m ? m : m, inten, REST[inten], 16, extra);
+    const r = t.fit(B * 0.25, 100, m, "easy", REST.easy, 4);
+    out.push({ key, title, sets: [
+      { ...f, stroke, strokeKey: m, label: title, inten, rest: REST[inten], extra, tip },
+      { ...r, stroke: m, label: "放松游", inten: "easy", rest: REST.easy, tip: "快游之后慢下来，让心跳回落" }] });
+  };
+
+  if (o.focus === "endurance") {
+    one("mid", "中距离分组", 100, "mod", REST.mod, "每组用时尽量一样，后半程不掉速");
+    one("long", "长距离分组", 200, "mod", REST.mod, "找到能一直保持的节奏，每组都游得一样");
+    one("xlong", "超长分组", 400, "mod", 20, "当成一段长距离来游，中间不要停", 1, 8);
+    ladderOpt("pyr", "金字塔", [[50, 100, 150, 100, 50], [50, 100, 150, 200, 150, 100, 50], [100, 200, 300, 200, 100]], "距离先变长再变短，每一段都保持同样的节奏");
+    ladderOpt("ladder", "阶梯递增", [[100, 200, 300], [100, 200, 300, 400], [100, 200, 300, 400, 500]], "距离一段比一段长，速度保持不变");
+    one("desc", "递减游", 100, "mod", REST.mod, "每 4 组一轮，一组比一组快，第 4 组最快");
+    one("neg", "后程加速", 200, "mod", REST.mod, "每组后半程要比前半程快");
+    { // 逐组减一趟
+      const lenT = k => k * t.T(P, m, "mod") + 20;
+      let L = 3; while (L < 14) { let s = 0; for (let k = 1; k <= L + 1; k++) s += lenT(k); if (s > B * 1.05) break; L++; }
+      const ladder = []; for (let k = L; k >= 1; k--) ladder.push(k * P);
+      out.push({ key: "minus1", title: "逐组减一趟", sets: [{ ladder, rounds: 1, stroke: m, label: "逐组减一趟", inten: "mod", rest: 20, tip: `先连续游 ${L} 趟，歇 20 秒，再游 ${L - 1} 趟，一直减到 1 趟` }] });
+    }
+    if (m === "自由泳") one("hypo", "控制呼吸", 100, "mod", REST.mod, "每 5 次划水换一次气，憋不住就改回 3 次");
+    one("pull", "划手组", 200, "mod", REST.mod, "两腿夹浮漂，只用手划，专心抱水和推水", 1.05);
+    one("kick", "打腿组", 100, "mod", REST.mod, "扶板打腿，每组用时尽量一样", KICK);
+  } else if (o.focus === "speed") {
+    withRecover("f50", "50 码快游", 50, "fast", "每组都全力游，休息要歇够，保证下一组还能快");
+    withRecover("f100", "100 码快游", 100, "fast", "前 50 码稳住，后 50 码顶住不掉速");
+    if (P === 25) withRecover("s25", "25 码冲刺", 25, "sprint", "从蹬壁开始全力，一口气冲到对面");
+    if (P === 25) withRecover("broken", "分段 100", 100, "fast", "每组拆成 50 + 25 + 25，中间各歇 10 秒和 5 秒，一段比一段快");
+    else withRecover("broken", "分段 200", 200, "fast", "每组拆成 100 + 50 + 50，中间各歇 10 秒和 5 秒，一段比一段快");
+    withRecover("descf", "递减快游", 50, "fast", "每 4 组一轮，第 1 组中等，第 4 组全力");
+    withRecover("build50", "渐快 50", 50, "fast", "每组从慢到快，最后几下全力");
+    withRecover("negf", "后程冲刺", 100, "fast", "前半程中等，后半程全力冲");
+    if (S.length > 1) withRecover("rot", "各泳姿冲刺", P === 25 ? 25 : 50, "sprint", "每组换一种泳姿，全力游", 1, S.join(" / "));
+    withRecover("kickf", "打腿冲刺", 50, "fast", "扶板全力打腿", KICK);
+  } else {
+    one("count", "数划水", 100, "mod", REST.mod, "数每趟划水次数，下一组试着少划一下");
+    one("half", "半程动作", 50, "mod", REST.mod, "前半趟想着刚才练的动作，后半趟正常游，对比感觉");
+    one("focus200", "分段关注点", 200, "mod", REST.mod, "每 50 码换一个关注点：入水、抱水、推水、打腿");
+    one("drillswim", "练习加游", 100, "mod", REST.mod, "每组前半段做刚才的技术练习，后半段完整游", 1.1);
+    one("rate", "高频划水", 50, "mod", REST.mod, "划水频率加快，但不用蛮力，保持动作完整");
+    one("uw", "水下腿", 50, "mod", 20, "每次蹬壁后水下海豚腿 3 到 5 次再出水，动作做完整");
+    if (m === "自由泳") one("bilat", "两侧换气", 100, "mod", REST.mod, "每 3 次划水换一次气，左右两边轮流");
+    one("kickt", "打腿组", 100, "mod", REST.mod, "扶板打腿，注意从髋部发力而不是膝盖", KICK);
+  }
+  return out;
+}
+
+function coolOptions(o, t, S, m) {
+  const d = t.fixD(o.time >= 60 ? 300 : 200), out = [];
+  for (const s of S) out.push({ key: "c-" + s, title: "放松游", sets: [{ n: 1, d, stroke: s, inten: "easy", rest: 0, tip: "游得越慢越好，深呼吸" }] });
+  out.push({ key: "c-slow", title: "越游越慢", sets: [{ n: 4, d: t.fixD(50), stroke: m, label: "越游越慢", inten: "easy", rest: 10, tip: "一组比一组慢，让心跳慢慢降下来" }] });
+  out.push({ key: "c-stretch", title: "放松游+拉伸", sets: [{ n: 1, d, stroke: m, label: "放松游+拉伸", inten: "easy", rest: 0, tip: "游完在池边拉伸肩膀、背部和大腿，各 30 秒" }] });
+  out.push({ key: "c-any", title: "随意游", sets: [{ n: 1, d, stroke: "任意泳姿", strokeKey: m, label: "随意游", inten: "easy", rest: 0, tip: "游自己最舒服的泳姿，怎么放松怎么来" }] });
+  return out;
+}
+
+// ---------- 状态 ----------
+const state = { o: null, ms: null, sel: {}, adj: {}, open: null };
+
+function strokesOf(o) { return o.strokes.length ? o.strokes : ["自由泳"]; }
+function buildAll() {
+  const o = state.o, t = tools(o), S = strokesOf(o);
+  if (!S.includes(state.ms)) state.ms = pick(S);
+  const m = state.ms;
+  const d = drillOptions(o, t, S, m);
+  return { t, S, opts: { warm: warmOptions(o, t, S, m), drill1: d, drill2: d, main: mainOptions(o, t, S, m), cool: coolOptions(o, t, S, m) } };
+}
+function randomize(slot, all) {
+  const list = all.opts[slot];
+  let choices = list.filter(x => x.key !== state.sel[slot]);
+  const other = slot === "drill1" ? state.sel.drill2 : slot === "drill2" ? state.sel.drill1 : null;
+  if (other) choices = choices.filter(x => x.key !== other);
+  if (!choices.length) choices = list;
+  state.sel[slot] = pick(choices).key;
+  for (const k of Object.keys(state.adj)) if (k.startsWith(slot + ":")) delete state.adj[k];
+}
+function ensureValid(all) {
+  for (const s of SLOTS) {
+    if (!all.opts[s].some(x => x.key === state.sel[s])) { delete state.sel[s]; randomize(s, all); }
+  }
+  if (state.sel.drill1 === state.sel.drill2 && all.opts.drill1.length > 1) randomize("drill2", all);
+}
+
+function applyAdj(set, delta, pool) {
+  const s = { ...set };
+  if (!delta) return s;
+  if (s.ladder) s.rounds = Math.max(1, s.rounds + delta);
+  else if (s.adjust === "d" || s.n === 1) s.d = Math.max(pool, s.d + delta * (s.n === 1 ? 100 : pool));
+  else s.n = Math.max(1, s.n + delta);
+  return s;
+}
+function finishSet(s, t) {
+  const key = s.strokeKey || s.stroke;
+  if (s.ladder) {
+    s.total = s.ladder.reduce((a, d) => a + d, 0) * s.rounds;
+    s.secs = s.rounds * s.ladder.reduce((a, d) => a + t.T(d, key, s.inten, s.extra || 1) + s.rest, 0);
+  } else {
+    s.total = s.n * s.d;
+    s.secs = s.n * t.T(s.d, key, s.inten, s.extra || 1) + Math.max(0, s.n - 1) * s.rest;
+  }
+  return s;
+}
+function compute() {
+  const all = buildAll();
+  ensureValid(all);
+  const rows = SLOTS.map(slot => {
+    const opt = all.opts[slot].find(x => x.key === state.sel[slot]);
+    const sets = opt.sets.map((s, i) => finishSet(applyAdj(s, state.adj[slot + ":" + i] || 0, all.t.pool), all.t));
+    const dist = sets.reduce((a, s) => a + s.total, 0), secs = sets.reduce((a, s) => a + s.secs, 0) + 30;
+    return { slot, opt, sets, dist, secs };
+  });
+  const dist = rows.reduce((a, r) => a + r.dist, 0), secs = rows.reduce((a, r) => a + r.secs, 0);
+  return { all, rows, dist, mins: Math.round(secs / 60) };
+}
+
+// ---------- 显示 ----------
+function qtyText(s) {
+  if (s.ladder) return `<div class="qty sm">${s.rounds} 轮<small>共 ${s.total} 码</small></div>`;
+  return `<div class="qty">${s.n > 1 ? s.n + "×" : ""}${s.d}<small>码</small></div>`;
+}
+function qtyPlain(s) { return s.ladder ? `${s.rounds} 轮 共 ${s.ladder.reduce((a, d) => a + d, 0) * s.rounds}` : (s.n > 1 ? `${s.n}×${s.d}` : `${s.d}`); }
 function nameOf(s) {
-  const n = s.label ? `${s.label} · ${s.stroke}` : s.stroke;
-  return s.ladder ? `金字塔 ${s.ladder.join("-")} · ${n}` : n;
+  const base = s.label || s.stroke;
+  const stroke = s.label ? ` <em>· ${s.stroke}</em>` : "";
+  return s.ladder && s.ladder.length > 1 && s.label !== "逐组减一趟" ? `${base} ${s.ladder.join("-")}${stroke}` : base + stroke;
 }
-function restText(s) {
-  if (!s.rest || !(s.n > 1 || s.ladder)) return "";
-  return `${s.ladder ? "每段" : "每组"}后歇 ${s.rest} 秒`;
-}
+function nameText(s) { return nameOf(s).replace(/<[^>]+>/g, ""); }
+function restText(s) { return s.rest && (s.n > 1 || s.ladder) ? `${s.ladder ? "每段" : "每组"}后歇 ${s.rest} 秒` : ""; }
+function stepUnit(s) { return s.ladder ? `${s.rounds} 轮` : (s.adjust === "d" || s.n === 1) ? `${s.adjust === "d" ? "每段 " : ""}${s.d} 码` : `${s.n} 组`; }
 
 let current = null;
-function render(plan) {
-  current = plan;
-  const o = plan.opts;
+function render() {
+  const plan = compute(); current = plan;
+  const o = state.o;
   document.getElementById("eyebrow").textContent = `${o.pool} 码泳池 · ${o.time} 分钟 · ${FOCUS[o.focus]}`;
   document.getElementById("totals").innerHTML = `
     <div class="total"><b>${plan.dist.toLocaleString()}<small>码</small></b><span>总距离</span></div>
     <div class="total"><b>${plan.mins}<small>分</small></b><span>预计用时</span></div>
     <div class="total"><b>${plan.dist / o.pool}<small>趟</small></b><span>单程趟数</span></div>`;
-  document.getElementById("mix").innerHTML = plan.sections.map(s =>
-    `<i style="flex:${s.dist};background:var(${SEC_COLOR[s.name]})"></i>`).join("");
-  document.getElementById("legend").innerHTML = plan.sections.map(s =>
-    `<span><i style="background:var(${SEC_COLOR[s.name]})"></i>${s.name} ${s.dist}</span>`).join("");
+  const agg = [["热身", "--seg-warm", ["warm"]], ["技术练习", "--seg-drill", ["drill1", "drill2"]], ["主项", "--seg-main", ["main"]], ["放松", "--seg-cool", ["cool"]]]
+    .map(([n, c, ks]) => ({ n, c, d: plan.rows.filter(r => ks.includes(r.slot)).reduce((a, r) => a + r.dist, 0) }));
+  document.getElementById("mix").innerHTML = agg.map(a => `<i style="flex:${a.d};background:var(${a.c})"></i>`).join("");
+  document.getElementById("legend").innerHTML = agg.map(a => `<span><i style="background:var(${a.c})"></i>${a.n} ${a.d}</span>`).join("");
 
-  const h = [];
-  plan.sections.forEach((sec, idx) => {
-    h.push(`<article class="sec${sec.name === "主项" ? " main" : ""}" style="--seg:var(${SEC_COLOR[sec.name]})">
-      <div class="sec-head"><h2><small>0${idx + 1}</small>${sec.name}</h2><span class="sec-meta">${sec.dist} 码 · 约 ${Math.max(1, Math.round(sec.secs / 60))} 分钟</span></div>
-      <div class="sets">`);
-    for (const s of sec.sets) {
-      const lv = INT[s.inten].lv;
-      const dots = [1, 2, 3, 4].map(i => `<i class="${i <= lv ? "on" : ""}"></i>`).join("");
-      const qty = s.ladder
-        ? `<div class="qty ladder">${s.rounds} 轮<small>共 ${s.total} 码</small></div>`
-        : `<div class="qty">${s.n > 1 ? s.n + "×" : ""}${s.d}<small>码</small></div>`;
+  const h = [`<div class="thead"><span>阶段</span><span>练什么</span></div>`];
+  for (const r of plan.rows) {
+    const ph = PHASE[r.slot], open = state.open === r.slot;
+    h.push(`<div class="row${r.slot === "main" ? " main" : ""}" style="--seg:var(${ph.color})"><div class="row-in">
+      <div class="phase"><b><i></i>${ph.name}</b><span>${r.dist} 码 · ${Math.max(1, Math.round(r.secs / 60))} 分</span></div>
+      <div class="body">`);
+    r.sets.forEach((s, i) => {
+      const dots = [1, 2, 3, 4].map(k => `<i class="${k <= INT[s.inten].lv ? "on" : ""}"></i>`).join("");
       const rt = restText(s);
-      h.push(`<div class="set">${qty}
-        <div class="what"><strong>${nameOf(s)}</strong>
-          <div class="meta"><span class="effort"><span class="dots" aria-hidden="true">${dots}</span>${INT[s.inten].label}</span>${rt ? `<span>${rt}</span>` : ""}</div>
-          <span class="tip">${s.tip}</span></div></div>`);
+      h.push(`<div class="line">${qtyText(s)}<div class="what"><strong>${nameOf(s)}</strong>
+        <div class="meta"><span class="effort"><span class="dots" aria-hidden="true">${dots}</span>${INT[s.inten].label}</span>${rt ? `<span>${rt}</span>` : ""}</div>
+        <span class="tip">${s.tip}</span></div></div>`);
+    });
+    const s0 = r.sets[0];
+    h.push(`<div class="ctrl">
+        <button type="button" class="choose" data-act="open" data-slot="${r.slot}" aria-expanded="${open}">选择 ${open ? "▴" : "▾"}</button>
+        <button type="button" class="mini" data-act="rand" data-slot="${r.slot}">随机</button>
+        <span class="stepper"><button type="button" data-act="dec" data-slot="${r.slot}" aria-label="减少">−</button><span>${stepUnit(s0)}</span><button type="button" data-act="inc" data-slot="${r.slot}" aria-label="增加">+</button></span>
+      </div></div></div>`);
+    if (open) {
+      h.push(`<div class="picker">`);
+      if (r.slot === "main" && plan.all.S.length > 1) {
+        h.push(`<p class="picker-h">主项泳姿</p><div class="stroke-row">${plan.all.S.map(s =>
+          `<button type="button" class="schip" data-act="stroke" data-v="${s}" aria-pressed="${s === state.ms}">${s}</button>`).join("")}</div>`);
+      }
+      h.push(`<p class="picker-h">可以选的练法 · ${plan.all.opts[r.slot].length} 种</p><div class="picks">`);
+      for (const op of plan.all.opts[r.slot]) {
+        const f = finishSet({ ...op.sets[0] }, plan.all.t);
+        const sub = op.sub || op.sets[0].stroke;
+        h.push(`<button type="button" class="pick" data-act="pick" data-slot="${r.slot}" data-key="${op.key}" aria-pressed="${op.key === r.opt.key}">
+          <span>${op.title} <em>· ${sub}</em></span><small>${qtyPlain(f)}</small></button>`);
+      }
+      h.push(`</div></div>`);
     }
-    h.push(`</div></article>`);
-  });
+    h.push(`</div>`);
+  }
   document.getElementById("out").innerHTML = h.join("");
+  save();
 }
 
 function planText(plan) {
-  const o = plan.opts;
+  const o = state.o;
   const L = [`今日泳池课表：共 ${plan.dist} 码，约 ${plan.mins} 分钟（${o.pool} 码泳池 · ${FOCUS[o.focus]}）`];
-  for (const sec of plan.sections) {
-    L.push("", `【${sec.name}】${sec.dist} 码`);
-    for (const s of sec.sets) {
-      const q = s.ladder ? `${s.rounds} 轮 ${nameOf(s)}` : `${s.n > 1 ? s.n + " × " : ""}${s.d} 码 ${nameOf(s)}`;
+  for (const r of plan.rows) {
+    L.push("", `【${PHASE[r.slot].name}】${r.dist} 码`);
+    for (const s of r.sets) {
+      const q = s.ladder ? `${s.rounds} 轮 ${nameText(s)}` : `${s.n > 1 ? s.n + " × " : ""}${s.d} 码 ${nameText(s)}`;
       const rt = restText(s);
       L.push(`· ${q}，${INT[s.inten].label}${rt ? "，" + rt : ""}`);
     }
@@ -424,34 +537,60 @@ function planText(plan) {
   return L.join("\n");
 }
 
+// ---------- 读写设置 ----------
 function readOpts() {
   const f = document.getElementById("opts");
   const v = n => f.querySelector(`input[name="${n}"]:checked`).value;
-  return { time: +v("time"), focus: v("focus"), pool: +v("pool"),
-    strokes: [...f.querySelectorAll('input[name="stroke"]:checked')].map(i => i.value) };
+  return { time: +v("time"), focus: v("focus"), pool: +v("pool"), strokes: [...f.querySelectorAll('input[name="stroke"]:checked')].map(i => i.value) };
 }
-function saveOpts(o) { try { localStorage.setItem("swimOpts2", JSON.stringify(o)); } catch (e) {} }
-function loadOpts() {
+function save() { try { localStorage.setItem("swimPlan3", JSON.stringify({ o: state.o, ms: state.ms, sel: state.sel, adj: state.adj })); } catch (e) {} }
+function load() {
   try {
-    const o = JSON.parse(localStorage.getItem("swimOpts2") || "null");
-    if (!o) return;
+    const d = JSON.parse(localStorage.getItem("swimPlan3") || "null");
+    if (!d || !d.o) return;
     const f = document.getElementById("opts");
-    for (const k of ["time", "focus", "pool"]) {
-      const el = f.querySelector(`input[name="${k}"][value="${o[k]}"]`); if (el) el.checked = true;
-    }
-    if (Array.isArray(o.strokes)) f.querySelectorAll('input[name="stroke"]').forEach(i => i.checked = o.strokes.includes(i.value));
+    for (const k of ["time", "focus", "pool"]) { const el = f.querySelector(`input[name="${k}"][value="${d.o[k]}"]`); if (el) el.checked = true; }
+    if (Array.isArray(d.o.strokes)) f.querySelectorAll('input[name="stroke"]').forEach(i => i.checked = d.o.strokes.includes(i.value));
+    state.ms = d.ms; state.sel = d.sel || {}; state.adj = d.adj || {};
   } catch (e) {}
 }
 function toast(msg) { const t = document.getElementById("toast"); t.textContent = msg; clearTimeout(toast.t); toast.t = setTimeout(() => t.textContent = "", 2500); }
-function regen() {
-  const o = readOpts();
-  if (!o.strokes.length) toast("没选泳姿，先按自由泳来排");
-  saveOpts(o);
-  render(makePlan(o));
-}
 
-document.getElementById("opts").addEventListener("submit", e => { e.preventDefault(); regen(); });
-document.getElementById("opts").addEventListener("change", regen);
+// ---------- 交互 ----------
+document.getElementById("opts").addEventListener("submit", e => {
+  e.preventDefault();
+  state.o = readOpts();
+  const S = strokesOf(state.o); state.ms = pick(S);
+  const all = buildAll();
+  for (const s of SLOTS) randomize(s, all);
+  state.adj = {}; state.open = null;
+  render();
+});
+document.getElementById("opts").addEventListener("change", () => {
+  state.o = readOpts();
+  if (!state.o.strokes.length) toast("没选泳姿，先按自由泳来排");
+  state.adj = {};
+  render();
+});
+document.getElementById("out").addEventListener("click", e => {
+  const b = e.target.closest("button[data-act]"); if (!b) return;
+  const slot = b.dataset.slot, act = b.dataset.act;
+  if (act === "open") state.open = state.open === slot ? null : slot;
+  else if (act === "rand") { const all = buildAll(); if (slot === "main") state.ms = pick(all.S); randomize(slot, buildAll()); }
+  else if (act === "pick") {
+    if (state.sel[slot] !== b.dataset.key) { state.sel[slot] = b.dataset.key; for (const k of Object.keys(state.adj)) if (k.startsWith(slot + ":")) delete state.adj[k]; }
+    state.open = null;
+  }
+  else if (act === "stroke") { state.ms = b.dataset.v; for (const k of Object.keys(state.adj)) if (k.startsWith("main:")) delete state.adj[k]; }
+  else if (act === "inc" || act === "dec") {
+    const k = slot + ":0", cur = state.adj[k] || 0, nxt = cur + (act === "inc" ? 1 : -1);
+    const row = current.rows.find(r => r.slot === slot), s = row.sets[0];
+    const atMin = s.ladder ? s.rounds <= 1 : (s.adjust === "d" || s.n === 1) ? s.d <= state.o.pool : s.n <= 1;
+    if (act === "dec" && atMin) return;
+    state.adj[k] = nxt;
+  }
+  render();
+});
 document.getElementById("copy").addEventListener("click", () => {
   if (!current) return;
   const text = planText(current);
@@ -463,8 +602,9 @@ document.getElementById("copy").addEventListener("click", () => {
   try { navigator.clipboard.writeText(text).then(() => toast("已复制，可以发给朋友"), fallback); } catch (e) { fallback(); }
 });
 
-loadOpts();
-render(makePlan(readOpts()));
+load();
+state.o = readOpts();
+render();
 
 /* 池底光影 */
 (function () {
@@ -477,18 +617,14 @@ render(makePlan(readOpts()));
     for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
       const u = x / 14, v = y / 9;
       const a = Math.sin(u + t) + Math.sin(v * 1.3 - t * 0.8) + Math.sin((u + v) * 0.9 + t * 0.6) + Math.sin(Math.hypot(u - 4, v - 3) * 1.4 - t);
-      const c = 1 - Math.min(1, Math.abs(a) / 1.6);
-      const lum = Math.pow(c, 5);
+      const lum = Math.pow(1 - Math.min(1, Math.abs(a) / 1.6), 5);
       img.data[k++] = 150 + 105 * lum; img.data[k++] = 225 + 30 * lum; img.data[k++] = 255; img.data[k++] = 255 * lum;
     }
     ctx.putImageData(img, 0, 0);
   }
   if (still) { draw(1.3); return; }
   let last = 0;
-  function loop(ts) {
-    if (!document.hidden && ts - last > 50) { draw(ts / 1600); last = ts; }
-    requestAnimationFrame(loop);
-  }
+  function loop(ts) { if (!document.hidden && ts - last > 50) { draw(ts / 1600); last = ts; } requestAnimationFrame(loop); }
   requestAnimationFrame(loop);
 })();
 </script>
